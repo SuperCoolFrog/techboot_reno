@@ -1,21 +1,35 @@
 package main
 
 import (
-	"log"
+	"bytes"
 	_ "embed"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"golang.org/x/image/colornames"
+	"image/color"
 )
 
 const (
 	screenWidth  = 640
 	screenHeight = 480
+	fontSize     = 12.0
 )
 
 //go:embed fonts/arial.ttf
-var arialFont []byte
+var arialFontBytes []byte
+var arialFontSource *text.GoTextFaceSource
+
+func init() {
+	src, err := text.NewGoTextFaceSource(bytes.NewReader(arialFontBytes))
+
+	arialFontSource = src
+
+	if err != nil {
+		log.Fatal("Error creating font face:", err)
+	}
+}
 
 type Game struct{}
 
@@ -28,9 +42,22 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Clear the screen with a black background
 	screen.Fill(colornames.Black)
 
+	face := &text.GoTextFace{
+		Source: arialFontSource,
+		Size:   28,
+	}
+
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(100, 150) // Set Position
+	op.ColorScale.ScaleWithColor(color.RGBA{R: 255, G: 99, B: 71, A: 255})
+
 	// Set text color to green
-	text.Draw(screen, "Hello, Ebitengine!", ebiten.ArialFont, 50, 50, colornames.Green)
-	text.Draw(screen, "This is a test.", ebiten.ArialFont, 50, 100, colornames.Green)
+	text.Draw(screen, "Hello, Ebitengine!", face, op)
+
+	op2 := &text.DrawOptions{}
+	op2.GeoM.Translate(100, 250) // Set Position
+	op2.ColorScale.ScaleWithColor(color.RGBA{R: 255, G: 99, B: 71, A: 255})
+	text.Draw(screen, "This is a test.", face, op2)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

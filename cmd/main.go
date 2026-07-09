@@ -14,7 +14,7 @@ import (
 const (
 	screenWidth  = 640
 	screenHeight = 480
-	fontSize     = 12.0
+	fontSize     = 28.0 // Consistent font size
 )
 
 //go:embed fonts/arial.ttf
@@ -23,12 +23,10 @@ var arialFontSource *text.GoTextFaceSource
 
 func init() {
 	src, err := text.NewGoTextFaceSource(bytes.NewReader(arialFontBytes))
-
-	arialFontSource = src
-
 	if err != nil {
-		log.Fatal("Error creating font face:", err)
+		log.Fatalf("Error creating font face: %v", err)
 	}
+	arialFontSource = src
 }
 
 type Game struct{}
@@ -44,7 +42,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	face := &text.GoTextFace{
 		Source: arialFontSource,
-		Size:   28,
+		Size:   fontSize, // Use consistent font size
 	}
 
 	op := &text.DrawOptions{}

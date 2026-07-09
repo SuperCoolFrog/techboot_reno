@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"log"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/font/basicfont"
-	"golang.org/x/image/math/fixed"
-	"log"
 )
 
 const (
@@ -18,17 +17,17 @@ const (
 type Game struct{}
 
 func (g *Game) Update() error {
-	//Update logic if needed
+	// Update logic if needed
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	// Clear the screen with a black background
-	screen.Fill(color.RGBA(0, 0, 0, 255))
+	screen.Fill(colornames.Black)
 
 	// Set text color to green
-	text.Draw(screen, "Hello, Ebitengine!", basicfont.Face7x13Dot, 50, 50, color.RGBA{0, 255, 0, 255})
-	text.Draw(screen, "This is a test.", basicfont.Face7x13Dot, 50, 100, color.RGBA{0, 255, 0, 255})
+	text.Draw(screen, "Hello, Ebitengine!", basicfont.Face7x13Dot, 50, 50, colornames.Green)
+	text.Draw(screen, "This is a test.", basicfont.Face7x13Dot, 50, 100, colornames.Green)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

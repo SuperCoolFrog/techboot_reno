@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	// Grid ends up being 44,20
+	// Grid ends up being 26,19
 	screenWidth   = 640 * 2
 	screenHeight  = 480 * 2
 	fontSize      = 24.0 * 2.0
@@ -59,12 +59,13 @@ func main() {
 	windowSizeW, windowSizeH := screenWidth, screenHeight
 	ebiten.SetWindowSize(windowSizeW, windowSizeH)
 	ebiten.SetWindowTitle("Techboot Reno - Cyber Crawler")
-	// ebiten.SetWindowResizable(true)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 
 	game := &Game{
-		Grid: NewGrid(44, 20, fontSize),
+		Grid: NewGrid(26, 20, fontSize, screenPadding),
 	}
+
+	game.Grid.Set(1,1,RenderFlagKeyCode, 'y')
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)

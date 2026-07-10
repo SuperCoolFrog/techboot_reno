@@ -7,17 +7,18 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"golang.org/x/image/colornames"
 	"image/color"
 )
 
 const (
-	screenWidth  = 640
-	screenHeight = 480
-	fontSize     = 28.0 // Consistent font size
+	// Grid ends up being 44,20
+	screenWidth   = 640 * 2
+	screenHeight  = 480 * 2
+	fontSize      = 24.0 * 2.0
+	screenPadding = fontSize / 4
 )
 
-//go:embed fonts/arial.ttf
+//go:embed fonts/Courierprime_1OVL.ttf
 var arialFontBytes []byte
 var arialFontSource *text.GoTextFaceSource
 
@@ -29,7 +30,9 @@ func init() {
 	arialFontSource = src
 }
 
-type Game struct{}
+type Game struct {
+	Grid Grid
+}
 
 func (g *Game) Update() error {
 	// Update logic if needed
@@ -38,24 +41,14 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	// Clear the screen with a black background
-	screen.Fill(colornames.Black)
+	screen.Fill(color.RGBA{R: 0, G: 0, B: 0, A: 255})
+	// screen.Fill(color.RGBA{R: 0, G: 0, B: 50, A: 255})
 
-	face := &text.GoTextFace{
-		Source: arialFontSource,
-		Size:   fontSize, // Use consistent font size
+
+	err := g.Grid.RenderDebug(screen)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	op := &text.DrawOptions{}
-	op.GeoM.Translate(100, 150) // Set Position
-	op.ColorScale.ScaleWithColor(color.RGBA{R: 255, G: 99, B: 71, A: 255})
-
-	// Set text color to green
-	text.Draw(screen, "Hello, Ebitengine!", face, op)
-
-	op2 := &text.DrawOptions{}
-	op2.GeoM.Translate(100, 250) // Set Position
-	op2.ColorScale.ScaleWithColor(color.RGBA{R: 255, G: 99, B: 71, A: 255})
-	text.Draw(screen, "This is a test.", face, op2)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -63,10 +56,16 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
-	ebiten.SetWindowSize(screenWidth, screenHeight)
-	ebiten.SetWindowTitle("Ebiten Text Example")
+	windowSizeW, windowSizeH := screenWidth, screenHeight
+	ebiten.SetWindowSize(windowSizeW, windowSizeH)
+	ebiten.SetWindowTitle("Techboot Reno - Cyber Crawler")
+	// ebiten.SetWindowResizable(true)
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 
-	game := &Game{}
+	game := &Game{
+		Grid: NewGrid(44, 20, fontSize),
+	}
+
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}

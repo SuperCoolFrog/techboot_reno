@@ -281,3 +281,7 @@ Additional Considerations
 
 This structure should provide a good foundation for developing an ASCII-like text-heavy game using Ebiten. Let me  
 know if you need further assistance!   
+
+---
+
+

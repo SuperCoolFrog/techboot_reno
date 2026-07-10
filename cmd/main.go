@@ -31,11 +31,20 @@ func init() {
 }
 
 type Game struct {
-	Grid Grid
+	Grid         Grid
+	inputRunes   []rune
+	testBufferId int
 }
 
 func (g *Game) Update() error {
 	// Update logic if needed
+	g.inputRunes = ebiten.AppendInputChars(g.inputRunes[:0])
+
+	if len(g.inputRunes) > 0 {
+		// g.Grid.Set(0, 0, RenderFlagKeyCode, byte(g.inputRunes[0]))
+		g.Grid.BufferAppend(g.testBufferId, byte(g.inputRunes[0]))
+	}
+
 	return nil
 }
 
@@ -43,7 +52,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Clear the screen with a black background
 	screen.Fill(color.RGBA{R: 0, G: 0, B: 0, A: 255})
 	// screen.Fill(color.RGBA{R: 0, G: 0, B: 50, A: 255})
-
 
 	err := g.Grid.RenderDebug(screen)
 	if err != nil {
@@ -64,8 +72,7 @@ func main() {
 	game := &Game{
 		Grid: NewGrid(26, 20, fontSize, screenPadding),
 	}
-
-	game.Grid.Set(1,1,RenderFlagKeyCode, 'y')
+	game.testBufferId = game.Grid.NewBuffer(1, 1, 5, 2)
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)

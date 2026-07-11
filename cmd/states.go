@@ -15,9 +15,11 @@ func (game *Game) UpdateState() {
 		game.State = Scene1_Start
 	case Scene1_Start:
 		game.State = Scene1_Animating
-		game.Animations.PlayAnimatedGridIntro(1.0, false)
+		game.Animations.PlayAnimatedGridIntro(game.GridSystem, 1.0, false)
 	case Scene1_Animating:
-		if !game.Animations.IsPlaying[AnimationGridIntro] {
+		if game.Animations.IsPlaying[AnimationIntroGrid] {
+			game.Animations.UpdateAnimatedGridIntro(game.GridSystem)
+		} else {
 			game.State = Scene1_Waiting
 		}
 	}

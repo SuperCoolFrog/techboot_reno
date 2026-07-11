@@ -32,10 +32,10 @@ func init() {
 
 type Game struct {
 	State      GameState
-	Grid       *Grid
+	GridSystem *GridSystem
 	inputRunes []rune
 	// testBufferId int
-	Animations *Animations
+	Animations *AnimationSystem
 }
 
 func (g *Game) Update() error {
@@ -47,9 +47,8 @@ func (g *Game) Update() error {
 	//	// g.Grid.Set(0, 0, RenderFlagKeyCode, byte(g.inputRunes[0]))
 	//	g.Grid.BufferAppend(g.testBufferId, byte(g.inputRunes[0]))
 	//}
-
-	g.Animations.Update()
 	g.UpdateState()
+	g.Animations.Update()
 
 	return nil
 }
@@ -64,7 +63,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// 	log.Fatal(err)
 	// }
 
-	g.Animations.Render(screen)
+	g.Animations.Render(screen, g.GridSystem)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -78,10 +77,14 @@ func main() {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetTPS(60) // Locks Update cycles to 60Hz natively
 
+	// This is a lot probably could tweak it once I have an idea of total grids
+	const MaxTotalCells = 100_000
+	const MaxGrids = 50
+
 	game := &Game{
 		State:      Scene1_Init,
-		Grid:       NewGrid(26, 20, fontSize, screenPadding),
-		Animations: NewAnimations(),
+		GridSystem: NewGridSystem(MaxTotalCells, MaxGrids),
+		Animations: NewAnimationSystem(),
 	}
 
 	// game.testBufferId = game.Grid.NewBuffer(1, 1, 5, 2)

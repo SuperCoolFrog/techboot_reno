@@ -86,7 +86,7 @@ func NewGrid(cols, rows, cellSize, padding int) *Grid {
 	return g
 }
 
-func (g *Grid) RestAndResize(cols, rows, cellSize, padding int) {
+func (g *Grid) ResetAndResize(cols, rows, cellSize, padding int) {
 	nuCap := cols * rows
 
 	if nuCap > g.MaxCapacity {
@@ -182,6 +182,13 @@ func (g *Grid) Set(x int, y int, flag RenderFlag, char byte) {
 	idx := g.IdxFromXY(x, y)
 	g.Flags[idx] = flag
 	g.Chars[idx] = char
+}
+
+func (g *Grid) SetAllCells(flag RenderFlag, char byte) {
+	for i := range g.Capacity {
+		g.Flags[i] = flag
+		g.Chars[i] = char
+	}
 }
 
 func (g *Grid) Get(x int, y int) (flag RenderFlag, char byte) {

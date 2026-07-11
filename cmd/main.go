@@ -34,6 +34,7 @@ type Game struct {
 	Grid         *Grid
 	inputRunes   []rune
 	testBufferId int
+	animations   *Animations
 }
 
 func (g *Game) Update() error {
@@ -46,6 +47,8 @@ func (g *Game) Update() error {
 		g.Grid.BufferAppend(g.testBufferId, byte(g.inputRunes[0]))
 	}
 
+	g.animations.Update()
+
 	return nil
 }
 
@@ -54,10 +57,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{R: 0, G: 0, B: 0, A: 255})
 	// screen.Fill(color.RGBA{R: 0, G: 0, B: 50, A: 255})
 
-	err := g.Grid.RenderDebug(screen)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err := g.Grid.RenderDebug(screen)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	g.animations.Render(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -72,9 +77,12 @@ func main() {
 	ebiten.SetTPS(60) // Locks Update cycles to 60Hz natively
 
 	game := &Game{
-		Grid: NewGrid(26, 20, fontSize, screenPadding),
+		Grid:       NewGrid(26, 20, fontSize, screenPadding),
+		animations: NewAnimations(),
 	}
 	game.testBufferId = game.Grid.NewBuffer(1, 1, 5, 2)
+
+	game.animations.PlayAnimatedGridIntro(1.0, false)
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)

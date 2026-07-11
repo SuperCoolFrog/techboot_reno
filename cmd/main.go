@@ -31,23 +31,25 @@ func init() {
 }
 
 type Game struct {
-	Grid         *Grid
-	inputRunes   []rune
-	testBufferId int
-	animations   *Animations
+	State      GameState
+	Grid       *Grid
+	inputRunes []rune
+	// testBufferId int
+	Animations *Animations
 }
 
 func (g *Game) Update() error {
 
 	// Update logic if needed
-	g.inputRunes = ebiten.AppendInputChars(g.inputRunes[:0])
+	//g.inputRunes = ebiten.AppendInputChars(g.inputRunes[:0])
 
-	if len(g.inputRunes) > 0 {
-		// g.Grid.Set(0, 0, RenderFlagKeyCode, byte(g.inputRunes[0]))
-		g.Grid.BufferAppend(g.testBufferId, byte(g.inputRunes[0]))
-	}
+	//if len(g.inputRunes) > 0 {
+	//	// g.Grid.Set(0, 0, RenderFlagKeyCode, byte(g.inputRunes[0]))
+	//	g.Grid.BufferAppend(g.testBufferId, byte(g.inputRunes[0]))
+	//}
 
-	g.animations.Update()
+	g.Animations.Update()
+	g.UpdateState()
 
 	return nil
 }
@@ -62,7 +64,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// 	log.Fatal(err)
 	// }
 
-	g.animations.Render(screen)
+	g.Animations.Render(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -77,12 +79,12 @@ func main() {
 	ebiten.SetTPS(60) // Locks Update cycles to 60Hz natively
 
 	game := &Game{
+		State:      Scene1_Init,
 		Grid:       NewGrid(26, 20, fontSize, screenPadding),
-		animations: NewAnimations(),
+		Animations: NewAnimations(),
 	}
-	game.testBufferId = game.Grid.NewBuffer(1, 1, 5, 2)
 
-	game.animations.PlayAnimatedGridIntro(1.0, false)
+	// game.testBufferId = game.Grid.NewBuffer(1, 1, 5, 2)
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)

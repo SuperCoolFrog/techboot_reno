@@ -19,24 +19,25 @@ const (
 )
 
 //go:embed fonts/Courierprime_1OVL.ttf
-var arialFontBytes []byte
-var arialFontSource *text.GoTextFaceSource
+var fontBytes []byte
+var fontSrc *text.GoTextFaceSource
 
 func init() {
-	src, err := text.NewGoTextFaceSource(bytes.NewReader(arialFontBytes))
+	src, err := text.NewGoTextFaceSource(bytes.NewReader(fontBytes))
 	if err != nil {
 		log.Fatalf("Error creating font face: %v", err)
 	}
-	arialFontSource = src
+	fontSrc = src
 }
 
 type Game struct {
-	Grid         Grid
+	Grid         *Grid
 	inputRunes   []rune
 	testBufferId int
 }
 
 func (g *Game) Update() error {
+
 	// Update logic if needed
 	g.inputRunes = ebiten.AppendInputChars(g.inputRunes[:0])
 
@@ -68,6 +69,7 @@ func main() {
 	ebiten.SetWindowSize(windowSizeW, windowSizeH)
 	ebiten.SetWindowTitle("Techboot Reno - Cyber Crawler")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
+	ebiten.SetTPS(60) // Locks Update cycles to 60Hz natively
 
 	game := &Game{
 		Grid: NewGrid(26, 20, fontSize, screenPadding),

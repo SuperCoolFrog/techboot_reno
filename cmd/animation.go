@@ -32,7 +32,7 @@ func NewAnimations() *Animations {
 		Delay:              make([]float32, AnimationCount),
 		Timers:             make([]float32, AnimationCount),
 		Durations:          make([]float32, AnimationCount),
-		GridAnimationIntro: NewGrid(27, 21, 48, 0),
+		GridAnimationIntro: NewGrid(27, 20, 48, 12),
 	}
 
 	return a
@@ -74,9 +74,9 @@ func (anims *Animations) Update() {
 
 func (anims *Animations) Render(screen *ebiten.Image) {
 	for animation := range AnimationCount {
-		if !anims.IsPlaying[animation] {
-			continue
-		}
+		// if !anims.IsPlaying[animation] {
+		// 	continue
+		// }
 
 		// Inidividual Renders
 		switch animation {
@@ -103,20 +103,58 @@ func (anims *Animations) PlayAnimatedGridIntro(duration float32, loop bool) {
 
 func (anims *Animations) updateAnimatedGridIntro() {
 	timer := anims.Timers[AnimationGridIntro]
-	duration := anims.Durations[AnimationGridIntro]
+	duration := float64(anims.Durations[AnimationGridIntro])
 	delay := anims.Delay[AnimationGridIntro]
-
 	grid := anims.GridAnimationIntro
-	completed := float64(timer-delay) / float64(duration)
+	// steps := 2.0
+	//stepDuration := duration / steps
+	trueTime := float64(timer - delay)
 
-	maxCol := int(float64(grid.Cols) * completed)
-	maxRow := int(float64(grid.Rows) * completed)
+	// Step 1
+	step1Duration := duration * 0.5
 
-	for x := 0; x < maxCol; x++ {
-		// grid.Set(x, 0, RenderFlagCellSquare, 0)
-		for y := 0; y < maxRow; y++ {
-			grid.Set(x, y, RenderFlagCellSquare, 0)
+	completed1 := trueTime / step1Duration
+
+	if completed1 < 1.0 {
+		maxCol := int(float64(grid.Cols) * completed1)
+		maxRow := int(float64(grid.Rows) * completed1)
+
+		for x := 0; x < maxCol; x++ {
+			// grid.Set(x, 0, RenderFlagCellSquare, 0)
+			for y := 0; y < maxRow; y++ {
+				grid.Set(x, y, RenderFlagCellSquare, 0)
+			}
 		}
+
+		return
 	}
 
+	// Step 2
+	step2Duration := step1Duration + duration*0.5
+
+	completed2 := trueTime / step2Duration
+
+	//	Start?
+
+	if completed2 < 1.0 {
+		halfCols := float64(grid.Cols) / 2.0
+		halfRows := float64(grid.Rows) / 2.0
+
+		targetCutCols := float64(grid.Cols) / 3.5
+		targetCutRows := float64(grid.Rows) / 2.5
+
+		cutCols := targetCutCols * completed2
+		cutRows := targetCutRows * completed2
+
+		minCol := int(halfCols) - int(cutCols)
+		minRow := int(halfRows) - int(cutRows)
+		maxCol := int(halfCols) + int(cutCols)
+		maxRow := int(halfRows) + int(cutRows)
+
+		for x := minCol; x < maxCol; x++ {
+			for y := minRow; y < maxRow; y++ {
+				grid.Set(x, y, RenderFlagEmpty, 0)
+			}
+		}
+	}
 }

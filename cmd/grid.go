@@ -39,6 +39,7 @@ type GridSystem struct {
 	Cols      []int
 	CellSizes []int
 	Paddings  []int
+	IsActive  []bool
 
 	NextGridID GridID
 }
@@ -52,6 +53,7 @@ func NewGridSystem(maxTotalCells int, maxGrid int) *GridSystem {
 		Cols:          make([]int, maxGrid),
 		CellSizes:     make([]int, maxGrid),
 		Paddings:      make([]int, maxGrid),
+		IsActive:      make([]bool, maxGrid),
 		NextGridID:    0,
 	}
 
@@ -112,8 +114,17 @@ func (gs *GridSystem) AllocateGrid(cols, rows, cellSize, padding int) GridID {
 	gs.Rows[id] = rows
 	gs.CellSizes[id] = cellSize
 	gs.Paddings[id] = padding
+	gs.IsActive[id] = false
 
 	return id
+}
+
+func (gs *GridSystem) EnableGrid(gridId GridID) {
+	gs.IsActive[gridId] = true
+}
+
+func (gs *GridSystem) DisableGrid(gridId GridID) {
+	gs.IsActive[gridId] = false
 }
 
 func (gs *GridSystem) IdxFromXY(gridId GridID, x, y int) int {
@@ -281,7 +292,17 @@ func (gs *GridSystem) RenderDebug(screen *ebiten.Image, gridID GridID) error {
 	return nil
 }
 
-func (gs *GridSystem) Render(screen *ebiten.Image, gridID GridID) error {
+func (gs *GridSystem) Render(screen *ebiten.Image) error {
+	for id := GridID(0); id < gs.NextGridID; id++ {
+		if gs.IsActive[id] {
+			gs.RenderGrid(screen, id)
+		}
+	}
+
+	return nil
+}
+
+func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 	offset := gs.Offsets[gridID]
 	count := gs.Counts[gridID]
 	size := float32(gs.CellSizes[gridID])

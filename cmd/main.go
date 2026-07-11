@@ -63,6 +63,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// 	log.Fatal(err)
 	// }
 
+	g.GridSystem.Render(screen)
 	g.Animations.Render(screen, g.GridSystem)
 }
 

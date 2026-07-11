@@ -21,6 +21,9 @@ func (game *Game) UpdateState() {
 			game.Animations.UpdateAnimatedGridIntro(game.GridSystem)
 		} else {
 			game.State = Scene1_Waiting
+			game.Animations.Offset = 1 // Intro animation is 0
+			game.GridSystem.EnableGrid(game.Animations.GridId[AnimationIntroGrid])
 		}
+	case Scene1_Waiting:
 	}
 }

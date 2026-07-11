@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -87,9 +86,8 @@ func (anims *AnimationSystem) Render(screen *ebiten.Image, gridSystem *GridSyste
 		}
 
 		if anims.HasGrid[animation] {
-			fmt.Printf("Rendering")
 			gridId := anims.GridId[animation]
-			gridSystem.Render(screen, gridId)
+			gridSystem.RenderGrid(screen, gridId)
 		}
 	}
 }
@@ -109,7 +107,7 @@ func (anims *AnimationSystem) PlayAnimatedGridIntro(gridSystem *GridSystem, dura
 	anims.Durations[AnimationIntroGrid] = duration
 	// anims.Delay[AnimationGridIntro] = 5.0 // Tried to fix vsync at the beginning but just live with it
 
-	gridId := gridSystem.AllocateGrid(27, 21, 48, 0)
+	gridId := gridSystem.AllocateGrid(27, 21, 48, 12)
 
 	gridSystem.SetAllCells(gridId, CellTypeNone, 0)
 

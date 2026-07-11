@@ -15,7 +15,7 @@ type GridCellType byte
 const (
 	CellTypeNone GridCellType = iota
 	CellTypeEmpty
-	CellTypeKeyCode
+	CellTypeChar
 	CellTypeReserved
 	CellTypeSquare
 )
@@ -320,7 +320,8 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 		x := float32(i%cols)*size + padding
 		y := float32(math.Trunc(float64(i/cols)))*size + padding
 
-		if cellTypes[i] == CellTypeSquare {
+		switch cellTypes[i] {
+		case CellTypeSquare:
 			vector.StrokeRect(screen, x, y, size, size, strokeW, clr, true)
 		}
 	}

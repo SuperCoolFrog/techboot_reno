@@ -5,8 +5,6 @@ import (
 	_ "embed"
 	"log"
 
-	"fmt"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image/color"

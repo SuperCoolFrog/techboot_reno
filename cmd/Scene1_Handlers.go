@@ -32,17 +32,21 @@ func Scene1_HandleButtonList(game *Game) {
 	startFocusCellType, _ := game.GridSystem.Get(gridId, 7, 8)
 	exitFocusCellType, _ := game.GridSystem.Get(gridId, 7, 9)
 
-	if startFocusCellType == CellTypeEmpty && exitFocusCellType == CellTypeEmpty {
+	startSelected := startFocusCellType != CellTypeEmpty
+	exitSelected := exitFocusCellType != CellTypeEmpty
+
+	if !(startSelected || exitSelected) {
 		// Neither Selected so select start
 		// start
 		game.GridSystem.Set(gridId, 7, 8, CellTypeChar, ':')
 		game.GridSystem.Set(gridId, 15, 8, CellTypeChar, '|')
 
-		startFocusCellType = CellTypeChar
-
 		// exit
 		game.GridSystem.Set(gridId, 7, 9, CellTypeEmpty, ' ')
 		game.GridSystem.Set(gridId, 15, 9, CellTypeEmpty, ' ')
+
+		startSelected = true
+		exitSelected = false
 	}
 
 	downKeyPressed := inpututil.IsKeyJustPressed(ebiten.KeyDown) ||
@@ -53,32 +57,31 @@ func Scene1_HandleButtonList(game *Game) {
 		inpututil.IsKeyJustPressed(ebiten.KeyK) ||
 		inpututil.IsKeyJustPressed(ebiten.KeyW)
 
-	if downKeyPressed && startFocusCellType != CellTypeEmpty {
+	if downKeyPressed && startSelected {
 		// start
 		game.GridSystem.Set(gridId, 7, 8, CellTypeEmpty, ' ')
 		game.GridSystem.Set(gridId, 15, 8, CellTypeEmpty, ' ')
 
-		startFocusCellType = CellTypeEmpty
-
 		// exit
 		game.GridSystem.Set(gridId, 7, 9, CellTypeChar, ':')
 		game.GridSystem.Set(gridId, 15, 9, CellTypeChar, '|')
-		exitFocusCellType = CellTypeChar
+
+		startSelected = false
+		exitSelected = true
 	}
 
-	if upKeyPressed && exitFocusCellType != CellTypeEmpty {
+	if upKeyPressed && exitSelected {
 		// start
 		game.GridSystem.Set(gridId, 7, 8, CellTypeChar, ':')
 		game.GridSystem.Set(gridId, 15, 8, CellTypeChar, '|')
-		startFocusCellType = CellTypeChar
 
 		// exit
 		game.GridSystem.Set(gridId, 7, 9, CellTypeEmpty, ' ')
 		game.GridSystem.Set(gridId, 15, 9, CellTypeEmpty, ' ')
-		exitFocusCellType = CellTypeEmpty
-	}
 
-	// keyPressed := upKeyPressed || downKeyPressed
+		startSelected = true
+		exitSelected = false
+	}
 
 	// Mouse
 	mx, my := ebiten.CursorPosition()
@@ -89,12 +92,13 @@ func Scene1_HandleButtonList(game *Game) {
 		// start
 		game.GridSystem.Set(gridId, 7, 8, CellTypeChar, ':')
 		game.GridSystem.Set(gridId, 15, 8, CellTypeChar, '|')
-		startFocusCellType = CellTypeChar
 
 		// exit
 		game.GridSystem.Set(gridId, 7, 9, CellTypeEmpty, ' ')
 		game.GridSystem.Set(gridId, 15, 9, CellTypeEmpty, ' ')
-		exitFocusCellType = CellTypeEmpty
+
+		startSelected = true
+		exitSelected = false
 	}
 
 	// Exit
@@ -102,12 +106,24 @@ func Scene1_HandleButtonList(game *Game) {
 		// start
 		game.GridSystem.Set(gridId, 7, 8, CellTypeEmpty, ' ')
 		game.GridSystem.Set(gridId, 15, 8, CellTypeEmpty, ' ')
-		startFocusCellType = CellTypeEmpty
 
 		// exit
 		game.GridSystem.Set(gridId, 7, 9, CellTypeChar, ':')
 		game.GridSystem.Set(gridId, 15, 9, CellTypeChar, '|')
-		exitFocusCellType = CellTypeChar
+
+		startSelected = false
+		exitSelected = true
+	}
+
+	acceptSelected := inpututil.IsKeyJustPressed(ebiten.KeyEnter) ||
+		inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
+
+	if acceptSelected && startSelected {
+		// Move to next scene
+	}
+
+	if acceptSelected && exitSelected {
+		game.Exit = true
 	}
 
 	game.GridSystem.Set(gridId, 8, 8, CellTypeChar, '[')

@@ -38,6 +38,7 @@ type Game struct {
 	Animations             *AnimationSystem
 	MouseMoved             bool
 	LastMouseX, LastMouseY int
+	Exit                   bool
 }
 
 func (g *Game) Update() error {
@@ -56,6 +57,10 @@ func (g *Game) Update() error {
 
 	g.UpdateState()
 	g.Animations.Update()
+
+	if g.Exit {
+		return ebiten.Termination
+	}
 
 	return nil
 }
@@ -97,7 +102,9 @@ func main() {
 
 	// game.testBufferId = game.Grid.NewBuffer(1, 1, 5, 2)
 
-	if err := ebiten.RunGame(game); err != nil {
-		log.Fatal(err)
+	if err := ebiten.RunGame(game); err != nil && err != ebiten.Termination {
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }

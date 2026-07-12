@@ -91,8 +91,12 @@ func main() {
 	ebiten.SetTPS(60) // Locks Update cycles to 60Hz natively
 
 	// This is a lot probably could tweak it once I have an idea of total grids
-	const MaxTotalCells = 100_000
-	const MaxGrids = 50
+	// const MaxTotalCells = 100_000
+	// const MaxGrids = 50
+
+	// 30X30X5 -- Tweaking values
+	const MaxTotalCells = 5_000
+	const MaxGrids = 5
 
 	game := &Game{
 		State:      Scene1_Init,

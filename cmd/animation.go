@@ -7,7 +7,8 @@ import (
 type AnimationId uint32
 
 const (
-	AnimationIntroGrid AnimationId = iota
+	AnimationGrid AnimationId = iota
+	AnimationDialog
 )
 
 const (

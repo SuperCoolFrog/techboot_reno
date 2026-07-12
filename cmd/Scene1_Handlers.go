@@ -7,7 +7,7 @@ import (
 )
 
 func Scene1_HandleAnimationComplete(game *Game) {
-	gridId := game.Animations.GridId[AnimationIntroGrid]
+	gridId := game.Animations.GridId[AnimationGrid]
 	game.State = Scene1_Waiting
 	// game.Animations.Offset = 1 // Intro animation is 0
 	game.GridSystem.EnableGrid(gridId)
@@ -27,7 +27,7 @@ func Scene1_HandleAnimationComplete(game *Game) {
 }
 
 func Scene1_HandleButtonList(game *Game) {
-	gridId := game.Animations.GridId[AnimationIntroGrid]
+	gridId := game.Animations.GridId[AnimationGrid]
 
 	startFocusCellType, _ := game.GridSystem.Get(gridId, 7, 8)
 	exitFocusCellType, _ := game.GridSystem.Get(gridId, 7, 9)

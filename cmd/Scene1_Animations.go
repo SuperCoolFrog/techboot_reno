@@ -1,29 +1,29 @@
 package main
 
 func (anims *AnimationSystem) PlayAnimatedGridIntro(gridSystem *GridSystem, duration float32, loop bool) {
-	if anims.IsPlaying[AnimationIntroGrid] {
+	if anims.IsPlaying[AnimationGrid] {
 		return
 	}
 
-	anims.IsPlaying[AnimationIntroGrid] = true
-	anims.Loop[AnimationIntroGrid] = loop
-	anims.Timers[AnimationIntroGrid] = 0.0
-	anims.Durations[AnimationIntroGrid] = duration
+	anims.IsPlaying[AnimationGrid] = true
+	anims.Loop[AnimationGrid] = loop
+	anims.Timers[AnimationGrid] = 0.0
+	anims.Durations[AnimationGrid] = duration
 	// anims.Delay[AnimationGridIntro] = 5.0 // Tried to fix vsync at the beginning but just live with it
 
 	gridId := gridSystem.AllocateGrid(27, 21, 48, 12)
 
 	gridSystem.SetAllCells(gridId, CellTypeNone, 0)
 
-	anims.HasGrid[AnimationIntroGrid] = true
-	anims.GridId[AnimationIntroGrid] = gridId
+	anims.HasGrid[AnimationGrid] = true
+	anims.GridId[AnimationGrid] = gridId
 }
 
 func (anims *AnimationSystem) UpdateAnimatedGridIntro(gridSystem *GridSystem) {
-	timer := anims.Timers[AnimationIntroGrid]
-	duration := float64(anims.Durations[AnimationIntroGrid])
-	delay := anims.Delay[AnimationIntroGrid]
-	gridId := anims.GridId[AnimationIntroGrid]
+	timer := anims.Timers[AnimationGrid]
+	duration := float64(anims.Durations[AnimationGrid])
+	delay := anims.Delay[AnimationGrid]
+	gridId := anims.GridId[AnimationGrid]
 	cols := gridSystem.Cols[gridId]
 	rows := gridSystem.Rows[gridId]
 
@@ -81,23 +81,23 @@ func (anims *AnimationSystem) UpdateAnimatedGridIntro(gridSystem *GridSystem) {
 }
 
 func (anims *AnimationSystem) PlayAnimatedGridExit(gridSystem *GridSystem, duration float32, loop bool) {
-	if anims.IsPlaying[AnimationIntroGrid] {
+	if anims.IsPlaying[AnimationGrid] {
 		return
 	}
 
-	anims.IsPlaying[AnimationIntroGrid] = true
-	anims.Loop[AnimationIntroGrid] = loop
-	anims.Timers[AnimationIntroGrid] = 0.0
-	anims.Durations[AnimationIntroGrid] = duration
+	anims.IsPlaying[AnimationGrid] = true
+	anims.Loop[AnimationGrid] = loop
+	anims.Timers[AnimationGrid] = 0.0
+	anims.Durations[AnimationGrid] = duration
 
 	// Assume Grid exists from intro
 }
 
 func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
-	timer := anims.Timers[AnimationIntroGrid]
-	duration := float64(anims.Durations[AnimationIntroGrid])
-	delay := anims.Delay[AnimationIntroGrid]
-	gridId := anims.GridId[AnimationIntroGrid]
+	timer := anims.Timers[AnimationGrid]
+	duration := float64(anims.Durations[AnimationGrid])
+	delay := anims.Delay[AnimationGrid]
+	gridId := anims.GridId[AnimationGrid]
 	cols := gridSystem.Cols[gridId]
 	rows := gridSystem.Rows[gridId]
 

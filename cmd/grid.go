@@ -332,7 +332,7 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 
 	face := &text.GoTextFace{
 		Source: fontSrc,
-		Size:   fontSize, // Use consistent font size
+		Size:   float64(size), // Use consistent font size
 	}
 
 	for i := range capacity {

@@ -30,7 +30,7 @@ func (game *Game) UpdateState() {
 	case Scene1_Waiting:
 		Scene1_HandleButtonList(game)
 	case Scene1_ExitAnimation:
-		game.Animations.PlayAnimatedGridExit(game.GridSystem, 3.0, false)
+		game.Animations.PlayAnimatedGridExit(game.GridSystem, 5.0, false)
 		game.State = Scene1_Exiting
 	case Scene1_Exiting:
 		if game.Animations.IsPlaying[AnimationIntroGrid] {

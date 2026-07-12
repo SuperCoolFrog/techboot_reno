@@ -98,11 +98,13 @@ func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
 	duration := float64(anims.Durations[AnimationIntroGrid])
 	delay := anims.Delay[AnimationIntroGrid]
 	gridId := anims.GridId[AnimationIntroGrid]
+	cols := gridSystem.Cols[gridId]
+	rows := gridSystem.Rows[gridId]
 
 	trueTime := float64(timer - delay)
 
 	// Step 1
-	step1Duration := duration * 0.32
+	step1Duration := duration * 0.25
 
 	completed1 := trueTime / step1Duration
 
@@ -173,32 +175,30 @@ func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
 	}
 
 	// Step 2
-	cols := gridSystem.Cols[gridId]
-	rows := gridSystem.Rows[gridId]
-
-	step2Duration := step1Duration + duration*0.32
-	completed2 := trueTime / step2Duration
+	step2Duration := step1Duration + duration*0.25
+	completed2 := (trueTime - step1Duration) / (duration * 0.25)
 
 	//	Start
 
 	if completed2 < 1.0 {
 		halfCols := float64(cols) / 2.0
 		halfRows := float64(rows) / 2.0
+		qtrCols := halfCols / 2.0
+		qtrRows := halfRows / 2.0
 
-		targetCutCols := float64(cols) / 2
-		targetCutRows := float64(rows) / 2
+		cutCols := qtrCols * completed2
+		cutRows := qtrRows * completed2
 
-		cutCols := targetCutCols * completed2
-		cutRows := targetCutRows * completed2
-
-		minCol := int(halfCols) - int(cutCols)
-		minRow := int(halfRows) - int(cutRows)
-		maxCol := int(halfCols) + int(cutCols)
-		maxRow := int(halfRows) + int(cutRows)
+		minCol := int(halfCols-qtrCols) - int(cutCols)
+		minRow := int(halfRows-qtrRows) - int(cutRows)
+		maxCol := int(halfCols+qtrCols) + int(cutCols)
+		maxRow := int(halfRows+qtrRows) + int(cutRows)
 
 		for x := minCol; x < maxCol; x++ {
 			for y := minRow; y < maxRow; y++ {
-				gridSystem.Set(gridId, x, y, CellTypeEmpty, 0)
+				if x >= 0 && x < cols && y >= 0 && y < rows {
+					gridSystem.Set(gridId, x, y, CellTypeEmpty, 0)
+				}
 			}
 		}
 
@@ -215,8 +215,8 @@ func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
 	}
 
 	// Step 3
-	step3Duration := step2Duration + duration*0.36
-	completed3 := trueTime / step3Duration
+	step3Duration := step2Duration + duration*0.25
+	completed3 := (trueTime - step2Duration) / (duration * 0.25)
 
 	if completed3 <= 1.0 {
 		if ct, _ := gridSystem.Get(gridId, 9, 8); completed3 >= .9 && ct != CellTypeEmpty {
@@ -239,15 +239,56 @@ func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
 			gridSystem.Set(gridId, 12, 8, CellTypeChar, '|')
 			gridSystem.Set(gridId, 13, 8, CellTypeEmpty, ' ')
 		}
-		if ct, _ := gridSystem.Get(gridId, 14, 8); completed3 >= .4 && ct != CellTypeEmpty {
+		if ct, _ := gridSystem.Get(gridId, 14, 8); completed3 >= .3 && ct != CellTypeEmpty {
 			gridSystem.Set(gridId, 13, 8, CellTypeChar, '|')
 			gridSystem.Set(gridId, 14, 8, CellTypeEmpty, ' ')
 		}
-		if ct, _ := gridSystem.Get(gridId, 15, 8); completed3 >= .2 && ct != CellTypeEmpty {
+		if ct, _ := gridSystem.Get(gridId, 15, 8); completed3 >= .1 && ct != CellTypeEmpty {
 			gridSystem.Set(gridId, 14, 8, CellTypeChar, '|')
 			gridSystem.Set(gridId, 15, 8, CellTypeEmpty, ' ')
 		}
 
+		return
 	}
 
+	// Step 4
+	gridSystem.Set(gridId, 8, 8, CellTypeEmpty, ' ')
+	step4Duration := step3Duration + duration*.125
+	completed4 := (trueTime - step3Duration) / (duration * 0.125)
+
+	if completed4 < 1.0 {
+
+		for x := 1; x <= int(float64(8)*completed4); x++ {
+			if x <= 6 {
+				gridSystem.Set(gridId, 6-x, 8, CellTypeChar, ':')
+				gridSystem.Set(gridId, 7-x, 8, CellTypeChar, '|')
+				gridSystem.Set(gridId, 8-x, 8, CellTypeEmpty, ' ')
+			} else {
+				gridSystem.Set(gridId, 0, 8, CellTypeChar, ':')
+				gridSystem.Set(gridId, 1, 8, CellTypeChar, '|')
+				gridSystem.Set(gridId, 2, 8, CellTypeChar, ' ')
+			}
+
+		}
+		return
+	}
+
+	// Step 5
+	completed5 := (trueTime - step4Duration) / (duration * 0.125)
+
+	if completed5 < 1.0 {
+		for y := 1; y <= int(float64(8)*completed5); y++ {
+			if y < 8 {
+				gridSystem.Set(gridId, 0, 8-y, CellTypeChar, ':')
+				gridSystem.Set(gridId, 1, 8-y, CellTypeChar, '|')
+				gridSystem.Set(gridId, 0, 8-y+1, CellTypeEmpty, ' ')
+				gridSystem.Set(gridId, 1, 8-y+1, CellTypeEmpty, ' ')
+			} else {
+				gridSystem.Set(gridId, 0, 0, CellTypeChar, ':')
+				gridSystem.Set(gridId, 1, 0, CellTypeChar, '|')
+				gridSystem.Set(gridId, 0, 1, CellTypeEmpty, ' ')
+				gridSystem.Set(gridId, 1, 1, CellTypeEmpty, ' ')
+			}
+		}
+	}
 }

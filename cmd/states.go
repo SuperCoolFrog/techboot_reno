@@ -20,6 +20,8 @@ const (
 	Scene2_Dialog_4
 	Scene2_Init_Dialog_5
 	Scene2_Dialog_5
+	Scene2_Init_Dialog_6
+	Scene2_Dialog_6
 
 	End // End
 )
@@ -76,6 +78,13 @@ func (game *Game) UpdateState() {
 		Scene2_InitDialog(4, game.GridSystem, game.Animations)
 		game.State = Scene2_Dialog_5
 	case Scene2_Dialog_5:
-		game.State = Scene2_HandleDialog(4, []byte("Good Luck..."), Scene2_Dialog_5, End, gs, anims)
+		game.State = Scene2_HandleDialog(4, []byte("Good Luck..."), Scene2_Dialog_5, Scene2_Init_Dialog_6, gs, anims)
+	case Scene2_Init_Dialog_6:
+		gridId := anims.GridId[AnimationDialog]
+		s2_AddTRenoMsgBuffer(gs, gridId, 5)
+		PlayDialogAnimation(2.0, false, gs, anims)
+		game.State = Scene2_Dialog_6
+	case Scene2_Dialog_6:
+		game.State = Scene2_HandleDialog(5, []byte("thanks"), Scene2_Dialog_6, End, gs, anims)
 	}
 }

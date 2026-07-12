@@ -11,7 +11,22 @@ func s2_AddRipMsgBuffer(gs *GridSystem, gridId GridID, y int) {
 	gs.Set(gridId, 7, y, CellTypeChar, '`')
 	gs.Set(gridId, 8, y, CellTypeChar, ':')
 
-	//Setup Buffer 1
+	//Setup Buffer
+	gs.NewBuffer(gridId, 9, y, gs.Cols[gridId]-10, 1)
+}
+
+func s2_AddTRenoMsgBuffer(gs *GridSystem, gridId GridID, y int) {
+	gs.Set(gridId, 0, y, CellTypeChar, '`')
+	gs.Set(gridId, 1, y, CellTypeChar, 'T')
+	gs.Set(gridId, 2, y, CellTypeChar, '.')
+	gs.Set(gridId, 3, y, CellTypeChar, 'R')
+	gs.Set(gridId, 4, y, CellTypeChar, 'E')
+	gs.Set(gridId, 5, y, CellTypeChar, 'N')
+	gs.Set(gridId, 6, y, CellTypeChar, '0')
+	gs.Set(gridId, 7, y, CellTypeChar, '`')
+	gs.Set(gridId, 8, y, CellTypeChar, ':')
+
+	//Setup Buffer
 	gs.NewBuffer(gridId, 9, y, gs.Cols[gridId]-10, 1)
 }
 

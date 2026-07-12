@@ -4,6 +4,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"image"
 	"image/color"
 	"math"
 	"unsafe"
@@ -125,6 +126,19 @@ func (gs *GridSystem) EnableGrid(gridId GridID) {
 
 func (gs *GridSystem) DisableGrid(gridId GridID) {
 	gs.IsActive[gridId] = false
+}
+
+func (gs *GridSystem) GridRectangle(gridId GridID, x1, y1, colCount, rowCount int) image.Rectangle {
+	size := gs.CellSizes[gridId]
+	padding := gs.Paddings[gridId]
+
+	posX := x1*size + padding
+	posY := y1*size + padding
+
+	w := posX + colCount*size
+	h := posY + rowCount*size
+
+	return image.Rect(posX, posY, w, h)
 }
 
 func (gs *GridSystem) IdxFromXY(gridId GridID, x, y int) int {
@@ -310,11 +324,16 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 	cols := gs.Cols[gridID]
 	capacity := gs.Counts[gridID]
 
-	// chars := gs.Chars[offset : offset+count]
+	chars := gs.Chars[offset : offset+count]
 	cellTypes := gs.CellTypes[offset : offset+count]
 
 	strokeW := float32(0.5)
 	clr := color.RGBA{R: 0, G: 255, B: 0, A: 255}
+
+	face := &text.GoTextFace{
+		Source: fontSrc,
+		Size:   fontSize, // Use consistent font size
+	}
 
 	for i := range capacity {
 		x := float32(i%cols)*size + padding
@@ -323,6 +342,15 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 		switch cellTypes[i] {
 		case CellTypeSquare:
 			vector.StrokeRect(screen, x, y, size, size, strokeW, clr, true)
+		case CellTypeChar:
+			opt := &text.DrawOptions{}
+			charStr := string(chars[i])
+			opt.ColorScale.ScaleWithColor(color.RGBA{R: 0, G: 255, B: 0, A: 255})
+			w, h := text.Measure(charStr, face, 0.0)
+			charX := x + (size-float32(w))/2
+			charY := y + (size-float32(h))/2
+			opt.GeoM.Translate(float64(charX), float64(charY)) // Set Position
+			text.Draw(screen, charStr, face, opt)
 		}
 	}
 

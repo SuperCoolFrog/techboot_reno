@@ -5,6 +5,8 @@ import (
 	_ "embed"
 	"log"
 
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image/color"
@@ -35,18 +37,25 @@ type Game struct {
 	GridSystem *GridSystem
 	inputRunes []rune
 	// testBufferId int
-	Animations *AnimationSystem
+	Animations             *AnimationSystem
+	MouseMoved             bool
+	LastMouseX, LastMouseY int
 }
 
 func (g *Game) Update() error {
 
-	// Update logic if needed
-	//g.inputRunes = ebiten.AppendInputChars(g.inputRunes[:0])
+	mx, my := ebiten.CursorPosition()
+	g.MouseMoved = mx != g.LastMouseX || my != g.LastMouseY
+	g.LastMouseX = mx
+	g.LastMouseY = my
 
-	//if len(g.inputRunes) > 0 {
-	//	// g.Grid.Set(0, 0, RenderFlagKeyCode, byte(g.inputRunes[0]))
-	//	g.Grid.BufferAppend(g.testBufferId, byte(g.inputRunes[0]))
-	//}
+	// Update logic if needed
+	g.inputRunes = ebiten.AppendInputChars(g.inputRunes[:0])
+
+	// if len(g.inputRunes) > 0 {
+	// 	fmt.Printf("rune: %v\n", g.inputRunes)
+	// }
+
 	g.UpdateState()
 	g.Animations.Update()
 

@@ -6,8 +6,8 @@ func InitDialogAnimation(gs *GridSystem, anims *AnimationSystem) {
 	anims.Timers[AnimationDialog] = 0.0
 	anims.Durations[AnimationDialog] = 0.0
 
-	gridId := gs.AllocateGrid(40, 30, 32, 12)
-	gs.SetAllCells(gridId, CellTypeSquare, 0)
+	gridId := gs.AllocateGrid(40, 30, 32, 16)
+	gs.SetAllCells(gridId, CellTypeEmpty, 0)
 	gs.EnableGrid(gridId)
 
 	anims.HasGrid[AnimationDialog] = true
@@ -24,10 +24,11 @@ func PlayDialogAnimation(
 		return
 	}
 
-	anims.IsPlaying[AnimationDialog] = false
+	anims.IsPlaying[AnimationDialog] = true
 	anims.Loop[AnimationDialog] = loop
 	anims.Timers[AnimationDialog] = 0.0
 	anims.Durations[AnimationDialog] = duration
+	anims.Delay[AnimationDialog] = 2
 }
 
 func UpdateDialogAnimation(
@@ -42,14 +43,12 @@ func UpdateDialogAnimation(
 
 	bCursor := gs.BufferCursor[bufferIdx]
 
-	currentCount := bCursor - bufferIdx
 	total := len(message)
 
 	targetCount := int(float32(total) * completedTime)
 
-	for currentCount < targetCount {
+	for bCursor <= targetCount {
 		gs.BufferAppend(gridId, bufferIdx, message[bCursor])
-		currentCount++
 		bCursor = gs.BufferCursor[bufferIdx]
 	}
 }

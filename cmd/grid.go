@@ -212,7 +212,7 @@ func (gs *GridSystem) NewBuffer(gridId GridID, bufferX, bufferY, bufferCols, buf
 
 	for y := bufferY; y < endY; y++ {
 		for x := bufferX; x < endX; x++ {
-			gs.Set(gridId, x, y, CellTypeReserved, '_')
+			gs.Set(gridId, x, y, CellTypeReserved, ' ')
 		}
 	}
 
@@ -332,7 +332,7 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 
 	face := &text.GoTextFace{
 		Source: fontSrc,
-		Size:   float64(size), // Use consistent font size
+		Size:   float64(size),
 	}
 
 	for i := range capacity {
@@ -342,6 +342,15 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 		switch cellTypes[i] {
 		case CellTypeSquare:
 			vector.StrokeRect(screen, x, y, size, size, strokeW, clr, true)
+		case CellTypeReserved:
+			opt := &text.DrawOptions{}
+			charStr := string(chars[i])
+			opt.ColorScale.ScaleWithColor(color.RGBA{R: 0, G: 255, B: 0, A: 255})
+			w, h := text.Measure(charStr, face, 0.0)
+			charX := x + (size-float32(w))/2
+			charY := y + (size-float32(h))/2
+			opt.GeoM.Translate(float64(charX), float64(charY)) // Set Position
+			text.Draw(screen, charStr, face, opt)
 		case CellTypeChar:
 			opt := &text.DrawOptions{}
 			charStr := string(chars[i])

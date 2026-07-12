@@ -12,7 +12,10 @@ const (
 
 	Scene2_Init
 	Scene2_Dialog_1
+	Scene2_Init_Dialog_2
 	Scene2_Dialog_2
+	Scene2_Init_Dialog_3
+	Scene2_Dialog_3
 )
 
 func (game *Game) UpdateState() {
@@ -41,9 +44,14 @@ func (game *Game) UpdateState() {
 		}
 	case Scene2_Init:
 		Scene2_HandleInit(game.GridSystem, game.Animations)
-		PlayDialogAnimation(5.0, false, game.GridSystem, game.Animations)
+		PlayDialogAnimation(2.0, false, game.GridSystem, game.Animations)
 		game.State = Scene2_Dialog_1
 	case Scene2_Dialog_1:
 		game.State = Scene2_HandleDialog1(game.GridSystem, game.Animations)
+	case Scene2_Init_Dialog_2:
+		Scene2_InitDialog2(game.GridSystem, game.Animations)
+		game.State = Scene2_Dialog_2
+	case Scene2_Dialog_2:
+		game.State = Scene2_HandleDialog2(game.GridSystem, game.Animations)
 	}
 }

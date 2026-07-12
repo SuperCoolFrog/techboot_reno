@@ -7,6 +7,11 @@ const (
 	Scene1_Start
 	Scene1_Animating
 	Scene1_Waiting
+	Scene1_ExitAnimation
+	Scene1_Exiting
+
+	Scene2_Init
+	Scene2_CutScene
 )
 
 func (game *Game) UpdateState() {
@@ -24,5 +29,14 @@ func (game *Game) UpdateState() {
 		}
 	case Scene1_Waiting:
 		Scene1_HandleButtonList(game)
+	case Scene1_ExitAnimation:
+		game.Animations.PlayAnimatedGridExit(game.GridSystem, 3.0, false)
+		game.State = Scene1_Exiting
+	case Scene1_Exiting:
+		if game.Animations.IsPlaying[AnimationIntroGrid] {
+			game.Animations.UpdateAnimatedGridExit(game.GridSystem)
+		} else {
+			game.State = Scene2_Init
+		}
 	}
 }

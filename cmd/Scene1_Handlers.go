@@ -9,7 +9,7 @@ import (
 func Scene1_HandleAnimationComplete(game *Game) {
 	gridId := game.Animations.GridId[AnimationIntroGrid]
 	game.State = Scene1_Waiting
-	game.Animations.Offset = 1 // Intro animation is 0
+	// game.Animations.Offset = 1 // Intro animation is 0
 	game.GridSystem.EnableGrid(gridId)
 	game.GridSystem.Set(gridId, 9, 3, CellTypeChar, 'T')
 	game.GridSystem.Set(gridId, 10, 3, CellTypeChar, 'E')
@@ -120,6 +120,7 @@ func Scene1_HandleButtonList(game *Game) {
 
 	if acceptSelected && startSelected {
 		// Move to next scene
+		game.State = Scene1_ExitAnimation
 	}
 
 	if acceptSelected && exitSelected {
@@ -142,3 +143,5 @@ func Scene1_HandleButtonList(game *Game) {
 	game.GridSystem.Set(gridId, 13, 9, CellTypeChar, ' ')
 	game.GridSystem.Set(gridId, 14, 9, CellTypeChar, ']')
 }
+
+func Scene1_HandleExit(game *Game) {}

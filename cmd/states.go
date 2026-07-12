@@ -16,9 +16,18 @@ const (
 	Scene2_Dialog_2
 	Scene2_Init_Dialog_3
 	Scene2_Dialog_3
+	Scene2_Init_Dialog_4
+	Scene2_Dialog_4
+	Scene2_Init_Dialog_5
+	Scene2_Dialog_5
+
+	End // End
 )
 
 func (game *Game) UpdateState() {
+	gs := game.GridSystem
+	anims := game.Animations
+
 	switch game.State {
 	case Scene1_Init:
 		game.State = Scene1_Start
@@ -49,9 +58,24 @@ func (game *Game) UpdateState() {
 	case Scene2_Dialog_1:
 		game.State = Scene2_HandleDialog1(game.GridSystem, game.Animations)
 	case Scene2_Init_Dialog_2:
-		Scene2_InitDialog2(game.GridSystem, game.Animations)
+		Scene2_InitDialog(1, game.GridSystem, game.Animations)
 		game.State = Scene2_Dialog_2
 	case Scene2_Dialog_2:
-		game.State = Scene2_HandleDialog2(game.GridSystem, game.Animations)
+		game.State = Scene2_HandleDialog(1, []byte("I don't this she ran..."), Scene2_Dialog_2, Scene2_Init_Dialog_3, gs, anims)
+	case Scene2_Init_Dialog_3:
+		Scene2_InitDialog(2, game.GridSystem, game.Animations)
+		game.State = Scene2_Dialog_3
+	case Scene2_Dialog_3:
+		game.State = Scene2_HandleDialog(2, []byte("I found an open door"), Scene2_Dialog_3, Scene2_Init_Dialog_4, gs, anims)
+	case Scene2_Init_Dialog_4:
+		Scene2_InitDialog(3, game.GridSystem, game.Animations)
+		game.State = Scene2_Dialog_4
+	case Scene2_Dialog_4:
+		game.State = Scene2_HandleDialog(3, []byte("CONNECT to RABBIT"), Scene2_Dialog_4, Scene2_Init_Dialog_5, gs, anims)
+	case Scene2_Init_Dialog_5:
+		Scene2_InitDialog(4, game.GridSystem, game.Animations)
+		game.State = Scene2_Dialog_5
+	case Scene2_Dialog_5:
+		game.State = Scene2_HandleDialog(4, []byte("Good Luck..."), Scene2_Dialog_5, End, gs, anims)
 	}
 }

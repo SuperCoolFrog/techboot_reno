@@ -57,18 +57,17 @@ func Scene2_HandleDialog1(gs *GridSystem, anims *AnimationSystem) GameState {
 	return Scene2_Dialog_1
 }
 
-func Scene2_InitDialog2(gs *GridSystem, anims *AnimationSystem) {
+func Scene2_InitDialog(bufferY int, gs *GridSystem, anims *AnimationSystem) {
 	gridId := anims.GridId[AnimationDialog]
-	s2_AddRipMsgBuffer(gs, gridId, 1)
+	s2_AddRipMsgBuffer(gs, gridId, bufferY)
 	PlayDialogAnimation(2.0, false, gs, anims)
 }
 
-func Scene2_HandleDialog2(gs *GridSystem, anims *AnimationSystem) GameState {
+func Scene2_HandleDialog(bufferY int, message []byte, currentState, nextState GameState, gs *GridSystem, anims *AnimationSystem) GameState {
 	gridId := anims.GridId[AnimationDialog]
-	bufferY := 1
 
 	buffer1Idx := gs.IdxFromXY(gridId, 9, bufferY)
-	message := []byte("I don't this she ran...")
+	//message := []byte("I don't this she ran...")
 
 	UpdateDialogAnimation(gridId, buffer1Idx, message, gs, anims)
 
@@ -78,8 +77,8 @@ func Scene2_HandleDialog2(gs *GridSystem, anims *AnimationSystem) GameState {
 		gs.Set(gridId, 9+b1Cursor, bufferY, CellTypeReserved, '|')
 	} else {
 		gs.Set(gridId, 9+b1Cursor, bufferY, CellTypeReserved, ' ')
-		return Scene2_Init_Dialog_3
+		return nextState
 	}
 
-	return Scene2_Dialog_2
+	return currentState
 }

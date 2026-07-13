@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"image/color"
+	"techboot_reno/cmd/assets"
 )
 
 const (
@@ -104,7 +105,7 @@ func main() {
 		Animations: NewAnimationSystem(),
 	}
 
-	// game.testBufferId = game.Grid.NewBuffer(1, 1, 5, 2)
+	assets.Load()
 
 	if err := ebiten.RunGame(game); err != nil && err != ebiten.Termination {
 		if err != nil {

@@ -1,4 +1,4 @@
-package main
+ackage main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"

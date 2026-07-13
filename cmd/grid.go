@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/color"
 	"math"
+	"techboot_reno/cmd/assets"
 	"unsafe"
 )
 
@@ -19,6 +20,7 @@ const (
 	CellTypeChar
 	CellTypeReserved
 	CellTypeSquare
+	CellTypeSprite
 )
 
 type GridSystem struct {
@@ -28,6 +30,7 @@ type GridSystem struct {
 	// Flat, parallel master slices targeting the MasterBuffer
 	CellTypes    []GridCellType
 	Chars        []byte
+	SpriteIDs    []assets.SpriteID
 	IsBuffer     []bool
 	BufferCols   []int
 	BufferRows   []int
@@ -61,6 +64,7 @@ func NewGridSystem(maxTotalCells int, maxGrid int) *GridSystem {
 	// 1. Calculate byte sizes based on the absolute maximum total cell capacity
 	sizeCellTypes := maxTotalCells * int(unsafe.Sizeof(GridCellType(0)))
 	sizeChars := maxTotalCells * int(unsafe.Sizeof(byte(0)))
+	sizeSpriteID := maxTotalCells * int(unsafe.Sizeof(assets.SpriteID(0)))
 	sizeIsBuffer := maxTotalCells * int(unsafe.Sizeof(bool(false)))
 	sizeCols := maxTotalCells * int(unsafe.Sizeof(int(0)))
 	sizeRows := maxTotalCells * int(unsafe.Sizeof(int(0)))
@@ -78,6 +82,9 @@ func NewGridSystem(maxTotalCells int, maxGrid int) *GridSystem {
 
 	gs.Chars = unsafe.Slice((*byte)(ptr), maxTotalCells)
 	ptr = unsafe.Add(ptr, sizeChars)
+
+	gs.SpriteIDs = unsafe.Slice((*assets.SpriteID)(ptr), maxTotalCells)
+	ptr = unsafe.Add(ptr, sizeSpriteID)
 
 	gs.IsBuffer = unsafe.Slice((*bool)(ptr), maxTotalCells)
 	ptr = unsafe.Add(ptr, sizeIsBuffer)
@@ -171,6 +178,18 @@ func (gs *GridSystem) Set(gridId GridID, x int, y int, flag GridCellType, char b
 	gs.Chars[idx] = char
 }
 
+func (gs *GridSystem) SetCellSprite(gridId GridID, x int, y int, spriteId assets.SpriteID) {
+	// Guard rails to protect neighboring grid data
+	if x < 0 || x >= gs.Cols[gridId] || y < 0 || y >= gs.Rows[gridId] {
+		panic("Grid cell coordinates out of bounds!")
+	}
+
+	idx := gs.IdxFromXY(gridId, x, y)
+
+	gs.CellTypes[idx] = CellTypeSprite
+	gs.SpriteIDs[idx] = spriteId
+}
+
 func (gs *GridSystem) SetAllCells(gridId GridID, cellType GridCellType, char byte) {
 	offset := gs.Offsets[gridId]
 	count := gs.Counts[gridId]
@@ -190,6 +209,18 @@ func (gs *GridSystem) Get(gridId GridID, x int, y int) (cellType GridCellType, c
 	char = gs.Chars[idx]
 
 	return cellType, char
+}
+
+func (gs *GridSystem) GetCellSprite(gridId GridID, x int, y int) (image *ebiten.Image) {
+	idx := gs.IdxFromXY(gridId, x, y)
+	spriteId := gs.SpriteIDs[idx]
+
+	img, found := assets.Images[spriteId]
+	if !found {
+		panic("Could not find sprite for spriteId: " + string(spriteId))
+	}
+
+	return img
 }
 
 func (gs *GridSystem) NewBuffer(gridId GridID, bufferX, bufferY, bufferCols, bufferRows int) (globalIdx int) {
@@ -326,6 +357,7 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 
 	chars := gs.Chars[offset : offset+count]
 	cellTypes := gs.CellTypes[offset : offset+count]
+	spriteIds := gs.SpriteIDs[offset : offset+count]
 
 	strokeW := float32(0.5)
 	clr := color.RGBA{R: 0, G: 255, B: 0, A: 255}
@@ -340,6 +372,8 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 		y := float32(math.Trunc(float64(i/cols)))*size + padding
 
 		switch cellTypes[i] {
+		case CellTypeSprite:
+			RenderSpriteCell(screen, x, y, size, spriteIds[i])
 		case CellTypeSquare:
 			vector.StrokeRect(screen, x, y, size, size, strokeW, clr, true)
 		case CellTypeReserved:
@@ -364,4 +398,27 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 	}
 
 	return nil
+}
+
+func RenderSpriteCell(screen *ebiten.Image, x, y, size float32, spriteId assets.SpriteID) {
+	sprite, found := assets.Images[spriteId]
+	if !found {
+		panic("Cell image not found for spriteId: " + string(spriteId))
+	}
+
+	spriteRect := sprite.Bounds()
+	spriteW := float32(spriteRect.Dx())
+	spriteH := float32(spriteRect.Dy())
+
+	op := &ebiten.DrawImageOptions{}
+
+	spriteX := (x + size/2) - (spriteW / 2)
+	spriteY := (y + size/2) - (spriteH / 2)
+	op.GeoM.Translate(float64(spriteX), float64(spriteY))
+
+	scaleX := float64(spriteW / size)
+	scaleY := float64(spriteH / size)
+	op.GeoM.Scale(scaleX, scaleY)
+
+	screen.DrawImage(sprite, op)
 }

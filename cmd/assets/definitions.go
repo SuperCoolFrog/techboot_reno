@@ -22,6 +22,8 @@ const (
 	SpriteIDCarrotLeft
 	SpriteIDCarrotDown
 	SpriteIDCarrotUp
+	SpriteIDDownConnectBar
+	SpriteIDUpConnectBar
 
 	SpirteIDCount // Always Last
 )

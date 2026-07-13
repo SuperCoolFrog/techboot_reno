@@ -1,5 +1,11 @@
 package main
 
+import (
+	"fmt"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
+)
+
 func s2_AddRipMsgBuffer(gs *GridSystem, gridId GridID, y int) {
 	gs.Set(gridId, 0, y, CellTypeChar, '`')
 	gs.Set(gridId, 1, y, CellTypeChar, 'R')
@@ -96,4 +102,25 @@ func Scene2_HandleDialog(bufferY int, message []byte, currentState, nextState Ga
 	}
 
 	return currentState
+}
+
+func Scene2_WaitForEnter(current, next GameState) GameState {
+	acceptSelected := inpututil.IsKeyJustPressed(ebiten.KeyEnter) ||
+		inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
+
+	if acceptSelected {
+		fmt.Printf("Accepted")
+		return next
+	}
+
+	return current
+}
+
+func Scene2_CleanUpScene(next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
+	dialogGridId := anims.GridId[AnimationDialog]
+	gs.DisableGrid(dialogGridId)
+	// @TODO this also sets the buffers CellTypes.  Need to consider how to handle that
+	// gs.SetAllCells(dialogGridId, CellTypeEmpty, ' ')
+
+	return next
 }

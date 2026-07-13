@@ -53,7 +53,8 @@ func loadGameImages() (map[SpriteID]*ebiten.Image, error) {
 	}
 
 	for i := SpriteID(0); i < SpirteIDCount; i++ {
-		images[i] = clippedSubImage(spriteSheet, image.Rect(int(i)*48, 0, 48, 48))
+		x1 := int(i) * 48
+		images[i] = clippedSubImage(spriteSheet, image.Rect(x1, 0, x1+48, 48))
 	}
 
 	return images, nil
@@ -87,6 +88,7 @@ func clippedSubImage(source *ebiten.Image, src image.Rectangle) *ebiten.Image {
 	}
 	subImage, ok := source.SubImage(src).(*ebiten.Image)
 	if !ok || subImage == nil {
+		fmt.Printf("Failed to subimage: %v", src.Bounds())
 		return nil
 	}
 

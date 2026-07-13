@@ -22,6 +22,10 @@ const (
 	Scene2_Dialog_5
 	Scene2_Init_Dialog_6
 	Scene2_Dialog_6
+	Scene2_Waiting
+	Scene2_CleanUp
+
+	Scene3_Init
 
 	End // End
 )
@@ -85,6 +89,12 @@ func (game *Game) UpdateState() {
 		PlayDialogAnimation(2.0, false, gs, anims)
 		game.State = Scene2_Dialog_6
 	case Scene2_Dialog_6:
-		game.State = Scene2_HandleDialog(5, []byte("thanks"), Scene2_Dialog_6, End, gs, anims)
+		game.State = Scene2_HandleDialog(5, []byte("thanks"), Scene2_Dialog_6, Scene2_Waiting, gs, anims)
+	case Scene2_Waiting:
+		game.State = Scene2_WaitForEnter(Scene2_Waiting, Scene2_CleanUp)
+	case Scene2_CleanUp:
+		game.State = Scene2_CleanUpScene(Scene3_Init, gs, anims)
+	case Scene3_Init:
+		game.State = Scene3_HandleInit(Scene3_Init, End, gs, anims)
 	}
 }

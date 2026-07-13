@@ -7,8 +7,8 @@ const (
 	SpriteIDHorizontalBar
 	SpriteIDRightConnectBar
 	SpriteIDLeftConnectBar
-	SpriteIDCornerTopRight
 	SpriteIDCornerTopLeft
+	SpriteIDCornerTopRight
 	SpriteIDBottomLeft
 	SpriteIDBottomRight
 	SpriteIDCircle

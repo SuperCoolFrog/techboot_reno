@@ -78,6 +78,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	g.GridSystem.Render(screen)
 	g.Animations.Render(screen, g.GridSystem)
+
+	// Test
+	// op := &ebiten.DrawImageOptions{}
+	// screen.DrawImage(assets.Images[assets.SpriteIDCircle], op)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -100,7 +104,7 @@ func main() {
 	const MaxGrids = 5
 
 	game := &Game{
-		State:      Scene1_Init,
+		State:      Scene3_Init, //Scene1_Init,
 		GridSystem: NewGridSystem(MaxTotalCells, MaxGrids),
 		Animations: NewAnimationSystem(),
 	}

@@ -20,6 +20,7 @@ const (
 )
 
 var fontColor = color.RGBA{R: 0, G: 255, B: 0, A: 255}
+var fontColorComment = color.RGBA{R: 150, G: 150, B: 150, A: 255 * 0.6}
 
 //go:embed fonts/Courierprime_1OVL.ttf
 var fontBytes []byte

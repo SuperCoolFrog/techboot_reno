@@ -9,8 +9,8 @@ const (
 	SpriteIDLeftConnectBar
 	SpriteIDCornerTopLeft
 	SpriteIDCornerTopRight
-	SpriteIDBottomLeft
-	SpriteIDBottomRight
+	SpriteIDCornerBottomLeft
+	SpriteIDCornerBottomRight
 	SpriteIDCircle
 	SpriteIDSquare
 	SpriteIDCarrotSE

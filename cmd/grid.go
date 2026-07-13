@@ -406,19 +406,26 @@ func RenderSpriteCell(screen *ebiten.Image, x, y, size float32, spriteId assets.
 		panic("Cell image not found for spriteId: " + string(spriteId))
 	}
 
+	x64 := float64(x)
+	y64 := float64(y)
+	size64 := float64(size)
+
 	spriteRect := sprite.Bounds()
-	spriteW := float32(spriteRect.Dx())
-	spriteH := float32(spriteRect.Dy())
+	spriteW := float64(spriteRect.Dx())
+	spriteH := float64(spriteRect.Dy())
 
 	op := &ebiten.DrawImageOptions{}
 
-	spriteX := (x + size/2) - (spriteW / 2)
-	spriteY := (y + size/2) - (spriteH / 2)
-	op.GeoM.Translate(float64(spriteX), float64(spriteY))
-
-	scaleX := float64(spriteW / size)
-	scaleY := float64(spriteH / size)
+	scaleX := size64 / spriteW
+	scaleY := size64 / spriteH
 	op.GeoM.Scale(scaleX, scaleY)
+
+	scaledW := (spriteW * scaleX)
+	scaledH := (spriteW * scaleY)
+
+	spriteX := (x64 + size64/2) - scaledW/2
+	spriteY := (y64 + size64/2) - scaledH/2
+	op.GeoM.Translate(spriteX, spriteY)
 
 	op.ColorScale.ScaleWithColor(fontColor)
 

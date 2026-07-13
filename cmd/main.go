@@ -19,6 +19,8 @@ const (
 	screenPadding = fontSize / 4
 )
 
+var fontColor = color.RGBA{R: 0, G: 255, B: 0, A: 255}
+
 //go:embed fonts/Courierprime_1OVL.ttf
 var fontBytes []byte
 var fontSrc *text.GoTextFaceSource

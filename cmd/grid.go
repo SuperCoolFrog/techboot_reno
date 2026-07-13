@@ -420,5 +420,7 @@ func RenderSpriteCell(screen *ebiten.Image, x, y, size float32, spriteId assets.
 	scaleY := float64(spriteH / size)
 	op.GeoM.Scale(scaleX, scaleY)
 
+	op.ColorScale.ScaleWithColor(fontColor)
+
 	screen.DrawImage(sprite, op)
 }

@@ -68,7 +68,7 @@ func (game *Game) UpdateState() {
 		Scene2_InitDialog(1, game.GridSystem, game.Animations)
 		game.State = Scene2_Dialog_2
 	case Scene2_Dialog_2:
-		game.State = Scene2_HandleDialog(1, []byte("I don't this she ran..."), Scene2_Dialog_2, Scene2_Init_Dialog_3, gs, anims)
+		game.State = Scene2_HandleDialog(1, []byte("I don't think she ran..."), Scene2_Dialog_2, Scene2_Init_Dialog_3, gs, anims)
 	case Scene2_Init_Dialog_3:
 		Scene2_InitDialog(2, game.GridSystem, game.Animations)
 		game.State = Scene2_Dialog_3

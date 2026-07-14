@@ -107,7 +107,7 @@ func main() {
 	const MaxGrids = 5
 
 	game := &Game{
-		State:      Scene3_Init, //Scene1_Init,
+		State:      Scene1_Init, // Scene3_Init, //Scene1_Init,
 		GridSystem: NewGridSystem(MaxTotalCells, MaxGrids),
 		Animations: NewAnimationSystem(),
 	}

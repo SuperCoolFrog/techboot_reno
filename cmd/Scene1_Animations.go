@@ -11,7 +11,7 @@ func (anims *AnimationSystem) PlayAnimatedGridIntro(gridSystem *GridSystem, dura
 	anims.Durations[AnimationGrid] = duration
 	// anims.Delay[AnimationGridIntro] = 5.0 // Tried to fix vsync at the beginning but just live with it
 
-	gridId := gridSystem.AllocateGrid(27, 21, 48, 12)
+	gridId := gridSystem.AllocateGrid(27, 21, 48, 12, 12)
 
 	gridSystem.SetAllCells(gridId, CellTypeNone, 0)
 

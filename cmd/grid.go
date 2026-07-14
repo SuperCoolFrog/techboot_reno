@@ -42,7 +42,8 @@ type GridSystem struct {
 	Rows      []int
 	Cols      []int
 	CellSizes []int
-	Paddings  []int
+	OffsetX   []int
+	OffsetY   []int
 	IsActive  []bool
 
 	NextGridID GridID
@@ -56,7 +57,8 @@ func NewGridSystem(maxTotalCells int, maxGrid int) *GridSystem {
 		Rows:          make([]int, maxGrid),
 		Cols:          make([]int, maxGrid),
 		CellSizes:     make([]int, maxGrid),
-		Paddings:      make([]int, maxGrid),
+		OffsetX:       make([]int, maxGrid),
+		OffsetY:       make([]int, maxGrid),
 		IsActive:      make([]bool, maxGrid),
 		NextGridID:    0,
 	}
@@ -100,7 +102,7 @@ func NewGridSystem(maxTotalCells int, maxGrid int) *GridSystem {
 	return gs
 }
 
-func (gs *GridSystem) AllocateGrid(cols, rows, cellSize, padding int) GridID {
+func (gs *GridSystem) AllocateGrid(cols, rows, cellSize, offsetX, offsetY int) GridID {
 	id := gs.NextGridID
 	gs.NextGridID++
 
@@ -121,7 +123,8 @@ func (gs *GridSystem) AllocateGrid(cols, rows, cellSize, padding int) GridID {
 	gs.Cols[id] = cols
 	gs.Rows[id] = rows
 	gs.CellSizes[id] = cellSize
-	gs.Paddings[id] = padding
+	gs.OffsetX[id] = offsetX
+	gs.OffsetY[id] = offsetY
 	gs.IsActive[id] = false
 
 	return id
@@ -137,10 +140,11 @@ func (gs *GridSystem) DisableGrid(gridId GridID) {
 
 func (gs *GridSystem) GridRectangle(gridId GridID, x1, y1, colCount, rowCount int) image.Rectangle {
 	size := gs.CellSizes[gridId]
-	padding := gs.Paddings[gridId]
+	offsetX := gs.OffsetX[gridId]
+	offsetY := gs.OffsetY[gridId]
 
-	posX := x1*size + padding
-	posY := y1*size + padding
+	posX := x1*size + offsetX
+	posY := y1*size + offsetY
 
 	w := posX + colCount*size
 	h := posY + rowCount*size
@@ -292,7 +296,8 @@ func (gs *GridSystem) RenderDebug(screen *ebiten.Image, gridID GridID) error {
 	offset := gs.Offsets[gridID]
 	count := gs.Counts[gridID]
 	size := float32(gs.CellSizes[gridID])
-	padding := float32(gs.Paddings[gridID])
+	offsetX := float32(gs.OffsetX[gridID])
+	offsetY := float32(gs.OffsetY[gridID])
 	cols := gs.Cols[gridID]
 
 	chars := gs.Chars[offset : offset+count]
@@ -306,8 +311,8 @@ func (gs *GridSystem) RenderDebug(screen *ebiten.Image, gridID GridID) error {
 	}
 
 	for i := 0; i < len(cellTypes); i++ {
-		x := float32(i%cols)*size + padding
-		y := float32(math.Trunc(float64(i/cols)))*size + padding
+		x := float32(i%cols)*size + offsetX
+		y := float32(math.Trunc(float64(i/cols)))*size + offsetY
 
 		vector.StrokeRect(screen, x, y, size, size, strokeW, clr, true)
 
@@ -351,7 +356,8 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 	offset := gs.Offsets[gridID]
 	count := gs.Counts[gridID]
 	size := float32(gs.CellSizes[gridID])
-	padding := float32(gs.Paddings[gridID])
+	offsetX := float32(gs.OffsetX[gridID])
+	offsetY := float32(gs.OffsetY[gridID])
 	cols := gs.Cols[gridID]
 	capacity := gs.Counts[gridID]
 
@@ -368,8 +374,8 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 	}
 
 	for i := range capacity {
-		x := float32(i%cols)*size + padding
-		y := float32(math.Trunc(float64(i/cols)))*size + padding
+		x := float32(i%cols)*size + offsetX
+		y := float32(math.Trunc(float64(i/cols)))*size + offsetY
 
 		switch cellTypes[i] {
 		case CellTypeSprite:

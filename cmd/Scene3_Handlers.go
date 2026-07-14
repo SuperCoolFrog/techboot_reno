@@ -39,7 +39,7 @@ var (
 )
 
 func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
-	gridId := gs.AllocateGrid(S3GridXCount, S3GridYCount, S3GridCellSize, 0)
+	gridId := gs.AllocateGrid(S3GridXCount, S3GridYCount, S3GridCellSize, 0, 0)
 	gs.SetAllCells(gridId, CellTypeEmpty, 0)
 	gs.EnableGrid(gridId)
 
@@ -115,11 +115,7 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	CommandBuffer.AppendDecorators(CmdBufferDecor)
 
 	LogBuffer = NewBuffer(LogBufferCols, LogBufferRows, LogBufferCapacity, false)
-
-	for i := 0; i <= LogBufferRows; i++ {
-		LogBuffer.AppendAll([]byte{byte('0' + i), '.', 'H', 'E', 'L', 'L', 'O'})
-		LogBuffer.NewLine()
-	}
+	LogBuffer.AppendAll([]byte("Type: Connect+Rabbit="))
 
 	return next
 }
@@ -134,7 +130,7 @@ func Scene3_InputHandler(runes []rune, current, next GameState, gs *GridSystem) 
 		CommandBuffer.NewLine()
 		CommandBuffer.AppendDecorators(CmdBufferDecor)
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
+	if utilDebouncedKeyPressed(ebiten.KeyBackspace) {
 		CommandBuffer.DecrementCursorWithDecor(CmdBufferDecor)
 	}
 

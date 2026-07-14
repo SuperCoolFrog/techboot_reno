@@ -6,7 +6,7 @@ func InitDialogAnimation(gs *GridSystem, anims *AnimationSystem) {
 	anims.Timers[AnimationDialog] = 0.0
 	anims.Durations[AnimationDialog] = 0.0
 
-	gridId := gs.AllocateGrid(40, 30, 32, 16)
+	gridId := gs.AllocateGrid(40, 30, 32, 16, 16)
 	gs.SetAllCells(gridId, CellTypeEmpty, 0)
 	gs.EnableGrid(gridId)
 

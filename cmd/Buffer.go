@@ -29,7 +29,7 @@ func NewBuffer(cols, rows, capacity int, lineOverflow bool) *Buffer {
 	return buffer
 }
 
-func (buffer *Buffer) AppendToBuffer(char byte) {
+func (buffer *Buffer) Append(char byte) {
 	if buffer.XCursor > buffer.Cols {
 		if buffer.LineOverflow {
 			buffer.NewLine()
@@ -40,6 +40,12 @@ func (buffer *Buffer) AppendToBuffer(char byte) {
 
 	buffer.History[buffer.YCursor-1][buffer.XCursor] = char
 	buffer.XCursor++
+}
+
+func (buffer *Buffer) AppendAll(chars []byte) {
+	for i := 0; i < len(chars); i++ {
+		buffer.Append(chars[i])
+	}
 }
 
 func (buffer *Buffer) AppendDecorators(decor BufferDecorator) {
@@ -75,7 +81,7 @@ func (buffer *Buffer) AppendWithDecor(char byte, decor BufferDecorator) {
 	for i := 0; i < len(decor.Prefix); i++ {
 		buffer.History[buffer.YCursor-1][i] = decor.Prefix[i]
 	}
-	buffer.AppendToBuffer(char)
+	buffer.Append(char)
 	for i := 0; i < len(decor.Postfix); i++ {
 		buffer.History[buffer.YCursor-1][buffer.XCursor+i] = decor.Postfix[i]
 	}
@@ -136,6 +142,7 @@ func (buffer *Buffer) DrawToGrid(gridId GridID, x, y int, gs *GridSystem) {
 		//for historyIdx := S3HistoryHead; historyIdx < S3HistoryCursor; historyIdx++ {
 		historyIdx := buffer.Head + r
 		bytes := buffer.History[historyIdx]
+
 		for i := 0; i < len(bytes); i++ {
 			gs.Set(gridId, x+i, y+r, CellTypeChar, bytes[i])
 		}

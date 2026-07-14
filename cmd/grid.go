@@ -169,7 +169,7 @@ func (gs *GridSystem) XYFromBufferIdx(gridId GridID, globalIdx int) (x int, y in
 func (gs *GridSystem) Set(gridId GridID, x int, y int, flag GridCellType, char byte) {
 	// Guard rails to protect neighboring grid data
 	if x < 0 || x >= gs.Cols[gridId] || y < 0 || y >= gs.Rows[gridId] {
-		panic("Grid cell coordinates out of bounds!")
+		panic("Grid cell coordinates out of bounds! " + string(x) + "," + string(y))
 	}
 
 	idx := gs.IdxFromXY(gridId, x, y)

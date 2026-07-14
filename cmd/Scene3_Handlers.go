@@ -16,6 +16,15 @@ const (
 	CommandBufferRows     int = S3GridYCount - 2
 	CommandBufferX        int = 1
 	CommandBufferY        int = 1
+
+	DividerX int = 36
+	DividerY int = S3GridYCount - 11
+
+	LogBufferCapacity int = 1000
+	LogBufferCols     int = S3GridXCount - DividerX - 2
+	LogBufferRows     int = S3GridYCount - DividerY - 1
+	LogBufferX        int = DividerX + 1
+	LogBufferY        int = DividerY + 1
 )
 
 var (
@@ -25,6 +34,8 @@ var (
 		Prefix:  []byte{':'},
 		Postfix: []byte{'|'},
 	}
+
+	LogBuffer *Buffer
 )
 
 func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
@@ -33,7 +44,6 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	gs.EnableGrid(gridId)
 
 	// Border
-	dividerX := 36
 
 	// .Corners
 	gs.SetCellSprite(gridId, 0, 0, assets.SpriteIDCornerTopLeft)
@@ -55,7 +65,7 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 		gs.SetCellSprite(gridId, i, 0, assets.SpriteIDHorizontalBar)
 	}
 	// ...Commands
-	hdrCmdX := dividerX/2 - 4
+	hdrCmdX := DividerX/2 - 4
 	gs.Set(gridId, hdrCmdX+1, 0, CellTypeChar, 'C')
 	gs.Set(gridId, hdrCmdX+2, 0, CellTypeChar, 'O')
 	gs.Set(gridId, hdrCmdX+3, 0, CellTypeChar, 'M')
@@ -66,7 +76,7 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	gs.Set(gridId, hdrCmdX+8, 0, CellTypeChar, 'S')
 
 	// ...Output
-	rightPanelHeaderX := S3GridXCount - dividerX/2
+	rightPanelHeaderX := S3GridXCount - DividerX/2
 	gs.Set(gridId, rightPanelHeaderX+1, 0, CellTypeChar, 'O')
 	gs.Set(gridId, rightPanelHeaderX+2, 0, CellTypeChar, 'U')
 	gs.Set(gridId, rightPanelHeaderX+3, 0, CellTypeChar, 'T')
@@ -81,28 +91,31 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 
 	// Dividers
 	// .Vertical
-	gs.SetCellSprite(gridId, dividerX, 0, assets.SpriteIDDownConnectBar)
+	gs.SetCellSprite(gridId, DividerX, 0, assets.SpriteIDDownConnectBar)
 	for i := 1; i < S3GridYCount-1; i++ {
-		gs.SetCellSprite(gridId, dividerX, i, assets.SpriteIDVerticalBar)
+		gs.SetCellSprite(gridId, DividerX, i, assets.SpriteIDVerticalBar)
 	}
-	gs.SetCellSprite(gridId, dividerX, S3GridYCount-1, assets.SpriteIDUpConnectBar)
+	gs.SetCellSprite(gridId, DividerX, S3GridYCount-1, assets.SpriteIDUpConnectBar)
 	// .Horizontal
-	verticalY := S3GridYCount - 11
-	gs.SetCellSprite(gridId, dividerX, verticalY, assets.SpriteIDRightConnectBar)
-	for i := 1; i < S3GridXCount-dividerX; i++ {
-		gs.SetCellSprite(gridId, dividerX+i, verticalY, assets.SpriteIDHorizontalBar)
+	// verticalY := S3GridYCount - 11
+	gs.SetCellSprite(gridId, DividerX, DividerY, assets.SpriteIDRightConnectBar)
+	for i := 1; i < S3GridXCount-DividerX; i++ {
+		gs.SetCellSprite(gridId, DividerX+i, DividerY, assets.SpriteIDHorizontalBar)
 	}
-	gs.SetCellSprite(gridId, S3GridXCount-1, verticalY, assets.SpriteIDLeftConnectBar)
+	gs.SetCellSprite(gridId, S3GridXCount-1, DividerY, assets.SpriteIDLeftConnectBar)
 	// ...Logs
-	gs.Set(gridId, rightPanelHeaderX+1, verticalY, CellTypeChar, 'L')
-	gs.Set(gridId, rightPanelHeaderX+2, verticalY, CellTypeChar, 'O')
-	gs.Set(gridId, rightPanelHeaderX+3, verticalY, CellTypeChar, 'G')
-	gs.Set(gridId, rightPanelHeaderX+4, verticalY, CellTypeChar, 'S')
+	gs.Set(gridId, rightPanelHeaderX+1, DividerY, CellTypeChar, 'L')
+	gs.Set(gridId, rightPanelHeaderX+2, DividerY, CellTypeChar, 'O')
+	gs.Set(gridId, rightPanelHeaderX+3, DividerY, CellTypeChar, 'G')
+	gs.Set(gridId, rightPanelHeaderX+4, DividerY, CellTypeChar, 'S')
 
 	GridIdScene3 = gridId
 
 	CommandBuffer = NewBuffer(CommandBufferCols, CommandBufferRows, CommandBufferCapacity, false)
 	CommandBuffer.AppendDecorators(CmdBufferDecor)
+
+	LogBuffer = NewBuffer(LogBufferCols, LogBufferRows, LogBufferCapacity, false)
+	LogBuffer.AppendAll([]byte{'H', 'E', 'L', 'L', 'O'})
 
 	return next
 }
@@ -122,6 +135,8 @@ func Scene3_InputHandler(runes []rune, current, next GameState, gs *GridSystem) 
 	}
 
 	CommandBuffer.DrawToGrid(GridIdScene3, CommandBufferX, CommandBufferY, gs)
+
+	LogBuffer.DrawToGrid(GridIdScene3, LogBufferX, LogBufferY, gs)
 
 	return current
 }

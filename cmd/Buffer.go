@@ -30,7 +30,7 @@ func NewBuffer(cols, rows, capacity int, lineOverflow bool) *Buffer {
 }
 
 func (buffer *Buffer) Append(char byte) {
-	if buffer.XCursor > buffer.Cols {
+	if buffer.XCursor >= buffer.Cols {
 		if buffer.LineOverflow {
 			buffer.NewLine()
 		} else {
@@ -71,7 +71,7 @@ func (buffer *Buffer) AppendDecorators(decor BufferDecorator) {
 func (buffer *Buffer) AppendWithDecor(char byte, decor BufferDecorator) {
 	preCount := len(decor.Prefix)
 	postCount := len(decor.Postfix)
-	if preCount+postCount+1+buffer.XCursor > buffer.Cols {
+	if preCount+postCount+1+buffer.XCursor >= buffer.Cols {
 		if buffer.LineOverflow {
 			buffer.NewLine()
 		} else {

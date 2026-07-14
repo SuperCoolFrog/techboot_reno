@@ -22,7 +22,7 @@ const (
 
 	LogBufferCapacity int = 1000
 	LogBufferCols     int = S3GridXCount - DividerX - 2
-	LogBufferRows     int = S3GridYCount - DividerY - 1
+	LogBufferRows     int = S3GridYCount - DividerY - 2
 	LogBufferX        int = DividerX + 1
 	LogBufferY        int = DividerY + 1
 )
@@ -115,7 +115,11 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	CommandBuffer.AppendDecorators(CmdBufferDecor)
 
 	LogBuffer = NewBuffer(LogBufferCols, LogBufferRows, LogBufferCapacity, false)
-	LogBuffer.AppendAll([]byte{'H', 'E', 'L', 'L', 'O'})
+
+	for i := 0; i <= LogBufferRows; i++ {
+		LogBuffer.AppendAll([]byte{byte('0' + i), '.', 'H', 'E', 'L', 'L', 'O'})
+		LogBuffer.NewLine()
+	}
 
 	return next
 }

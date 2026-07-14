@@ -94,6 +94,13 @@ func Scene3_InputHandler(runes []rune, current, next GameState, gs *GridSystem) 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		s3_SubmitLine()
 	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
+		if S3CurrentBufferCursor > 1 {
+			S3History[S3HistoryCursor-1][S3CurrentBufferCursor] = ' '
+			S3CurrentBufferCursor--
+			S3History[S3HistoryCursor-1][S3CurrentBufferCursor] = '|'
+		}
+	}
 
 	return current
 }
@@ -106,6 +113,10 @@ func s3_UpdateGrid(gs *GridSystem) {
 		for i := 0; i < len(bytes); i++ {
 			gs.Set(GridIdScene3, S3HistoryX+i, S3HistoryY+h, CellTypeChar, bytes[i])
 		}
+	}
+
+	if S3HistoryHead > 0 {
+		gs.SetCellSprite(GridIdScene3, 1, 1, assets.SpriteIDCarrotUp)
 	}
 }
 
@@ -131,6 +142,7 @@ func s3_NextBuffer() {
 func s3_SubmitLine() {
 	S3History[S3HistoryCursor-1][0] = ' '
 	S3History[S3HistoryCursor-1][S3CurrentBufferCursor] = ' '
+
 	s3_NextBuffer()
 
 	for S3HistoryCursor-S3HistoryHead > S3RenderHistoryMax {

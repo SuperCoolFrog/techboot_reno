@@ -26,6 +26,7 @@ const (
 	Scene2_CleanUp
 
 	Scene3_Init
+	Scene3_InputHandlingLoop
 
 	End // End
 )
@@ -95,6 +96,8 @@ func (game *Game) UpdateState() {
 	case Scene2_CleanUp:
 		game.State = Scene2_CleanUpScene(Scene3_Init, gs, anims)
 	case Scene3_Init:
-		game.State = Scene3_HandleInit(Scene3_Init, End, gs, anims)
+		game.State = Scene3_HandleInit(Scene3_Init, Scene3_InputHandlingLoop, gs, anims)
+	case Scene3_InputHandlingLoop:
+		Scene3_InputHandler(game.inputRunes, Scene3_InputHandlingLoop, End, gs)
 	}
 }

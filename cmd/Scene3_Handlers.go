@@ -7,24 +7,20 @@ import (
 )
 
 const (
-	S3GridXCount          int = 64
-	S3GridYCount          int = 48
-	S3GridCellSize        int = 20
-	S3BufferCapacity      int = 35
-	S3BufferInputCapacity int = S3BufferCapacity - 2
-	S3RenderHistoryMax    int = S3GridYCount - 2
-	S3HistoryY            int = 1
-	S3HistoryX            int = 1
+	S3GridXCount   int = 64
+	S3GridYCount   int = 48
+	S3GridCellSize int = 20
+
+	CommandBufferCapacity int = 2000 // @TODO Ring Buffer
+	CommandBufferCols     int = 35
+	CommandBufferRows     int = S3GridYCount - 2
+	CommandBufferX        int = 1
+	CommandBufferY        int = 1
 )
 
 var (
-	GridIdScene3 GridID
-
-	S3HistoryCapacity     = 2000 // @TODO Ring Buffer
-	S3History             [][]byte
-	S3HistoryHead         int
-	S3HistoryCursor       int
-	S3CurrentBufferCursor int
+	GridIdScene3  GridID
+	CommandBuffer *Buffer
 )
 
 func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
@@ -99,82 +95,28 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	gs.Set(gridId, rightPanelHeaderX+3, verticalY, CellTypeChar, 'G')
 	gs.Set(gridId, rightPanelHeaderX+4, verticalY, CellTypeChar, 'S')
 
-	S3History = make([][]byte, S3HistoryCapacity)
-	S3History[0] = make([]byte, S3BufferCapacity)
-	S3HistoryHead = 0
-	S3HistoryCursor = 0
-
-	s3_NextBuffer()
-
 	GridIdScene3 = gridId
+
+	CommandBuffer = NewBuffer(CommandBufferCols, CommandBufferRows, CommandBufferCapacity, false)
+	CommandBuffer.AppendPrePostfix([]byte{':'}, []byte{'|'})
 
 	return next
 }
 
 func Scene3_InputHandler(runes []rune, current, next GameState, gs *GridSystem) GameState {
 	for i := 0; i < len(runes); i++ {
-		s3_AppendToBuffer(byte(runes[i]))
+		CommandBuffer.AppendWithPrePostfix(byte(runes[i]), []byte{':'}, []byte{'|'})
 	}
-
-	s3_UpdateGrid(gs)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		s3_SubmitLine()
+		CommandBuffer.NewLine()
+		CommandBuffer.AppendPrePostfix([]byte{':'}, []byte{'|'})
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
-		if S3CurrentBufferCursor > 1 {
-			S3History[S3HistoryCursor-1][S3CurrentBufferCursor] = ' '
-			S3CurrentBufferCursor--
-			S3History[S3HistoryCursor-1][S3CurrentBufferCursor] = '|'
-		}
+		CommandBuffer.TrimEndWithPrePostfix([]byte{':'}, []byte{'|'})
 	}
+
+	CommandBuffer.DrawToGrid(GridIdScene3, CommandBufferX, CommandBufferY, gs)
 
 	return current
-}
-
-func s3_UpdateGrid(gs *GridSystem) {
-	for h := 0; h < S3RenderHistoryMax; h++ {
-		//for historyIdx := S3HistoryHead; historyIdx < S3HistoryCursor; historyIdx++ {
-		historyIdx := S3HistoryHead + h
-		bytes := S3History[historyIdx]
-		for i := 0; i < len(bytes); i++ {
-			gs.Set(GridIdScene3, S3HistoryX+i, S3HistoryY+h, CellTypeChar, bytes[i])
-		}
-	}
-
-	if S3HistoryHead > 0 {
-		gs.SetCellSprite(GridIdScene3, 1, 1, assets.SpriteIDCarrotUp)
-	}
-}
-
-func s3_AppendToBuffer(char byte) {
-	if S3CurrentBufferCursor > S3BufferInputCapacity {
-		S3History[S3HistoryCursor-1][S3CurrentBufferCursor] = '|'
-		return
-	}
-
-	S3History[S3HistoryCursor-1][S3CurrentBufferCursor] = char
-	S3CurrentBufferCursor++
-	S3History[S3HistoryCursor-1][S3CurrentBufferCursor] = '|'
-}
-
-func s3_NextBuffer() {
-	S3History[S3HistoryCursor] = make([]byte, S3BufferCapacity)
-	S3History[S3HistoryCursor][0] = ':'
-	S3History[S3HistoryCursor][1] = '|'
-	S3CurrentBufferCursor = 1
-	S3HistoryCursor++
-}
-
-func s3_SubmitLine() {
-	S3History[S3HistoryCursor-1][0] = ' '
-	S3History[S3HistoryCursor-1][S3CurrentBufferCursor] = ' '
-
-	s3_NextBuffer()
-
-	for S3HistoryCursor-S3HistoryHead > S3RenderHistoryMax {
-		S3HistoryHead++
-	}
-
-	//@TODO eventually implement ring buffer
 }

@@ -1,5 +1,10 @@
 package main
 
+type BufferDecorator struct {
+	Prefix  []byte
+	Postfix []byte
+}
+
 type Buffer struct {
 	Cols, Rows, Capacity   int
 	Head, YCursor, XCursor int
@@ -37,9 +42,9 @@ func (buffer *Buffer) AppendToBuffer(char byte) {
 	buffer.XCursor++
 }
 
-func (buffer *Buffer) AppendPrePostfix(prefix, postfix []byte) {
-	preCount := len(prefix)
-	postCount := len(postfix)
+func (buffer *Buffer) AppendDecorators(decor BufferDecorator) {
+	preCount := len(decor.Prefix)
+	postCount := len(decor.Postfix)
 	if preCount+postCount+buffer.XCursor > buffer.Cols {
 		if buffer.LineOverflow {
 			buffer.NewLine()
@@ -47,18 +52,19 @@ func (buffer *Buffer) AppendPrePostfix(prefix, postfix []byte) {
 			return
 		}
 	}
-	for i := 0; i < len(prefix); i++ {
-		buffer.History[buffer.YCursor-1][i] = prefix[i]
+	for i := 0; i < len(decor.Prefix); i++ {
+		buffer.History[buffer.YCursor-1][i] = decor.Prefix[i]
 		buffer.XCursor++
 	}
-	for i := 0; i < len(postfix); i++ {
-		buffer.History[buffer.YCursor-1][buffer.XCursor+i] = postfix[i]
+
+	for i := 0; i < len(decor.Postfix); i++ {
+		buffer.History[buffer.YCursor-1][buffer.XCursor+i] = decor.Postfix[i]
 	}
 }
 
-func (buffer *Buffer) AppendWithPrePostfix(char byte, prefix, postfix []byte) {
-	preCount := len(prefix)
-	postCount := len(postfix)
+func (buffer *Buffer) AppendWithDecor(char byte, decor BufferDecorator) {
+	preCount := len(decor.Prefix)
+	postCount := len(decor.Postfix)
 	if preCount+postCount+1+buffer.XCursor > buffer.Cols {
 		if buffer.LineOverflow {
 			buffer.NewLine()
@@ -66,16 +72,16 @@ func (buffer *Buffer) AppendWithPrePostfix(char byte, prefix, postfix []byte) {
 			return
 		}
 	}
-	for i := 0; i < len(prefix); i++ {
-		buffer.History[buffer.YCursor-1][i] = prefix[i]
+	for i := 0; i < len(decor.Prefix); i++ {
+		buffer.History[buffer.YCursor-1][i] = decor.Prefix[i]
 	}
 	buffer.AppendToBuffer(char)
-	for i := 0; i < len(postfix); i++ {
-		buffer.History[buffer.YCursor-1][buffer.XCursor+i] = postfix[i]
+	for i := 0; i < len(decor.Postfix); i++ {
+		buffer.History[buffer.YCursor-1][buffer.XCursor+i] = decor.Postfix[i]
 	}
 }
 
-func (buffer *Buffer) TrimEnd() {
+func (buffer *Buffer) DecrementCursor() {
 	if buffer.XCursor > 0 {
 		for i := 0; i < buffer.Cols-buffer.XCursor; i++ {
 			buffer.History[buffer.YCursor-1][buffer.XCursor+i] = ' '
@@ -84,14 +90,25 @@ func (buffer *Buffer) TrimEnd() {
 	}
 }
 
-func (buffer *Buffer) TrimEndWithPrePostfix(prefix, postfix []byte) {
-	if buffer.XCursor > len(prefix) {
+func (buffer *Buffer) TrimDecor(decor BufferDecorator) {
+	for i := 0; i < len(decor.Prefix); i++ {
+		if buffer.History[buffer.YCursor-1][i] == decor.Prefix[i] {
+			buffer.History[buffer.YCursor-1][i] = ' '
+		}
+	}
+	for i := 0; i < len(decor.Postfix); i++ {
+		buffer.History[buffer.YCursor-1][buffer.XCursor+i] = ' '
+	}
+}
+
+func (buffer *Buffer) DecrementCursorWithDecor(decor BufferDecorator) {
+	if buffer.XCursor > len(decor.Prefix) {
 		for i := 0; i < buffer.Cols-buffer.XCursor; i++ {
 			buffer.History[buffer.YCursor-1][buffer.XCursor+i] = ' '
 		}
 		buffer.XCursor--
-		for i := 0; i < len(postfix); i++ {
-			buffer.History[buffer.YCursor-1][buffer.XCursor+i] = postfix[i]
+		for i := 0; i < len(decor.Postfix); i++ {
+			buffer.History[buffer.YCursor-1][buffer.XCursor+i] = decor.Postfix[i]
 		}
 	}
 }

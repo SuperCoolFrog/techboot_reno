@@ -19,8 +19,12 @@ const (
 )
 
 var (
-	GridIdScene3  GridID
-	CommandBuffer *Buffer
+	GridIdScene3   GridID
+	CommandBuffer  *Buffer
+	CmdBufferDecor = BufferDecorator{
+		Prefix:  []byte{':'},
+		Postfix: []byte{'|'},
+	}
 )
 
 func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
@@ -98,22 +102,23 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	GridIdScene3 = gridId
 
 	CommandBuffer = NewBuffer(CommandBufferCols, CommandBufferRows, CommandBufferCapacity, false)
-	CommandBuffer.AppendPrePostfix([]byte{':'}, []byte{'|'})
+	CommandBuffer.AppendDecorators(CmdBufferDecor)
 
 	return next
 }
 
 func Scene3_InputHandler(runes []rune, current, next GameState, gs *GridSystem) GameState {
 	for i := 0; i < len(runes); i++ {
-		CommandBuffer.AppendWithPrePostfix(byte(runes[i]), []byte{':'}, []byte{'|'})
+		CommandBuffer.AppendWithDecor(byte(runes[i]), CmdBufferDecor)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		CommandBuffer.TrimDecor(CmdBufferDecor)
 		CommandBuffer.NewLine()
-		CommandBuffer.AppendPrePostfix([]byte{':'}, []byte{'|'})
+		CommandBuffer.AppendDecorators(CmdBufferDecor)
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) {
-		CommandBuffer.TrimEndWithPrePostfix([]byte{':'}, []byte{'|'})
+		CommandBuffer.DecrementCursorWithDecor(CmdBufferDecor)
 	}
 
 	CommandBuffer.DrawToGrid(GridIdScene3, CommandBufferX, CommandBufferY, gs)

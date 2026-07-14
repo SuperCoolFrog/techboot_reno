@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	S3GridXCount          int = 40
-	S3GridYCount          int = 30
-	S3GridCellSize        int = 32
-	S3BufferCapacity      int = 23                   // Max 23
-	S3BufferInputCapacity int = S3BufferCapacity - 2 // Max 23
+	S3GridXCount          int = 64
+	S3GridYCount          int = 48
+	S3GridCellSize        int = 20
+	S3BufferCapacity      int = 35
+	S3BufferInputCapacity int = S3BufferCapacity - 2
 	S3RenderHistoryMax    int = S3GridYCount - 2
 	S3HistoryY            int = 1
 	S3HistoryX            int = 1
@@ -59,15 +59,16 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 
 	// Dividers
 	// .Vertical
-	gs.SetCellSprite(gridId, 24, 0, assets.SpriteIDDownConnectBar)
+	dividerX := 36
+	gs.SetCellSprite(gridId, dividerX, 0, assets.SpriteIDDownConnectBar)
 	for i := 1; i < S3GridYCount-1; i++ {
-		gs.SetCellSprite(gridId, 24, i, assets.SpriteIDVerticalBar)
+		gs.SetCellSprite(gridId, dividerX, i, assets.SpriteIDVerticalBar)
 	}
-	gs.SetCellSprite(gridId, 24, S3GridYCount-1, assets.SpriteIDUpConnectBar)
+	gs.SetCellSprite(gridId, dividerX, S3GridYCount-1, assets.SpriteIDUpConnectBar)
 	// .Horizontal
-	gs.SetCellSprite(gridId, 24, S3GridYCount-11, assets.SpriteIDRightConnectBar)
-	for i := 1; i < S3GridXCount-25; i++ {
-		gs.SetCellSprite(gridId, 24+i, S3GridYCount-11, assets.SpriteIDHorizontalBar)
+	gs.SetCellSprite(gridId, dividerX, S3GridYCount-11, assets.SpriteIDRightConnectBar)
+	for i := 1; i < S3GridXCount-dividerX; i++ {
+		gs.SetCellSprite(gridId, dividerX+i, S3GridYCount-11, assets.SpriteIDHorizontalBar)
 	}
 	gs.SetCellSprite(gridId, S3GridXCount-1, S3GridYCount-11, assets.SpriteIDLeftConnectBar)
 

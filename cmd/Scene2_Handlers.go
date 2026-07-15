@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -109,7 +108,6 @@ func Scene2_WaitForEnter(current, next GameState) GameState {
 		inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
 
 	if acceptSelected {
-		fmt.Printf("Accepted")
 		return next
 	}
 

@@ -47,20 +47,20 @@ func UpdateAnimationGrid(gs *GridSystem, anims *AnimationSystem) {
 	duration := anims.Durations[AnimationScannerGrid]
 	delay := anims.Delay[AnimationScannerGrid]
 
-	trueTime := float32(math.Min(float64(timer-delay), 0))
+	trueTime := float32(math.Max(float64(timer-delay), 0))
 	completedTime := trueTime / duration
 
 	gs.SetAllCells(AnimationScannerGrid, CellTypeEmpty, 0)
 
 	if completedTime <= 0.5 {
-		y := int(float32(AnimationScannerRows-1) / 2 * completedTime)
+		y := int(float32(AnimationScannerRows-1) * (completedTime / .5))
 		for i := 0; i < AnimationScannerCols; i++ {
 			gs.SetCellSprite(AnimationScannerGrid, i, y, assets.SpriteIDHorizontalBar)
 		}
 	} else {
-		y := int(float32(AnimationScannerRows-1) / 2 * completedTime)
+		y := int(float32(AnimationScannerRows-1) * ((completedTime - .5) / .5))
 		for i := 0; i < AnimationScannerCols; i++ {
-			gs.SetCellSprite(AnimationScannerGrid, i, AnimationScannerRows-y, assets.SpriteIDHorizontalBar)
+			gs.SetCellSprite(AnimationScannerGrid, i, AnimationScannerRows-1-y, assets.SpriteIDHorizontalBar)
 		}
 	}
 }

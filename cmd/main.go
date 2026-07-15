@@ -102,12 +102,12 @@ func main() {
 	// const MaxTotalCells = 100_000
 	// const MaxGrids = 50
 
-	// 30X30X5 -- Tweaking values
-	const MaxTotalCells = 5_000
-	const MaxGrids = 5
+	// Tweaking values
+	const MaxTotalCells = 150_000
+	const MaxGrids = 15
 
 	game := &Game{
-		State:      Scene1_Init, // Scene3_Init, //Scene1_Init,
+		State:      Scene3_Init, //Scene1_Init,
 		GridSystem: NewGridSystem(MaxTotalCells, MaxGrids),
 		Animations: NewAnimationSystem(),
 	}

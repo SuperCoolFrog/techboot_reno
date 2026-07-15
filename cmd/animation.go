@@ -9,6 +9,7 @@ type AnimationId uint32
 const (
 	AnimationGrid AnimationId = iota
 	AnimationDialog
+	AnimationScanner
 )
 
 const (

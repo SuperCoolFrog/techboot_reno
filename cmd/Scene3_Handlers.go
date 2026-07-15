@@ -43,6 +43,8 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	gs.SetAllCells(gridId, CellTypeEmpty, 0)
 	gs.EnableGrid(gridId)
 
+	InitOutputGrid(gs, anims)
+
 	// Border
 
 	// .Corners
@@ -120,7 +122,7 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	return next
 }
 
-func Scene3_InputHandler(runes []rune, current, next GameState, gs *GridSystem) GameState {
+func Scene3_Update(runes []rune, current, next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
 	for i := 0; i < len(runes); i++ {
 		CommandBuffer.AppendWithDecor(byte(runes[i]), CmdBufferDecor)
 	}
@@ -137,6 +139,8 @@ func Scene3_InputHandler(runes []rune, current, next GameState, gs *GridSystem) 
 	CommandBuffer.DrawToGrid(GridIdScene3, CommandBufferX, CommandBufferY, gs)
 
 	LogBuffer.DrawToGrid(GridIdScene3, LogBufferX, LogBufferY, gs)
+
+	UpdateAnimationGrid(gs, anims)
 
 	return current
 }

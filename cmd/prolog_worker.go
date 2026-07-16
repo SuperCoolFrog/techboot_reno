@@ -8,78 +8,71 @@ import (
 	"strings"
 )
 
-const parserpl2 = `
-parse_command(InputStr, Action, Arg) :-
-    atom_string(InputAtom, InputStr),
-    atom_concat(CleanedCommand, '=', InputAtom),
-    atomic_list_concat([ActionAtom, ArgAtom], ' ', CleanedCommand),
-    downcase_atom(ActionAtom, Action),
-    atom_number(ArgAtom, Arg).
-
-`
-
 func (g *Game) prologWorker() {
-	// 1. Boot up a clean, zero-dependency Trealla WebAssembly sandbox instance
+	// Initialize a clean, zero-dependency Trealla WebAssembly instance
 	pl, err := trealla.New()
 	if err != nil {
 		fmt.Printf("Failed to boot Trealla: %v\n", err)
 		return
 	}
 
-	fmt.Printf("✅ Trealla Prolog engine ready for high-throughput string parsing!\n")
+	ctx := context.Background()
 
-	// 2. Main consumer channel loop reading raw bytes from your Ebitengine render thread
+	_, _ = pl.QueryOnce(ctx, "dynamic(parse_command/3).")
+
+	// Normalize line endings safely
+	// rulesStr := strings.ReplaceAll(g.parserpl, "\r\n", "\n")
+
+	//query := fmt.Sprintf("assertz(parse_command(test, connect, 42)).", g.parserpl)
+	// query := fmt.Sprintf("%s", g.parserpl)
+	_, err = pl.QueryOnce(ctx, g.parserpl)
+	if err != nil {
+		fmt.Printf("[X] Embedded rules failed: %v\n", err)
+		panic(err)
+	}
+
+	fmt.Printf("✅ Embedded rules compiled successfully and ready for pre-query loading!\n")
+
 	for rawBytes := range g.prologInput {
 		cleanedStr := strings.TrimSpace(string(rawBytes))
 		if len(cleanedStr) == 0 {
 			continue
 		}
 
-		// CRITICAL FIX: Downcase the string in Go first!
-		// This translates "CONNECT 42=" directly to "connect 42="
+		// Keep your working Go downcasing logic intact
 		normalizedStr := strings.ToLower(cleanedStr)
-
 		fmt.Printf("Processing Input: '%s'\n", normalizedStr)
-		ctx := context.Background()
 
-		// THE FINAL COMPACT ISO QUERY METHOD:
-		// 1. append/3 slices the incoming lowercased character array seamlessly
-		// 2. atom_chars/2 and atom_number/2 re-bundle the components into standard output fields
+		// only working like this; bind does not work, possibly expects atom
 		query := pl.Query(ctx,
-			`append(ActionChars, [' '|ValAndEquals], RawInput),
-			 append(ArgChars, ['='], ValAndEquals),
-			 atom_chars(Action, ActionChars),
-			 atom_chars(ArgAtom, ArgChars),
-			 atom_number(ArgAtom, Arg).`,
-			trealla.WithBind("RawInput", normalizedStr), // Trealla maps this straight to a lowercase character list!
+			// "parse_command(test, Action, Arg).",
+			"parse_command('"+normalizedStr+"', Action, Arg).",
+			// "parse_command(RawInput, Action, Arg).",
+			// trealla.WithBind("RawInput", "'"+normalizedStr+"'"),
+			// "parse_command('connect', Action, Arg).",
 		)
 
 		if query.Next(ctx) {
 			answer := query.Current()
 
-			// FIX: Extract the Action variable as a trealla.Atom instead of a primitive string
+			// Extract variables using the safe trealla.Atom mapping type
 			actionAtom, ok1 := answer.Solution["Action"].(trealla.Atom)
 			argResult, ok2 := answer.Solution["Arg"].(int64)
 
 			if ok1 && ok2 {
-				// Convert the custom Trealla Atom type cleanly back into a standard Go string
 				actionStr := string(actionAtom)
 				fmt.Printf("🎯 SUCCESS! Action: %s, Arg: %d\n", actionStr, argResult)
 
-				// Route structural execution tokens straight back into your main update thread loop
 				g.prologOutput <- CommandPayload{
 					Action: actionStr,
 					Value:  int(argResult),
 				}
 			} else {
-				fmt.Printf("❌ Failed to parse output mapping: Action=%T, Arg=%T\n",
-					answer.Solution["Action"], answer.Solution["Arg"])
+				fmt.Printf("❌ Failed to parse output mapping: Action=%T, Arg=%T\nFor: %v\n",
+					answer.Solution["Action"], answer.Solution["Arg"], answer)
 			}
-		}
-
-		// Catch driver or internal runtime thread failures cleanly
-		if err := query.Err(); err != nil {
-			fmt.Printf("⚠️ Engine Runtime Error: %v\n", err)
+		} else {
+			fmt.Printf("❌ Prolog: Embedded rules rejected the command format.\n")
 		}
 		query.Close()
 	}

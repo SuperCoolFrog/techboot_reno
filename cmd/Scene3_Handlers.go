@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"techboot_reno/cmd/assets"
@@ -122,7 +123,7 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	return next
 }
 
-func Scene3_Update(runes []rune, current, next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
+func Scene3_Update(runes []rune, current, next GameState, input chan []byte, commands chan CommandPayload, gs *GridSystem, anims *AnimationSystem) GameState {
 	for i := 0; i < len(runes); i++ {
 		CommandBuffer.AppendWithDecor(byte(runes[i]), CmdBufferDecor)
 	}
@@ -131,6 +132,9 @@ func Scene3_Update(runes []rune, current, next GameState, gs *GridSystem, anims 
 		CommandBuffer.TrimDecor(CmdBufferDecor)
 		CommandBuffer.NewLine()
 		CommandBuffer.AppendDecorators(CmdBufferDecor)
+
+		fmt.Printf("ENter\n")
+		ParseInput([]byte("CONNECT 42="), input)
 	}
 	if utilDebouncedKeyPressed(ebiten.KeyBackspace) {
 		CommandBuffer.DecrementCursorWithDecor(CmdBufferDecor)
@@ -142,5 +146,46 @@ func Scene3_Update(runes []rune, current, next GameState, gs *GridSystem, anims 
 
 	UpdateAnimationGrid(gs, anims)
 
+loop:
+	for {
+		select {
+		case cmd := <-commands:
+			fmt.Printf("Commands: %v", cmd)
+			// switch cmd.action {
+			// case "set_speed":
+			// 	g.playerspeed = cmd.value
+			// case "set_health":
+			// 	g.playerhealth = cmd.value
+			// }
+		default:
+			break loop // nothing left in the queue for this frame
+		}
+	}
+
 	return current
+}
+
+func ParseInput(input []byte, parserInput chan []byte) {
+	fmt.Printf("Input: %s\n", input)
+
+	// if input[len(input)-1] != '=' {
+	// 	// Command not entered
+	// 	return
+	// }
+
+	fmt.Printf("Passed\n")
+
+	// Allocate or copy a standalone slice for the background worker
+	// to prevent data races on the local inputBuffer
+	commandCopy := make([]byte, len(input))
+	copy(commandCopy, input)
+	// Ship the bytes off the render thread instantly
+	select {
+	case parserInput <- commandCopy:
+	default:
+		// Dropped if worker queue is completely choked
+		fmt.Printf("Dropped\n")
+	}
+
+	// Placeholder for now until using prolog parsing
 }

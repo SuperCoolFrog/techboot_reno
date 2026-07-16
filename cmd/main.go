@@ -7,6 +7,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/ichiban/prolog"
 	"image/color"
 	"techboot_reno/cmd/assets"
 )
@@ -26,6 +27,9 @@ var fontColorComment = color.RGBA{R: 150, G: 150, B: 150, A: 255 * 0.6}
 var fontBytes []byte
 var fontSrc *text.GoTextFaceSource
 
+//go:embed parser.pl
+var parserpl []byte
+
 func init() {
 	src, err := text.NewGoTextFaceSource(bytes.NewReader(fontBytes))
 	if err != nil {
@@ -34,15 +38,22 @@ func init() {
 	fontSrc = src
 }
 
+type CommandPayload struct {
+	Action string
+	Value  int
+}
+
 type Game struct {
-	State      GameState
-	GridSystem *GridSystem
-	inputRunes []rune
-	// testBufferId int
+	State                  GameState
+	GridSystem             *GridSystem
+	inputRunes             []rune
 	Animations             *AnimationSystem
 	MouseMoved             bool
 	LastMouseX, LastMouseY int
 	Exit                   bool
+	parserpl               string
+	prologInput            chan []byte         // Channel sending raw bytes to Prolog thread
+	prologOutput           chan CommandPayload // Channel receiving parsed commands from Prolog thread
 }
 
 func (g *Game) Update() error {
@@ -98,6 +109,11 @@ func main() {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetTPS(60) // Locks Update cycles to 60Hz natively
 
+	parser := prolog.New(nil, nil)
+	if err := parser.Exec(string(parserpl)); err != nil {
+		log.Fatalf("Failed to compile Prolog script: %v", err)
+	}
+
 	// This is a lot probably could tweak it once I have an idea of total grids
 	// const MaxTotalCells = 100_000
 	// const MaxGrids = 50
@@ -107,10 +123,16 @@ func main() {
 	const MaxGrids = 15
 
 	game := &Game{
-		State:      Scene3_Init, //Scene1_Init,
-		GridSystem: NewGridSystem(MaxTotalCells, MaxGrids),
-		Animations: NewAnimationSystem(),
+		State:        Scene3_Init, //Scene1_Init,
+		GridSystem:   NewGridSystem(MaxTotalCells, MaxGrids),
+		Animations:   NewAnimationSystem(),
+		parserpl:     string(parserpl),
+		prologInput:  make(chan []byte, 124), // Buffered to prevent blocking input
+		prologOutput: make(chan CommandPayload, 24),
 	}
+
+	// Initialize parser
+	go game.prologWorker()
 
 	assets.Load()
 

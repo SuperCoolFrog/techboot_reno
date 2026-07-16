@@ -98,6 +98,6 @@ func (game *Game) UpdateState() {
 	case Scene3_Init:
 		game.State = Scene3_HandleInit(Scene3_Init, Scene3_InputHandlingLoop, gs, anims)
 	case Scene3_InputHandlingLoop:
-		Scene3_Update(game.inputRunes, Scene3_InputHandlingLoop, End, gs, anims)
+		Scene3_Update(game.inputRunes, Scene3_InputHandlingLoop, End, game.prologInput, game.prologOutput, gs, anims)
 	}
 }

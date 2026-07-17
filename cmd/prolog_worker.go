@@ -18,16 +18,7 @@ func (g *Game) prologWorker() {
 
 	ctx := context.Background()
 
-	_, _ = pl.QueryOnce(ctx, "dynamic(parse_command/3).")
-
-	// Normalize line endings safely
-	// rulesStr := strings.ReplaceAll(g.parserpl, "\r\n", "\n")
-
-	//query := fmt.Sprintf("assertz(parse_command(test, connect, 42)).", g.parserpl)
-	// query := fmt.Sprintf("%s", g.parserpl)
-	_, err = pl.QueryOnce(ctx, g.parserpl)
-	if err != nil {
-		fmt.Printf("[X] Embedded rules failed: %v\n", err)
+	if err := pl.ConsultText(ctx, "user", g.parserpl); err != nil {
 		panic(err)
 	}
 
@@ -45,12 +36,18 @@ func (g *Game) prologWorker() {
 
 		// only working like this; bind does not work, possibly expects atom
 		query := pl.Query(ctx,
-			// "parse_command(test, Action, Arg).",
+			// "parse_command('"+normalizedStr+"', Action, Arg).",
+			// "phrase(lex(Tokens),  [h,e,l,l,o,' ', w,o,r,l,d]).",
+			// "lex2([h,e,l,l,o,' ', w,o,r,l,d], Tokens).",
 			"parse_command('"+normalizedStr+"', Action, Arg).",
-			// "parse_command(RawInput, Action, Arg).",
-			// trealla.WithBind("RawInput", "'"+normalizedStr+"'"),
-			// "parse_command('connect', Action, Arg).",
 		)
+
+		q, err11 := pl.QueryOnce(ctx, "sentence([the, cat, chases, a, mouse], Out).")
+		if err11 != nil {
+			panic(err11)
+		} else {
+			fmt.Printf("Once query valid: %v\n", q)
+		}
 
 		if query.Next(ctx) {
 			answer := query.Current()

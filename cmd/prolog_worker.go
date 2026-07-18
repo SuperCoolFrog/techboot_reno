@@ -25,10 +25,12 @@ func (g *Game) prologWorker() {
 	fmt.Printf("✅ Embedded rules compiled successfully and ready for pre-query loading!\n")
 
 	for rawBytes := range g.prologInput {
-		cleanedStr := strings.TrimSpace(string(rawBytes))
+		cleanedBytes := rawBytes[0:len(rawBytes)-1] //Remove trailing =
+		cleanedStr := strings.TrimSpace(string(cleanedBytes))
 		if len(cleanedStr) == 0 {
 			continue
 		}
+
 
 		// Keep your working Go downcasing logic intact
 		normalizedStr := strings.ToLower(cleanedStr)

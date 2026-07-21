@@ -6,11 +6,11 @@ type BufferDecorator struct {
 }
 
 type Buffer struct {
-	Cols, Rows, Capacity   int
-	Head, YCursor, XCursor int
-	LineOverflow           bool
-	History                [][]byte
-	HistoryLineXCursor
+	Cols, Rows, Capacity int
+	Head, YCursor        int
+	LineOverflow         bool
+	History              [][]byte
+	XCursors             []int
 }
 
 func NewBuffer(cols, rows, capacity int, lineOverflow bool) *Buffer {
@@ -20,9 +20,9 @@ func NewBuffer(cols, rows, capacity int, lineOverflow bool) *Buffer {
 		Capacity:     capacity,
 		Head:         0,
 		YCursor:      0,
-		XCursor:      0,
 		LineOverflow: lineOverflow,
 		History:      make([][]byte, capacity),
+		XCursors:     make([]int, capacity),
 	}
 
 	buffer.NewLine()
@@ -30,8 +30,36 @@ func NewBuffer(cols, rows, capacity int, lineOverflow bool) *Buffer {
 	return buffer
 }
 
+func (buffer *Buffer) GetXCursor() int {
+	roXCursor := 0
+
+	if buffer.YCursor > 0 {
+		roXCursor = buffer.XCursors[buffer.YCursor-1]
+	}
+	return roXCursor
+}
+func (buffer *Buffer) IncrementXCursor() int {
+	if buffer.YCursor > 0 {
+		buffer.XCursors[buffer.YCursor-1]++
+		return buffer.XCursors[buffer.YCursor-1]
+	}
+
+	buffer.XCursors[buffer.YCursor]++
+	return buffer.XCursors[buffer.YCursor]
+}
+
+func (buffer *Buffer) DecrementXCursor() int {
+	if buffer.YCursor > 0 {
+		buffer.XCursors[buffer.YCursor-1]--
+		return buffer.XCursors[buffer.YCursor-1]
+	}
+
+	buffer.XCursors[buffer.YCursor]--
+	return buffer.XCursors[buffer.YCursor]
+}
+
 func (buffer *Buffer) Append(char byte) {
-	if buffer.XCursor >= buffer.Cols {
+	if buffer.GetXCursor() >= buffer.Cols {
 		if buffer.LineOverflow {
 			buffer.NewLine()
 		} else {
@@ -39,8 +67,8 @@ func (buffer *Buffer) Append(char byte) {
 		}
 	}
 
-	buffer.History[buffer.YCursor-1][buffer.XCursor] = char
-	buffer.XCursor++
+	buffer.History[buffer.YCursor-1][buffer.GetXCursor()] = char
+	buffer.IncrementXCursor()
 }
 
 func (buffer *Buffer) AppendAll(chars []byte) {
@@ -52,7 +80,7 @@ func (buffer *Buffer) AppendAll(chars []byte) {
 func (buffer *Buffer) AppendDecorators(decor BufferDecorator) {
 	preCount := len(decor.Prefix)
 	postCount := len(decor.Postfix)
-	if preCount+postCount+buffer.XCursor > buffer.Cols {
+	if preCount+postCount+buffer.GetXCursor() > buffer.Cols {
 		if buffer.LineOverflow {
 			buffer.NewLine()
 		} else {
@@ -61,18 +89,18 @@ func (buffer *Buffer) AppendDecorators(decor BufferDecorator) {
 	}
 	for i := 0; i < len(decor.Prefix); i++ {
 		buffer.History[buffer.YCursor-1][i] = decor.Prefix[i]
-		buffer.XCursor++
+		buffer.IncrementXCursor()
 	}
 
 	for i := 0; i < len(decor.Postfix); i++ {
-		buffer.History[buffer.YCursor-1][buffer.XCursor+i] = decor.Postfix[i]
+		buffer.History[buffer.YCursor-1][buffer.GetXCursor()+i] = decor.Postfix[i]
 	}
 }
 
 func (buffer *Buffer) AppendWithDecor(char byte, decor BufferDecorator) {
 	preCount := len(decor.Prefix)
 	postCount := len(decor.Postfix)
-	if preCount+postCount+1+buffer.XCursor >= buffer.Cols {
+	if preCount+postCount+1+buffer.GetXCursor() >= buffer.Cols {
 		if buffer.LineOverflow {
 			buffer.NewLine()
 		} else {
@@ -84,16 +112,16 @@ func (buffer *Buffer) AppendWithDecor(char byte, decor BufferDecorator) {
 	}
 	buffer.Append(char)
 	for i := 0; i < len(decor.Postfix); i++ {
-		buffer.History[buffer.YCursor-1][buffer.XCursor+i] = decor.Postfix[i]
+		buffer.History[buffer.YCursor-1][buffer.GetXCursor()+i] = decor.Postfix[i]
 	}
 }
 
 func (buffer *Buffer) DecrementCursor() {
-	if buffer.XCursor > 0 {
-		for i := 0; i < buffer.Cols-buffer.XCursor; i++ {
-			buffer.History[buffer.YCursor-1][buffer.XCursor+i] = ' '
+	if buffer.GetXCursor() > 0 {
+		for i := 0; i < buffer.Cols-buffer.GetXCursor(); i++ {
+			buffer.History[buffer.YCursor-1][buffer.GetXCursor()+i] = ' '
 		}
-		buffer.XCursor--
+		buffer.DecrementXCursor()
 	}
 }
 
@@ -104,25 +132,25 @@ func (buffer *Buffer) TrimDecor(decor BufferDecorator) {
 		}
 	}
 	for i := 0; i < len(decor.Postfix); i++ {
-		buffer.History[buffer.YCursor-1][buffer.XCursor+i] = ' '
+		buffer.History[buffer.YCursor-1][buffer.GetXCursor()+i] = ' '
 	}
 }
 
 func (buffer *Buffer) DecrementCursorWithDecor(decor BufferDecorator) {
-	if buffer.XCursor > len(decor.Prefix) {
-		for i := 0; i < buffer.Cols-buffer.XCursor; i++ {
-			buffer.History[buffer.YCursor-1][buffer.XCursor+i] = ' '
+	if buffer.GetXCursor() > len(decor.Prefix) {
+		for i := 0; i < buffer.Cols-buffer.GetXCursor(); i++ {
+			buffer.History[buffer.YCursor-1][buffer.GetXCursor()+i] = ' '
 		}
-		buffer.XCursor--
+		buffer.DecrementXCursor()
 		for i := 0; i < len(decor.Postfix); i++ {
-			buffer.History[buffer.YCursor-1][buffer.XCursor+i] = decor.Postfix[i]
+			buffer.History[buffer.YCursor-1][buffer.GetXCursor()+i] = decor.Postfix[i]
 		}
 	}
 }
 
 func (buffer *Buffer) NextBuffer() {
 	buffer.History[buffer.YCursor] = make([]byte, buffer.Cols)
-	buffer.XCursor = 0
+	buffer.XCursors[buffer.YCursor] = 0
 	buffer.YCursor++
 }
 
@@ -140,7 +168,11 @@ func (buffer *Buffer) NewLine() {
 
 func (buffer *Buffer) GetLastBufferLine() ([]byte, bool) {
 	if buffer.YCursor > 1 {
-		return buffer.History[buffer.YCursor-2], true
+		lastY := buffer.YCursor - 2
+		b := buffer.History[lastY]
+		xCursor := buffer.XCursors[lastY]
+
+		return b[0:xCursor], true
 	}
 
 	return []byte{}, false

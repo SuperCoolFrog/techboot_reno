@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/trealla-prolog/go/trealla"
 	"techboot_reno/cmd/assets"
 )
 
@@ -123,7 +124,7 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	return next
 }
 
-func Scene3_Update(runes []rune, current, next GameState, input chan []byte, commands chan CommandPayload, gs *GridSystem, anims *AnimationSystem) GameState {
+func Scene3_Update(runes []rune, current, next GameState, input chan []byte, commands chan trealla.Atom, gs *GridSystem, anims *AnimationSystem) GameState {
 	for i := 0; i < len(runes); i++ {
 		CommandBuffer.AppendWithDecor(byte(runes[i]), CmdBufferDecor)
 	}
@@ -153,13 +154,16 @@ loop:
 	for {
 		select {
 		case cmd := <-commands:
-			fmt.Printf("Commands: %v", cmd)
-			// switch cmd.action {
-			// case "set_speed":
-			// 	g.playerspeed = cmd.value
-			// case "set_health":
-			// 	g.playerhealth = cmd.value
-			// }
+			fmt.Printf("Commands: %v\n", cmd)
+
+			switch cmd {
+			case AtomConnectTrue:
+				fmt.Printf("Connection Made!\n")
+			case AtomConnectFalse:
+				fmt.Printf("Connection Failed!\n")
+			case AtomInvalid:
+				fmt.Printf("Invalid!\n")
+			}
 		default:
 			break loop // nothing left in the queue for this frame
 		}

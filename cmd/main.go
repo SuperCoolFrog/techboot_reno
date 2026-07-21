@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/ichiban/prolog"
+	"github.com/trealla-prolog/go/trealla"
 	"image/color"
 	"techboot_reno/cmd/assets"
 )
@@ -38,11 +39,6 @@ func init() {
 	fontSrc = src
 }
 
-type CommandPayload struct {
-	Action string
-	Value  int
-}
-
 type Game struct {
 	State                  GameState
 	GridSystem             *GridSystem
@@ -52,8 +48,8 @@ type Game struct {
 	LastMouseX, LastMouseY int
 	Exit                   bool
 	parserpl               string
-	prologInput            chan []byte         // Channel sending raw bytes to Prolog thread
-	prologOutput           chan CommandPayload // Channel receiving parsed commands from Prolog thread
+	prologInput            chan []byte       // Channel sending raw bytes to Prolog thread
+	prologOutput           chan trealla.Atom // Channel receiving parsed commands from Prolog thread
 }
 
 func (g *Game) Update() error {
@@ -127,8 +123,8 @@ func main() {
 		GridSystem:   NewGridSystem(MaxTotalCells, MaxGrids),
 		Animations:   NewAnimationSystem(),
 		parserpl:     string(parserpl),
-		prologInput:  make(chan []byte, 124), // Buffered to prevent blocking input
-		prologOutput: make(chan CommandPayload, 24),
+		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
+		prologOutput: make(chan trealla.Atom, 128),
 	}
 
 	// Initialize parser

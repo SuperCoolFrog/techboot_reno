@@ -51,10 +51,10 @@ func (g *Game) prologWorker() {
 		q, err11 := pl.QueryOnce(ctx, queryStr)
 		if err11 != nil {
 			panic(err11)
-		} //else {
+		}
 
-		val := q.Solution["Out"]
-		fmt.Printf("Once query valid: %+v ; %T\n", val, val)
+		// val := q.Solution["Out"]
+		// fmt.Printf("Once query valid: %+v ; %T\n", val, val)
 
 		var r Result
 
@@ -62,13 +62,12 @@ func (g *Game) prologWorker() {
 			panic(errv)
 		}
 
-		fmt.Printf("Cast %s; %T \n", r.Out.Result.String(), r.Out.Result)
+		// fmt.Printf("Cast %s; %T \n", r.Out.Result.String(), r.Out.Result)
+		// if r.Out.Result == trealla.Atom("connect_true") {
+		// 	fmt.Printf("Matches atom")
+		// }
 
-		if r.Out.Result == trealla.Atom("connect_true") {
-			fmt.Printf("Matches atom")
-		}
-
-		//}
+		g.prologOutput <- r.Out.Result
 
 		// if query.Next(ctx) {
 		// 	answer := query.Current()

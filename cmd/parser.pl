@@ -17,6 +17,7 @@ shape(1, square).
 
 connection(state(3), rabbit).
 
+result(invalid).
 result(connect_true).
 result(connect_false).
 
@@ -66,7 +67,8 @@ process_command(List, Out) :-
     % 6. Print the answers to the user console
     % print_results(RawArgs, PrologArgs),
     % print_result_out(RawArgs, PrologArgs),
-    out_value(PrologArgs, Out).
+    !, out_value(PrologArgs, Out).
+process_command(_, Out) :- Out = result(invalid).
 
 % Helper: If an atom starts with an uppercase letter or is an underscore, treat it as a variable
 % bind_variables(Atom, Variable) :-

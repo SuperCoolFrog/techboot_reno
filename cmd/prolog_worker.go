@@ -8,6 +8,15 @@ import (
 	"strings"
 )
 
+type OutResult struct {
+	trealla.Functor `prolog:"/1"`
+	Result          trealla.Atom
+}
+
+type Result struct {
+	Out OutResult `prolog:"Out"`
+}
+
 func (g *Game) prologWorker() {
 	// Initialize a clean, zero-dependency Trealla WebAssembly instance
 	pl, err := trealla.New()
@@ -39,27 +48,27 @@ func (g *Game) prologWorker() {
 
 		fmt.Printf("Processing queryStr: '%s'\n", queryStr)
 
-		// only working like this; bind does not work, possibly expects atom
-		// query := pl.Query(ctx,
-		// 	// "parse_command('"+normalizedStr+"', Action, Arg).",
-		// 	// "phrase(lex(Tokens),  [h,e,l,l,o,' ', w,o,r,l,d]).",
-		// 	// "lex2([h,e,l,l,o,' ', w,o,r,l,d], Tokens).",
-		// 	"parse_command('"+normalizedStr+"', Action, Arg).",
-		// )
-
-		// query := pl.Query(ctx, queryStr)
-		// defer query.Close()
-		// if query.Next(ctx) {
-		// 	fmt.Printf("Response %v\n", query.Current())
-		// }
-
-		// q, err11 := pl.QueryOnce(ctx, "sentence([the, cat, chases, a, mouse], Out).")
 		q, err11 := pl.QueryOnce(ctx, queryStr)
 		if err11 != nil {
 			panic(err11)
-		} else {
-			fmt.Printf("Once query valid: %v\n", q.Solution["Out"])
+		} //else {
+
+		val := q.Solution["Out"]
+		fmt.Printf("Once query valid: %+v ; %T\n", val, val)
+
+		var r Result
+
+		if errv := q.Solution.Scan(&r); errv != nil {
+			panic(errv)
 		}
+
+		fmt.Printf("Cast %s; %T \n", r.Out.Result.String(), r.Out.Result)
+
+		if r.Out.Result == trealla.Atom("connect_true") {
+			fmt.Printf("Matches atom")
+		}
+
+		//}
 
 		// if query.Next(ctx) {
 		// 	answer := query.Current()

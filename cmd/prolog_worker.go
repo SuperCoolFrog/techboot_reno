@@ -47,13 +47,19 @@ func (g *Game) prologWorker() {
 		// 	"parse_command('"+normalizedStr+"', Action, Arg).",
 		// )
 
-		// q, err11 := pl.QueryOnce(ctx, "sentence([the, cat, chases, a, mouse], Out).")
-		q, _ := pl.QueryOnce(ctx, queryStr)
-		// if err11 != nil {
-		// 	panic(err11)
-		// } else {
-		fmt.Printf("Once query valid: %v\n", q)
+		// query := pl.Query(ctx, queryStr)
+		// defer query.Close()
+		// if query.Next(ctx) {
+		// 	fmt.Printf("Response %v\n", query.Current())
 		// }
+
+		// q, err11 := pl.QueryOnce(ctx, "sentence([the, cat, chases, a, mouse], Out).")
+		q, err11 := pl.QueryOnce(ctx, queryStr)
+		if err11 != nil {
+			panic(err11)
+		} else {
+			fmt.Printf("Once query valid: %v\n", q.Solution["Out"])
+		}
 
 		// if query.Next(ctx) {
 		// 	answer := query.Current()

@@ -60,8 +60,9 @@ process_command(List, Out) :-
     % 4. Construct the executable Goal
     Goal =.. [Verb | PrologArgs],
     
-    % 5. Execute the Goal safely
-    current_predicate(_, Goal), 
+    % 5. ISO-compliant safety check: extract Name/Arity and check existence
+    functor(Goal, Name, Arity),
+    current_predicate(Name/Arity),
     call(Goal),
     
     % 6. Print the answers to the user console
@@ -73,11 +74,11 @@ process_command(List, Out) :-
 process_command(_, Out) :- Out = result(invalid).
 
 % Helper: If an atom starts with an uppercase letter or is an underscore, treat it as a variable
-% bind_variables(Atom, Variable) :-
 bind_variables(Atom, _) :-
     atom(Atom),
     (   sub_atom(Atom, 0, 1, _, FirstChar),
-        char_type(FirstChar, upper)
+        char_code(FirstChar, Code),
+        Code >= 65, Code =< 90 % Matches 'A' through 'Z'
     ;   Atom == '_'
     ),
     !. % If it matches the criteria, leave Variable unbound.

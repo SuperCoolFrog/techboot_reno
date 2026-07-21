@@ -17,6 +17,19 @@ shape(1, square).
 
 connection(state(3), rabbit).
 
+result(connect_true).
+result(connect_false).
+
+print_results(A, B) :- format('The result is: ~w ;; ~w~n', [A, B]).
+
+print_result_out(_, B) :- 
+    out_value(B, Out),
+    format('The Out is: ~w~n', [Out]).
+
+
+out_value([_|Rest], Out) :- Rest \= [], !, out_value(Rest, Out).
+out_value([H|_], Out) :- Out = H.
+
 
 % Predicates
 
@@ -25,12 +38,15 @@ search(FT, FN, StateId) :-
     fs(state(StateId), file_id(FID)), 
     file_details(file_id(FID), file_type(FT), file_name(FN)).
 
-connect(Name, StateId) :-
+connect(Name, StateId, Out) :-
 		state(StateId),
-		connection(state(StateId), Name).
+		connection(state(StateId), Name), !,
+        Out = result(connect_true).
+
+connect(_, _, Out) :- Out = result(connect_false).
 
 % Parser
-process_command(List) :-
+process_command(List, Out) :-
     % 1. Clean filler words
     remove_fillers(List, CleanedList),
     
@@ -48,10 +64,13 @@ process_command(List) :-
     call(Goal),
     
     % 6. Print the answers to the user console
-    print_results(RawArgs, PrologArgs).
+    % print_results(RawArgs, PrologArgs),
+    % print_result_out(RawArgs, PrologArgs),
+    out_value(PrologArgs, Out).
 
 % Helper: If an atom starts with an uppercase letter or is an underscore, treat it as a variable
-bind_variables(Atom, Variable) :-
+% bind_variables(Atom, Variable) :-
+bind_variables(Atom, _) :-
     atom(Atom),
     (   sub_atom(Atom, 0, 1, _, FirstChar),
         char_type(FirstChar, upper)
@@ -60,31 +79,13 @@ bind_variables(Atom, Variable) :-
     !. % If it matches the criteria, leave Variable unbound.
 bind_variables(Value, Value). % Otherwise, keep it as a concrete value (like 'my_file.txt').
 
+remove_fillers([], []).
+remove_fillers([X|Xs], Ys) :-
+    member(X, [to, from, at, with, the, a]), !, % Add any filler words here
+    remove_fillers(Xs, Ys).
+remove_fillers([X|Xs], [X|Ys]) :-
+    remove_fillers(Xs, Ys).
 
+% Examples
+% process_command([connect, rabbit, 3, 'Out'], Out).
 
-% Parser
-%process_command(List) :-
-%    % Clean the list by removing filler words
-%    remove_fillers(List, CleanedList),
-%    
-%    % Reconstruct into a Prolog Goal using the Univ (=..) operator
-%    % CleanedList must look like [Verb, Arg1, Arg2, ...]
-%    Goal =.. CleanedList,
-%
-%		current_predicate(_, Goal), call(Goal).
-%    
-%    % Check if the predicate exists and is true
-%		% (   current_predicate(_, Goal), call(Goal)
-%    % ->  format('Success: Fact "~w" is true.~n', [Goal])
-%    % ;   format('Failure: Fact "~w" is false or undefined.~n', [Goal])
-%    % ).
-%
-%% 3. Helper: Strip out structural filler words dynamically
-%remove_fillers([], []).
-%remove_fillers([X|Xs], Ys) :-
-%    member(X, [to, from, at, with, the, a]), !, % Add any filler words here
-%    remove_fillers(Xs, Ys).
-%remove_fillers([X|Xs], [X|Ys]) :-
-%    remove_fillers(Xs, Ys).
-%
-%

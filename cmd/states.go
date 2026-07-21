@@ -30,6 +30,7 @@ const (
 	Scene3_CleanUp
 
 	Scene4_Init
+	Scene4_StackAnim
 	Scene4_Run
 
 	End // End
@@ -106,7 +107,9 @@ func (game *Game) UpdateState() {
 	case Scene3_CleanUp:
 		game.State = Scene3_HandleCleaUp(Scene4_Init, gs, anims)
 	case Scene4_Init:
-		game.State = Scene4_HandleInit(Scene4_Init, Scene4_Run, gs, anims)
+		game.State = Scene4_HandleInit(Scene4_Init, Scene4_StackAnim, gs, anims)
+	case Scene4_StackAnim:
+		game.State = Scene4_UpdateStackAnimation(Scene4_StackAnim, Scene4_Run, gs, anims)
 	case Scene4_Run:
 		game.State = Scene4_Update(Scene4_Run, End, game.inputRunes, game.prologInput, game.prologOutput, gs, anims)
 	}

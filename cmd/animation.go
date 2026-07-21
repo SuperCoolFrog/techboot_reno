@@ -10,6 +10,7 @@ const (
 	AnimationGrid AnimationId = iota
 	AnimationDialog
 	AnimationScanner
+	AnimationMemoryStack
 )
 
 const (

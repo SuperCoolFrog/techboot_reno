@@ -68,6 +68,8 @@ process_command(List, Out) :-
     % print_results(RawArgs, PrologArgs),
     % print_result_out(RawArgs, PrologArgs),
     !, out_value(PrologArgs, Out).
+
+% Any commands that fail return invalid
 process_command(_, Out) :- Out = result(invalid).
 
 % Helper: If an atom starts with an uppercase letter or is an underscore, treat it as a variable

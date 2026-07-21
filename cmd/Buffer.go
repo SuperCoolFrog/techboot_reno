@@ -10,6 +10,7 @@ type Buffer struct {
 	Head, YCursor, XCursor int
 	LineOverflow           bool
 	History                [][]byte
+	HistoryLineXCursor
 }
 
 func NewBuffer(cols, rows, capacity int, lineOverflow bool) *Buffer {
@@ -135,6 +136,14 @@ func (buffer *Buffer) NewLine() {
 	}
 
 	//@TODO eventually implement ring buffer
+}
+
+func (buffer *Buffer) GetLastBufferLine() ([]byte, bool) {
+	if buffer.YCursor > 1 {
+		return buffer.History[buffer.YCursor-2], true
+	}
+
+	return []byte{}, false
 }
 
 func (buffer *Buffer) DrawToGrid(gridId GridID, x, y int, gs *GridSystem) {

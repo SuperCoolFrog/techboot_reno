@@ -133,8 +133,11 @@ func Scene3_Update(runes []rune, current, next GameState, input chan []byte, com
 		CommandBuffer.NewLine()
 		CommandBuffer.AppendDecorators(CmdBufferDecor)
 
-		fmt.Printf("ENter\n")
-		ParseInput([]byte("CONNECT 42="), input)
+		fmt.Printf("Enter\n")
+		// ParseInput([]byte("CONNECT 42="), input)
+		if lastLine, exists := CommandBuffer.GetLastBufferLine(); exists {
+			ParseInput(lastLine, input)
+		}
 	}
 	if utilDebouncedKeyPressed(ebiten.KeyBackspace) {
 		CommandBuffer.DecrementCursorWithDecor(CmdBufferDecor)
@@ -166,12 +169,12 @@ loop:
 }
 
 func ParseInput(input []byte, parserInput chan []byte) {
-	fmt.Printf("Input: %s\n", input)
+	fmt.Printf("Input: %s ;; %s\n", input, input[len(input)-1])
 
-	// if input[len(input)-1] != '=' {
-	// 	// Command not entered
-	// 	return
-	// }
+	if input[len(input)-1] != '=' {
+		// Command not entered
+		return
+	}
 
 	fmt.Printf("Passed\n")
 

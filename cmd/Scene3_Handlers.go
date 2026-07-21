@@ -119,7 +119,8 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	CommandBuffer.AppendDecorators(CmdBufferDecor)
 
 	LogBuffer = NewBuffer(LogBufferCols, LogBufferRows, LogBufferCapacity, false)
-	LogBuffer.AppendAll([]byte("Type: Connect+Rabbit="))
+	LogBuffer.AppendAll([]byte("Type: connect rabbit="))
+	LogBuffer.NewLine()
 
 	return next
 }
@@ -150,6 +151,8 @@ func Scene3_Update(runes []rune, current, next GameState, input chan []byte, com
 
 	UpdateAnimationGrid(gs, anims)
 
+	state := current
+
 loop:
 	for {
 		select {
@@ -159,17 +162,22 @@ loop:
 			switch cmd {
 			case AtomConnectTrue:
 				fmt.Printf("Connection Made!\n")
+				state = next
 			case AtomConnectFalse:
-				fmt.Printf("Connection Failed!\n")
+				// fmt.Printf("Connection Failed!\n")
+				LogBuffer.AppendAll([]byte("Connection Failed"))
+				LogBuffer.NewLine()
 			case AtomInvalid:
-				fmt.Printf("Invalid!\n")
+				// fmt.Printf("Invalid!\n")
+				LogBuffer.AppendAll([]byte("Invalid Command"))
+				LogBuffer.NewLine()
 			}
 		default:
 			break loop // nothing left in the queue for this frame
 		}
 	}
 
-	return current
+	return state
 }
 
 func ParseInput(input []byte, parserInput chan []byte) {
@@ -195,4 +203,16 @@ func ParseInput(input []byte, parserInput chan []byte) {
 	}
 
 	// Placeholder for now until using prolog parsing
+}
+
+func Scene3_HandleCleaUp(next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
+
+	anims.IsPlaying[AnimationScannerGrid] = false
+	anims.Loop[AnimationScannerGrid] = false
+
+	gs.SetAllCells(OutputGridId, CellTypeEmpty, 0)
+	gs.SetAllCells(AnimationScannerGrid, CellTypeEmpty, 0)
+	gs.DisableGrid(AnimationScannerGrid)
+
+	return next
 }

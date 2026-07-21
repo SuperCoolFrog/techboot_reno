@@ -2,19 +2,21 @@
 % Data
 
 % .State Scene 3
-state(3).
+state(21).
 
 file_details(file_id(1), file_type(email), file_name(roy_1)).
 file_details(file_id(2), file_type(email), file_name(roy_2)).
 file_details(file_id(3), file_type(email), file_name(roy_3)).
 
-fs(state(3),file_id(1)). 
-fs(state(3),file_id(2)). 
-fs(state(3),file_id(3)). 
+fs(state(999),file_id(1)). 
+fs(state(999),file_id(2)). 
+fs(state(999),file_id(3)). 
 
 shape(1, square).
 
-connection(state(3), rabbit).
+
+% Scene3_InputHandlingLoop
+connection(state(21), rabbit).
 
 result(invalid).
 result(connect_true).

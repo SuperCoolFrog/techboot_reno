@@ -44,7 +44,7 @@ func (g *Game) prologWorker() {
 		normalizedStr := strings.ToLower(cleanedStr)
 
 		csvStr := strings.ReplaceAll(normalizedStr, " ", ",")
-		queryStr := fmt.Sprintf("process_command([%s,3,'Out'], Out).", csvStr)
+		queryStr := fmt.Sprintf("process_command([%s,%d,'Out'], Out).", csvStr, g.State)
 
 		fmt.Printf("Processing queryStr: '%s'\n", queryStr)
 

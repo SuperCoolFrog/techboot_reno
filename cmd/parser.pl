@@ -4,25 +4,22 @@
 
 shape(1, square).
 
+state(21).
+state(25).
 
 % Scene3_InputHandlingLoop :: 21
-state(21).
 connection(state(21), rabbit).
 
 % Scene4_Run :: 25
-state(25).
-
 crawl(state(25), [files, programs, networks]).
 crawl(StateId, result(list, List)) :-
     state(StateId),
     info(state(StateId), List),!.
 
-
-files(state(25), [roy_1, roy_2, roy_3]).
+files(state(25), [roy_1_fn, roy_2_fn, roy_3_fn]).
 files(StateId, result(list, List)) :-
     state(StateId),
     files(state(StateId), List), !.
-
 
 programs(state(25), [sweep, breach]).
 programs(StateId, result(list, List)) :-

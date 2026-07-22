@@ -1,26 +1,47 @@
 % :- debug.
 % Data
 
-% .State Scene 3
-state(21).
-
-file_details(file_id(1), file_type(email), file_name(roy_1)).
-file_details(file_id(2), file_type(email), file_name(roy_2)).
-file_details(file_id(3), file_type(email), file_name(roy_3)).
-
-fs(state(999),file_id(1)). 
-fs(state(999),file_id(2)). 
-fs(state(999),file_id(3)). 
 
 shape(1, square).
 
 
-% Scene3_InputHandlingLoop
+% Scene3_InputHandlingLoop :: 21
+state(21).
 connection(state(21), rabbit).
 
-result(invalid).
-result(connect_true).
-result(connect_false).
+% Scene4_Run :: 25
+state(25).
+
+crawl(state(25), [files, programs, networks]).
+crawl(StateId, result(list, List)) :-
+    state(StateId),
+    info(state(StateId), List),!.
+
+
+files(state(25), [roy_1, roy_2, roy_3]).
+files(StateId, result(list, List)) :-
+    state(StateId),
+    files(state(StateId), List), !.
+
+
+programs(state(25), [sweep, breach]).
+programs(StateId, result(list, List)) :-
+    state(StateId),
+    programs(state(StateId), List), !.
+
+networks(state(25), [lobby]).
+networks(StateId, result(list, List)) :-
+    state(StateId),
+    networks(state(StateId), List), !.
+
+
+% =========================================================================
+% Results
+% =========================================================================
+
+% result(invalid, []).
+% result(connect_true, []).
+% result(connect_false, []).
 
 print_results(A, B) :- format('The result is: ~w ;; ~w~n', [A, B]).
 
@@ -34,17 +55,13 @@ out_value([H|_], Out) :- Out = H.
 % =========================================================================
 % Target Predicates (Refactored for Clean Unification)
 % =========================================================================
-search(FT, FN, StateId) :- 
-    state(StateId), 
-    fs(state(StateId), file_id(FID)), 
-    file_details(file_id(FID), file_type(FT), file_name(FN)).
 
 % Pattern-match result directly in the head to force early unification
-connect(Name, StateId, result(connect_true)) :-
+connect(Name, StateId, result(connect_true, [])) :-
     state(StateId),
     connection(state(StateId), Name), !.
 
-connect(_, _, result(connect_false)).
+connect(_, _, result(connect_false, [])).
 
 % =========================================================================
 % Parser
@@ -73,7 +90,7 @@ process_command(List, Out) :-
     !.
 
 % Any commands that fail or do not exist return invalid
-process_command(_, Out) :- Out = result(invalid).
+process_command(_, Out) :- Out = result(invalid, []).
 
 % =========================================================================
 % Helpers

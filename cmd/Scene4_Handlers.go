@@ -49,6 +49,7 @@ func Scene4_UpdateStackAnimation(current, next GameState, gs *GridSystem, anims 
 
 	LogBuffer.AppendAll([]byte("Connection Successful"))
 	LogBuffer.NewLine()
+	gs.SetAllCells(OutputGridId, CellTypeEmpty, 0)
 
 	return next
 }

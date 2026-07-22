@@ -9,8 +9,9 @@ import (
 )
 
 type OutResult struct {
-	trealla.Functor `prolog:"/1"`
-	Result          trealla.Atom
+	trealla.Functor `prolog:"/2"`
+	ResultType      trealla.Atom
+	Items           []trealla.Atom
 }
 
 type Result struct {
@@ -67,7 +68,7 @@ func (g *Game) prologWorker() {
 		// 	fmt.Printf("Matches atom")
 		// }
 
-		g.prologOutput <- r.Out.Result
+		g.prologOutput <- r.Out.ResultType
 
 		// if query.Next(ctx) {
 		// 	answer := query.Current()

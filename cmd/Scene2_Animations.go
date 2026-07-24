@@ -1,33 +1,18 @@
 package main
 
-func InitDialogAnimation(gs *GridSystem, anims *AnimationSystem) {
-	anims.IsPlaying[AnimationDialog] = false
-	anims.Loop[AnimationDialog] = false
-	anims.Timers[AnimationDialog] = 0.0
-	anims.Durations[AnimationDialog] = 0.0
-
-	gridId := gs.AllocateGrid(40, 30, 32, 16, 16)
-	gs.SetAllCells(gridId, CellTypeEmpty, 0)
-	gs.EnableGrid(gridId)
-
-	anims.HasGrid[AnimationDialog] = true
-	anims.GridId[AnimationDialog] = gridId
-}
-
 func PlayDialogAnimation(
-	duration float32,
-	loop bool,
 	gs *GridSystem,
 	anims *AnimationSystem,
 ) {
+
 	if anims.IsPlaying[AnimationDialog] {
 		return
 	}
 
 	anims.IsPlaying[AnimationDialog] = true
-	anims.Loop[AnimationDialog] = loop
+	anims.Loop[AnimationDialog] = false
 	anims.Timers[AnimationDialog] = 0.0
-	anims.Durations[AnimationDialog] = duration
+	anims.Durations[AnimationDialog] = 2.0
 	anims.Delay[AnimationDialog] = 2
 }
 

@@ -35,26 +35,21 @@ func s2_AddTRenoMsgBuffer(gs *GridSystem, gridId GridID, y int) {
 	gs.NewBuffer(gridId, 9, y, gs.Cols[gridId]-10, 1)
 }
 
-func Scene2_HandleInit(gridSystem *GridSystem, anims *AnimationSystem) {
+func Scene2_HandleInit(current, next GameState, gridSystem *GridSystem, anims *AnimationSystem) GameState {
 	animationGridId := anims.GridId[AnimationStartScene]
 	gridSystem.DisableGrid(animationGridId)
 	gridSystem.Set(animationGridId, 0, 1, CellTypeEmpty, ' ')
 	gridSystem.Set(animationGridId, 1, 1, CellTypeEmpty, ' ')
 
-	InitDialogAnimation(gridSystem, anims)
+	gridSystem.EnableGrid(GridDialogScene)
 
 	gridId := anims.GridId[AnimationDialog]
 
 	s2_AddRipMsgBuffer(gridSystem, gridId, 0)
 
-	// Init Animations
+	PlayDialogAnimation(gridSystem, anims)
 
-	// 'Ripl3y':"I think you're right"|
-	// 'Ripl3y':"I don't think she ran"|
-	// 'Ripl3y':"I found an open door"|
-	// 'Ripl3y':"CONNECT to RABBIT and you're in"|
-	// 'Ripl3y':"Good Luck"|
-
+	return next
 }
 
 func Scene2_HandleDialog1(gs *GridSystem, anims *AnimationSystem) GameState {
@@ -80,7 +75,7 @@ func Scene2_HandleDialog1(gs *GridSystem, anims *AnimationSystem) GameState {
 func Scene2_InitDialog(bufferY int, gs *GridSystem, anims *AnimationSystem) {
 	gridId := anims.GridId[AnimationDialog]
 	s2_AddRipMsgBuffer(gs, gridId, bufferY)
-	PlayDialogAnimation(2.0, false, gs, anims)
+	PlayDialogAnimation(gs, anims)
 }
 
 func Scene2_HandleDialog(bufferY int, message []byte, currentState, nextState GameState, gs *GridSystem, anims *AnimationSystem) GameState {

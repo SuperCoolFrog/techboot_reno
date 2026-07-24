@@ -54,9 +54,7 @@ func (game *Game) UpdateState() {
 	case Scene1_Exiting:
 		game.State = Scene1_UpdateAnimatedGridExit(Scene1_Exiting, Scene2_Init, game.GridSystem, game.Animations)
 	case Scene2_Init:
-		Scene2_HandleInit(game.GridSystem, game.Animations)
-		PlayDialogAnimation(2.0, false, game.GridSystem, game.Animations)
-		game.State = Scene2_Dialog_1
+		game.State = Scene2_HandleInit(Scene2_Init, Scene2_Dialog_1, game.GridSystem, game.Animations)
 	case Scene2_Dialog_1:
 		game.State = Scene2_HandleDialog1(game.GridSystem, game.Animations)
 	case Scene2_Init_Dialog_2:
@@ -82,7 +80,7 @@ func (game *Game) UpdateState() {
 	case Scene2_Init_Dialog_6:
 		gridId := anims.GridId[AnimationDialog]
 		s2_AddTRenoMsgBuffer(gs, gridId, 5)
-		PlayDialogAnimation(2.0, false, gs, anims)
+		PlayDialogAnimation(gs, anims)
 		game.State = Scene2_Dialog_6
 	case Scene2_Dialog_6:
 		game.State = Scene2_HandleDialog(5, []byte("thanks"), Scene2_Dialog_6, Scene2_Waiting, gs, anims)

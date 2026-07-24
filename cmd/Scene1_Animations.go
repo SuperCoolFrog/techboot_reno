@@ -1,29 +1,24 @@
 package main
 
-func (anims *AnimationSystem) PlayAnimatedGridIntro(gridSystem *GridSystem, duration float32, loop bool) {
-	if anims.IsPlaying[AnimationGrid] {
-		return
+func Scene1_PlayAnimatedGridIntro(current, next GameState, anims *AnimationSystem) GameState {
+	if anims.IsPlaying[AnimationStartScene] {
+		return next
 	}
+	anims.IsPlaying[AnimationStartScene] = true
 
-	anims.IsPlaying[AnimationGrid] = true
-	anims.Loop[AnimationGrid] = loop
-	anims.Timers[AnimationGrid] = 0.0
-	anims.Durations[AnimationGrid] = duration
-	// anims.Delay[AnimationGridIntro] = 5.0 // Tried to fix vsync at the beginning but just live with it
-
-	gridId := gridSystem.AllocateGrid(27, 21, 48, 12, 12)
-
-	gridSystem.SetAllCells(gridId, CellTypeNone, 0)
-
-	anims.HasGrid[AnimationGrid] = true
-	anims.GridId[AnimationGrid] = gridId
+	return next
 }
 
-func (anims *AnimationSystem) UpdateAnimatedGridIntro(gridSystem *GridSystem) {
-	timer := anims.Timers[AnimationGrid]
-	duration := float64(anims.Durations[AnimationGrid])
-	delay := anims.Delay[AnimationGrid]
-	gridId := anims.GridId[AnimationGrid]
+func Scene1_UpdateAnimatedGridIntro(current, next GameState, gridSystem *GridSystem, anims *AnimationSystem) GameState {
+	if !anims.IsPlaying[AnimationStartScene] {
+		Scene1_HandleAnimationComplete(gridSystem)
+		return next
+	}
+
+	timer := anims.Timers[AnimationStartScene]
+	duration := float64(anims.Durations[AnimationStartScene])
+	delay := anims.Delay[AnimationStartScene]
+	gridId := anims.GridId[AnimationStartScene]
 	cols := gridSystem.Cols[gridId]
 	rows := gridSystem.Rows[gridId]
 
@@ -47,7 +42,7 @@ func (anims *AnimationSystem) UpdateAnimatedGridIntro(gridSystem *GridSystem) {
 			}
 		}
 
-		return
+		return current
 	}
 
 	// Step 2
@@ -78,26 +73,33 @@ func (anims *AnimationSystem) UpdateAnimatedGridIntro(gridSystem *GridSystem) {
 			}
 		}
 	}
+
+	return current
 }
 
-func (anims *AnimationSystem) PlayAnimatedGridExit(gridSystem *GridSystem, duration float32, loop bool) {
-	if anims.IsPlaying[AnimationGrid] {
-		return
+func Scene1_PlayAnimatedGridExit(current, next GameState, anims *AnimationSystem) GameState {
+	if anims.IsPlaying[AnimationStartScene] {
+		return current
 	}
 
-	anims.IsPlaying[AnimationGrid] = true
-	anims.Loop[AnimationGrid] = loop
-	anims.Timers[AnimationGrid] = 0.0
-	anims.Durations[AnimationGrid] = duration
+	anims.IsPlaying[AnimationStartScene] = true
+	anims.Loop[AnimationStartScene] = false
+	anims.Timers[AnimationStartScene] = 0.0
+	anims.Durations[AnimationStartScene] = 5.0
 
-	// Assume Grid exists from intro
+	return next
 }
 
-func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
-	timer := anims.Timers[AnimationGrid]
-	duration := float64(anims.Durations[AnimationGrid])
-	delay := anims.Delay[AnimationGrid]
-	gridId := anims.GridId[AnimationGrid]
+func Scene1_UpdateAnimatedGridExit(current, next GameState, gridSystem *GridSystem, anims *AnimationSystem) GameState {
+
+	if !anims.IsPlaying[AnimationStartScene] {
+		return next
+	}
+
+	timer := anims.Timers[AnimationStartScene]
+	duration := float64(anims.Durations[AnimationStartScene])
+	delay := anims.Delay[AnimationStartScene]
+	gridId := anims.GridId[AnimationStartScene]
 	cols := gridSystem.Cols[gridId]
 	rows := gridSystem.Rows[gridId]
 
@@ -171,7 +173,7 @@ func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
 			gridSystem.Set(gridId, 14, 9, CellTypeEmpty, ' ')
 		}
 
-		return
+		return current
 	}
 
 	// Step 2
@@ -211,7 +213,7 @@ func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
 		gridSystem.Set(gridId, 13, 8, CellTypeChar, 'T')
 		gridSystem.Set(gridId, 14, 8, CellTypeChar, ']')
 		gridSystem.Set(gridId, 15, 8, CellTypeChar, '|')
-		return
+		return current
 	}
 
 	// Step 3
@@ -248,7 +250,7 @@ func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
 			gridSystem.Set(gridId, 15, 8, CellTypeEmpty, ' ')
 		}
 
-		return
+		return current
 	}
 
 	// Step 4
@@ -270,7 +272,7 @@ func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
 			}
 
 		}
-		return
+		return current
 	}
 
 	// Step 5
@@ -291,4 +293,6 @@ func (anims *AnimationSystem) UpdateAnimatedGridExit(gridSystem *GridSystem) {
 			}
 		}
 	}
+
+	return current
 }

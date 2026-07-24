@@ -7,13 +7,6 @@ import (
 type AnimationId uint32
 
 const (
-	AnimationGrid AnimationId = iota
-	AnimationDialog
-	AnimationScanner
-	AnimationMemoryStack
-)
-
-const (
 	deltaTime = 1.0 / 60.0 // constant because locked to 60hz in ebitengine
 )
 
@@ -36,8 +29,10 @@ func NewAnimationSystem() *AnimationSystem {
 
 		-----
 		11
+
+		//
+		const AnimationCount = 11
 	*/
-	const AnimationCount = 11
 
 	a := &AnimationSystem{
 		Id:        make([]AnimationId, AnimationCount),

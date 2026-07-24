@@ -18,49 +18,49 @@ const (
 )
 
 var (
-	OutputGridId         GridID
-	AnimationScannerGrid GridID
+	GridIdOutput           GridID
+	GridIdAnimationScanner GridID
 )
 
 func InitOutputGrid(gs *GridSystem, anims *AnimationSystem) {
-	OutputGridId = gs.AllocateGrid(OutputGridCols, OutputGridRows, OutputGridSize, OutputGridX, OutputGridY)
-	gs.SetAllCells(OutputGridId, CellTypeSquare, 0)
-	gs.EnableGrid(OutputGridId)
+	GridIdOutput = gs.AllocateGrid(OutputGridCols, OutputGridRows, OutputGridSize, OutputGridX, OutputGridY)
+	gs.SetAllCells(GridIdOutput, CellTypeSquare, 0)
+	gs.EnableGrid(GridIdOutput)
 
-	AnimationScannerGrid = gs.AllocateGrid(AnimationScannerCols, AnimationScannerRows, AnimationScannerSize, OutputGridX, OutputGridY)
-	gs.SetAllCells(AnimationScannerGrid, CellTypeEmpty, 0)
-	gs.EnableGrid(AnimationScannerGrid)
+	GridIdAnimationScanner = gs.AllocateGrid(AnimationScannerCols, AnimationScannerRows, AnimationScannerSize, OutputGridX, OutputGridY)
+	gs.SetAllCells(GridIdAnimationScanner, CellTypeEmpty, 0)
+	gs.EnableGrid(GridIdAnimationScanner)
 
 	// for i := 0; i < AnimationScannerCols; i++ {
 	// 	gs.SetCellSprite(AnimationScannerGrid, i, 0, assets.SpriteIDHorizontalBar)
 	// }
 
-	anims.IsPlaying[AnimationScannerGrid] = true
-	anims.Loop[AnimationScannerGrid] = true
-	anims.Durations[AnimationScannerGrid] = 10.0
-	anims.Timers[AnimationScannerGrid] = 0.0
-	anims.Delay[AnimationScannerGrid] = 0
+	anims.IsPlaying[GridIdAnimationScanner] = true
+	anims.Loop[GridIdAnimationScanner] = true
+	anims.Durations[GridIdAnimationScanner] = 10.0
+	anims.Timers[GridIdAnimationScanner] = 0.0
+	anims.Delay[GridIdAnimationScanner] = 0
 }
 
 func UpdateAnimationGrid(gs *GridSystem, anims *AnimationSystem) {
-	timer := anims.Timers[AnimationScannerGrid]
-	duration := anims.Durations[AnimationScannerGrid]
-	delay := anims.Delay[AnimationScannerGrid]
+	timer := anims.Timers[GridIdAnimationScanner]
+	duration := anims.Durations[GridIdAnimationScanner]
+	delay := anims.Delay[GridIdAnimationScanner]
 
 	trueTime := float32(math.Max(float64(timer-delay), 0))
 	completedTime := trueTime / duration
 
-	gs.SetAllCells(AnimationScannerGrid, CellTypeEmpty, 0)
+	gs.SetAllCells(GridIdAnimationScanner, CellTypeEmpty, 0)
 
 	if completedTime <= 0.5 {
 		y := int(float32(AnimationScannerRows-1) * (completedTime / .5))
 		for i := 0; i < AnimationScannerCols; i++ {
-			gs.SetCellSprite(AnimationScannerGrid, i, y, assets.SpriteIDHorizontalBar)
+			gs.SetCellSprite(GridIdAnimationScanner, i, y, assets.SpriteIDHorizontalBar)
 		}
 	} else {
 		y := int(float32(AnimationScannerRows-1) * ((completedTime - .5) / .5))
 		for i := 0; i < AnimationScannerCols; i++ {
-			gs.SetCellSprite(AnimationScannerGrid, i, AnimationScannerRows-1-y, assets.SpriteIDHorizontalBar)
+			gs.SetCellSprite(GridIdAnimationScanner, i, AnimationScannerRows-1-y, assets.SpriteIDHorizontalBar)
 		}
 	}
 }

@@ -21,7 +21,7 @@ files(StateId, result(list, List)) :-
     state(StateId),
     files(state(StateId), List), !.
 
-programs(state(25), [sweep, breach]).
+programs(state(25), [breach, mem, memcopy]).
 programs(StateId, result(list, List)) :-
     state(StateId),
     programs(state(StateId), List), !.

@@ -36,7 +36,7 @@ func s2_AddTRenoMsgBuffer(gs *GridSystem, gridId GridID, y int) {
 }
 
 func Scene2_HandleInit(gridSystem *GridSystem, anims *AnimationSystem) {
-	animationGridId := anims.GridId[AnimationGrid]
+	animationGridId := anims.GridId[AnimationStartScene]
 	gridSystem.DisableGrid(animationGridId)
 	gridSystem.Set(animationGridId, 0, 1, CellTypeEmpty, ' ')
 	gridSystem.Set(animationGridId, 1, 1, CellTypeEmpty, ' ')

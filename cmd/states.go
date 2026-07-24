@@ -44,25 +44,15 @@ func (game *Game) UpdateState() {
 	case Scene1_Init:
 		game.State = Scene1_Start
 	case Scene1_Start:
-		game.State = Scene1_Animating
-		game.Animations.PlayAnimatedGridIntro(game.GridSystem, 1.0, false)
+		game.State = Scene1_PlayAnimatedGridIntro(Scene1_Start, Scene1_Animating, game.Animations)
 	case Scene1_Animating:
-		if game.Animations.IsPlaying[AnimationGrid] {
-			game.Animations.UpdateAnimatedGridIntro(game.GridSystem)
-		} else {
-			Scene1_HandleAnimationComplete(game)
-		}
+		game.State = Scene1_UpdateAnimatedGridIntro(Scene1_Animating, Scene1_Waiting, game.GridSystem, game.Animations)
 	case Scene1_Waiting:
-		Scene1_HandleButtonList(game)
+		game.State = Scene1_HandleButtonList(Scene1_Waiting, Scene1_ExitAnimation, game)
 	case Scene1_ExitAnimation:
-		game.Animations.PlayAnimatedGridExit(game.GridSystem, 5.0, false)
-		game.State = Scene1_Exiting
+		game.State = Scene1_PlayAnimatedGridExit(Scene1_ExitAnimation, Scene1_Exiting, game.Animations)
 	case Scene1_Exiting:
-		if game.Animations.IsPlaying[AnimationGrid] {
-			game.Animations.UpdateAnimatedGridExit(game.GridSystem)
-		} else {
-			game.State = Scene2_Init
-		}
+		game.State = Scene1_UpdateAnimatedGridExit(Scene1_Exiting, Scene2_Init, game.GridSystem, game.Animations)
 	case Scene2_Init:
 		Scene2_HandleInit(game.GridSystem, game.Animations)
 		PlayDialogAnimation(2.0, false, game.GridSystem, game.Animations)

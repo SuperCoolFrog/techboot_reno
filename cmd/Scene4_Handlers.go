@@ -9,10 +9,14 @@ import (
 	"techboot_reno/cmd/assets"
 )
 
+var (
+	OutputBuffer *Buffer
+)
+
 func Scene4_HandleInit(current, next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
 	LogBuffer.AppendAll([]byte("Connecting..."))
 	LogBuffer.NewLine()
-	LogBuffer.DrawToGrid(GridIdScene3, LogBufferX, LogBufferY, gs)
+	LogBuffer.DrawToGrid(GridIdFullScene, LogBufferX, LogBufferY, gs)
 
 	anims.IsPlaying[AnimationMemoryStack] = true
 	anims.Loop[AnimationMemoryStack] = false
@@ -37,19 +41,19 @@ func Scene4_UpdateStackAnimation(current, next GameState, gs *GridSystem, anims 
 	y := int(float32(OutputGridRows-1) * completedTime)
 	for i := 0; i < OutputGridRows; i++ {
 		iy := OutputGridRows - 1 - y
-		gs.SetCellSprite(OutputGridId, x-1, iy, assets.SpriteIDSquare)
-		gs.SetCellSprite(OutputGridId, x, iy, assets.SpriteIDSquare)
-		gs.SetCellSprite(OutputGridId, x+1, iy, assets.SpriteIDSquare)
+		gs.SetCellSprite(GridIdOutput, x-1, iy, assets.SpriteIDSquare)
+		gs.SetCellSprite(GridIdOutput, x, iy, assets.SpriteIDSquare)
+		gs.SetCellSprite(GridIdOutput, x+1, iy, assets.SpriteIDSquare)
 	}
 
 	if anims.IsPlaying[AnimationMemoryStack] {
-		LogBuffer.DrawToGrid(GridIdScene3, LogBufferX, LogBufferY, gs)
+		LogBuffer.DrawToGrid(GridIdFullScene, LogBufferX, LogBufferY, gs)
 		return current
 	}
 
 	LogBuffer.AppendAll([]byte("Connection Successful"))
 	LogBuffer.NewLine()
-	gs.SetAllCells(OutputGridId, CellTypeEmpty, 0)
+	gs.SetAllCells(GridIdOutput, CellTypeEmpty, 0)
 
 	return next
 }
@@ -74,9 +78,9 @@ func Scene4_Update(current, next GameState, runes []rune, input chan []byte, com
 		CommandBuffer.DecrementCursorWithDecor(CmdBufferDecor)
 	}
 
-	CommandBuffer.DrawToGrid(GridIdScene3, CommandBufferX, CommandBufferY, gs)
+	CommandBuffer.DrawToGrid(GridIdFullScene, CommandBufferX, CommandBufferY, gs)
 
-	LogBuffer.DrawToGrid(GridIdScene3, LogBufferX, LogBufferY, gs)
+	LogBuffer.DrawToGrid(GridIdFullScene, LogBufferX, LogBufferY, gs)
 
 	UpdateAnimationGrid(gs, anims)
 
@@ -88,19 +92,14 @@ loop:
 		case cmd := <-commands:
 			fmt.Printf("Commands: %v\n", cmd)
 
-			// switch cmd {
-			// case AtomConnectTrue:
-			// 	fmt.Printf("Connection Made!\n")
-			// 	state = next
-			// case AtomConnectFalse:
-			// 	// fmt.Printf("Connection Failed!\n")
-			// 	LogBuffer.AppendAll([]byte("Connection Failed"))
-			// 	LogBuffer.NewLine()
-			// case AtomInvalid:
-			// 	// fmt.Printf("Invalid!\n")
-			// 	LogBuffer.AppendAll([]byte("Invalid Command"))
-			// 	LogBuffer.NewLine()
-			// }
+			switch cmd {
+			case AtomList:
+				// Display list items
+			case AtomInvalid:
+				// fmt.Printf("Invalid!\n")
+				LogBuffer.AppendAll([]byte("Invalid Command"))
+				LogBuffer.NewLine()
+			}
 		default:
 			break loop // nothing left in the queue for this frame
 		}

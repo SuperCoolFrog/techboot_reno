@@ -189,7 +189,4 @@ func (buffer *Buffer) DrawToGrid(gridId GridID, x, y int, gs *GridSystem) {
 		}
 	}
 
-	// if S3HistoryHead > 0 {
-	// 	gs.SetCellSprite(GridIdScene3, 1, 1, assets.SpriteIDCarrotUp)
-	// }
 }

@@ -119,7 +119,7 @@ func main() {
 	const MaxGrids = 15
 
 	game := &Game{
-		State:        Scene3_Init, //Scene1_Init,
+		State:        Scene1_Init, //Scene1_Init,
 		GridSystem:   NewGridSystem(MaxTotalCells, MaxGrids),
 		Animations:   NewAnimationSystem(),
 		parserpl:     string(parserpl),
@@ -131,6 +131,8 @@ func main() {
 	go game.prologWorker()
 
 	assets.Load()
+
+	InitBucketItems(game.GridSystem, game.Animations)
 
 	if err := ebiten.RunGame(game); err != nil && err != ebiten.Termination {
 		if err != nil {

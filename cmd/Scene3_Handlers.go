@@ -30,9 +30,9 @@ const (
 )
 
 var (
-	GridIdScene3   GridID
-	CommandBuffer  *Buffer
-	CmdBufferDecor = BufferDecorator{
+	GridIdFullScene GridID
+	CommandBuffer   *Buffer
+	CmdBufferDecor  = BufferDecorator{
 		Prefix:  []byte{':'},
 		Postfix: []byte{'|'},
 	}
@@ -113,7 +113,7 @@ func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *Animation
 	gs.Set(gridId, rightPanelHeaderX+3, DividerY, CellTypeChar, 'G')
 	gs.Set(gridId, rightPanelHeaderX+4, DividerY, CellTypeChar, 'S')
 
-	GridIdScene3 = gridId
+	GridIdFullScene = gridId
 
 	CommandBuffer = NewBuffer(CommandBufferCols, CommandBufferRows, CommandBufferCapacity, false)
 	CommandBuffer.AppendDecorators(CmdBufferDecor)
@@ -145,9 +145,9 @@ func Scene3_Update(runes []rune, current, next GameState, input chan []byte, com
 		CommandBuffer.DecrementCursorWithDecor(CmdBufferDecor)
 	}
 
-	CommandBuffer.DrawToGrid(GridIdScene3, CommandBufferX, CommandBufferY, gs)
+	CommandBuffer.DrawToGrid(GridIdFullScene, CommandBufferX, CommandBufferY, gs)
 
-	LogBuffer.DrawToGrid(GridIdScene3, LogBufferX, LogBufferY, gs)
+	LogBuffer.DrawToGrid(GridIdFullScene, LogBufferX, LogBufferY, gs)
 
 	UpdateAnimationGrid(gs, anims)
 
@@ -207,12 +207,12 @@ func ParseInput(input []byte, parserInput chan []byte) {
 
 func Scene3_HandleCleaUp(next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
 
-	anims.IsPlaying[AnimationScannerGrid] = false
-	anims.Loop[AnimationScannerGrid] = false
+	anims.IsPlaying[GridIdAnimationScanner] = false
+	anims.Loop[GridIdAnimationScanner] = false
 
-	gs.SetAllCells(OutputGridId, CellTypeEmpty, 0)
-	gs.SetAllCells(AnimationScannerGrid, CellTypeEmpty, 0)
-	gs.DisableGrid(AnimationScannerGrid)
+	gs.SetAllCells(GridIdOutput, CellTypeEmpty, 0)
+	gs.SetAllCells(GridIdAnimationScanner, CellTypeEmpty, 0)
+	gs.DisableGrid(GridIdAnimationScanner)
 
 	return next
 }

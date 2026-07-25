@@ -28,13 +28,9 @@ type GridSystem struct {
 	MasterBuffer  []byte
 
 	// Flat, parallel master slices targeting the MasterBuffer
-	CellTypes    []GridCellType
-	Chars        []byte
-	SpriteIDs    []assets.SpriteID
-	IsBuffer     []bool
-	BufferCols   []int
-	BufferRows   []int
-	BufferCursor []int
+	CellTypes []GridCellType
+	Chars     []byte
+	SpriteIDs []assets.SpriteID
 
 	// Metadata tracking tables (indexed directly by GridId)
 	Offsets   []int
@@ -67,12 +63,11 @@ func NewGridSystem(maxTotalCells int, maxGrid int) *GridSystem {
 	sizeCellTypes := maxTotalCells * int(unsafe.Sizeof(GridCellType(0)))
 	sizeChars := maxTotalCells * int(unsafe.Sizeof(byte(0)))
 	sizeSpriteID := maxTotalCells * int(unsafe.Sizeof(assets.SpriteID(0)))
-	sizeIsBuffer := maxTotalCells * int(unsafe.Sizeof(bool(false)))
 	sizeCols := maxTotalCells * int(unsafe.Sizeof(int(0)))
 	sizeRows := maxTotalCells * int(unsafe.Sizeof(int(0)))
 	sizeCursor := maxTotalCells * int(unsafe.Sizeof(int(0)))
 
-	totalByteSize := sizeCellTypes + sizeChars + sizeIsBuffer + sizeCols + sizeRows + sizeCursor
+	totalByteSize := sizeCellTypes + sizeChars + sizeCols + sizeRows + sizeCursor
 
 	// 2. Allocate the single massive global block
 	gs.MasterBuffer = make([]byte, totalByteSize)
@@ -87,17 +82,6 @@ func NewGridSystem(maxTotalCells int, maxGrid int) *GridSystem {
 
 	gs.SpriteIDs = unsafe.Slice((*assets.SpriteID)(ptr), maxTotalCells)
 	ptr = unsafe.Add(ptr, sizeSpriteID)
-
-	gs.IsBuffer = unsafe.Slice((*bool)(ptr), maxTotalCells)
-	ptr = unsafe.Add(ptr, sizeIsBuffer)
-
-	gs.BufferCols = unsafe.Slice((*int)(ptr), maxTotalCells)
-	ptr = unsafe.Add(ptr, sizeCols)
-
-	gs.BufferRows = unsafe.Slice((*int)(ptr), maxTotalCells)
-	ptr = unsafe.Add(ptr, sizeRows)
-
-	gs.BufferCursor = unsafe.Slice((*int)(ptr), maxTotalCells)
 
 	return gs
 }
@@ -158,18 +142,6 @@ func (gs *GridSystem) IdxFromXY(gridId GridID, x, y int) int {
 	return offset + (y*cols + x)
 }
 
-func (gs *GridSystem) XYFromBufferIdx(gridId GridID, globalIdx int) (x int, y int) {
-	offset := gs.Offsets[gridId]
-	idx := globalIdx - offset // this assumes the bufferIdx is a global/master buffer idx not relative to
-
-	cols := gs.Cols[gridId]
-
-	x = idx / cols
-	y = idx % cols
-
-	return x, y
-}
-
 func (gs *GridSystem) Set(gridId GridID, x int, y int, flag GridCellType, char byte) {
 	// Guard rails to protect neighboring grid data
 	if x < 0 || x >= gs.Cols[gridId] || y < 0 || y >= gs.Rows[gridId] {
@@ -225,71 +197,6 @@ func (gs *GridSystem) GetCellSprite(gridId GridID, x int, y int) (image *ebiten.
 	}
 
 	return img
-}
-
-func (gs *GridSystem) NewBuffer(gridId GridID, bufferX, bufferY, bufferCols, bufferRows int) (globalIdx int) {
-	gridCols := gs.Cols[gridId]
-	gridRows := gs.Rows[gridId]
-
-	// 1. Precise 2D Matrix Guard Rails
-	// Check if the starting point is valid
-	if bufferX < 0 || bufferY < 0 {
-		panic("Buffer starting coordinates cannot be negative!")
-	}
-	// Check if the sub-buffer physically bleeds out of the grid's right or bottom edges
-	if bufferX+bufferCols > gridCols || bufferY+bufferRows > gridRows {
-		panic("Sub-buffer geometry overflows the grid boundaries!")
-	}
-
-	// 2. Corrected Target Loops (Iterate from start coordinate to start + dimension size)
-	endX := bufferX + bufferCols
-	endY := bufferY + bufferRows
-
-	for y := bufferY; y < endY; y++ {
-		for x := bufferX; x < endX; x++ {
-			gs.Set(gridId, x, y, CellTypeReserved, ' ')
-		}
-	}
-
-	// 3. Store metadata at the buffer's root cell location
-	bufferIdx := gs.IdxFromXY(gridId, bufferX, bufferY)
-
-	gs.IsBuffer[bufferIdx] = true
-	gs.BufferCols[bufferIdx] = bufferCols
-	gs.BufferRows[bufferIdx] = bufferRows
-	gs.BufferCursor[bufferIdx] = 0
-
-	return bufferIdx
-}
-
-func (gs *GridSystem) BufferAppend(gridId GridID, bufferId int, char byte) (success bool) {
-	if !gs.IsBuffer[bufferId] {
-		return false
-	}
-
-	cursor := gs.BufferCursor[bufferId]
-	cols := gs.BufferCols[bufferId]
-	rows := gs.BufferRows[bufferId]
-	size := cols * rows
-
-	if cursor >= size {
-		return false
-	}
-
-	cursorX := cursor % cols
-	cursorY := cursor / cols
-
-	// 2. Compute the exact linear step within the parent grid matrix
-	// Moving down a row in the sub-buffer means stepping forward by a full parent grid width
-	gridCols := gs.Cols[gridId]
-	linearStep := (cursorY * gridCols) + cursorX
-
-	targetIdx := bufferId + linearStep
-
-	gs.Chars[targetIdx] = char
-	gs.BufferCursor[bufferId] = cursor + 1
-
-	return true
 }
 
 func (gs *GridSystem) RenderDebug(screen *ebiten.Image, gridID GridID) error {

@@ -104,7 +104,7 @@ func (bs *BufferSystem) AllocateBuffer(cols, activeRows, totalRows int, lineOver
 	bs.TotalRows[id] = totalRows
 	bs.LineOverflow[id] = lineOverflow
 	bs.YCursor[id] = 1
-	bs.XCursors[xCursorsOffset] = 1
+	bs.XCursors[xCursorsOffset] = 0
 	bs.ActiveRowHead[id] = 0
 
 	return id
@@ -151,7 +151,6 @@ func (bs *BufferSystem) DecrementXCursor(id BufferID) int {
 
 func (bs *BufferSystem) NextBuffer(id BufferID) {
 	bs.YCursor[id]++
-	bs.IncrementXCursor(id) // Always start cursor at 1
 }
 
 func (bs *BufferSystem) NewLine(id BufferID) {
@@ -166,12 +165,14 @@ func (bs *BufferSystem) NewLine(id BufferID) {
 	//@TODO eventually implement ring buffer
 }
 
-func (bs *BufferSystem) Append(id BufferID, char byte) {
-	if bs.GetXCursor(id) >= bs.Cols[id] {
+func (bs *BufferSystem) Append(id BufferID, char byte) error {
+	xCursor := bs.GetXCursor(id)
+	cols := bs.Cols[id]
+	if xCursor >= cols {
 		if bs.LineOverflow[id] {
 			bs.NewLine(id)
 		} else {
-			return
+			return fmt.Errorf("Cannot Append %s, LineOverflow is false and Cols max reached\n -> XCursor: %d, Cols: %d\n", xCursor, cols)
 		}
 	}
 
@@ -179,23 +180,33 @@ func (bs *BufferSystem) Append(id BufferID, char byte) {
 
 	bs.Histories[historyIdx] = char
 	bs.IncrementXCursor(id)
+
+	return nil
 }
 
-func (bs *BufferSystem) AppendAll(id BufferID, chars []byte) {
+func (bs *BufferSystem) AppendAll(id BufferID, chars []byte) error {
 	for i := 0; i < len(chars); i++ {
-		bs.Append(id, chars[i])
+		err := bs.Append(id, chars[i])
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
-func (bs *BufferSystem) AppendDecorators(id BufferID, decor BufferDecorator) {
+func (bs *BufferSystem) AppendDecorators(id BufferID, decor BufferDecorator) error {
 	preCount := len(decor.Prefix)
 	postCount := len(decor.Postfix)
+	xCursor := bs.GetXCursor(id)
 
-	if preCount+postCount+bs.GetXCursor(id) > bs.Cols[id] {
+	if preCount+postCount+xCursor > bs.Cols[id] {
 		if bs.LineOverflow[id] {
 			bs.NewLine(id)
 		} else {
-			return
+			return fmt.Errorf(`Cannot append decorators.  LineOverflow is false and max cols would be exceeded
+			-> PrefixCount: %d, PostfixCount: %d, xCursor: %d
+			`, preCount, postCount, xCursor)
 		}
 	}
 
@@ -219,17 +230,23 @@ func (bs *BufferSystem) AppendDecorators(id BufferID, decor BufferDecorator) {
 			break
 		}
 	}
+
+	return nil
 }
 
-func (bs *BufferSystem) AppendWithDecor(id BufferID, char byte, decor BufferDecorator) {
-	preCount := len(decor.Prefix)
+func (bs *BufferSystem) AppendWithDecor(id BufferID, char byte, decor BufferDecorator) error {
+	// preCount := len(decor.Prefix)
 	postCount := len(decor.Postfix)
+	xCursor := bs.GetXCursor(id) // Cursor includes prefix, or it should
+	cols := bs.Cols[id]
 
-	if preCount+postCount+1+bs.GetXCursor(id) >= bs.Cols[id] {
+	if postCount+xCursor+1 >= cols {
 		if bs.LineOverflow[id] {
 			bs.NewLine(id)
 		} else {
-			return
+			return fmt.Errorf(`Cannot append decorators.  LineOverflow is false and max cols would be exceeded
+			-> PostfixCount: %d, xCursor: %d, cols: %d
+			`, postCount, xCursor, cols)
 		}
 	}
 
@@ -239,9 +256,10 @@ func (bs *BufferSystem) AppendWithDecor(id BufferID, char byte, decor BufferDeco
 		bs.Histories[historyIdxRow0+i] = decor.Prefix[i]
 	}
 
-	bs.Append(id, char)
-
-	fmt.Printf("Post Append XCursor %d\n", bs.GetXCursor(id))
+	err := bs.Append(id, char)
+	if err != nil {
+		return err
+	}
 
 	// Postfix is added but doesn't effect XCursor.  Meant to be overwritten
 	for i := 0; i < len(decor.Postfix); i++ {
@@ -252,6 +270,8 @@ func (bs *BufferSystem) AppendWithDecor(id BufferID, char byte, decor BufferDeco
 			break
 		}
 	}
+
+	return nil
 }
 
 func (bs *BufferSystem) DecrementCursor(id BufferID) {
@@ -293,7 +313,7 @@ func (bs *BufferSystem) DecrementCursorWithDecor(id BufferID, decor BufferDecora
 	}
 }
 
-func (bs *BufferSystem) GetBufferRow(id BufferID, rowIdx int) ([]byte, bool) {
+func (bs *BufferSystem) GetBufferRow(id BufferID, rowIdx int) ([]byte, error) {
 	if rowIdx < bs.TotalRows[id] {
 		historyOffset := bs.HistoryOffsets[id]
 		xCursorOffset := bs.XCursorsOffsets[id]
@@ -301,41 +321,39 @@ func (bs *BufferSystem) GetBufferRow(id BufferID, rowIdx int) ([]byte, bool) {
 		historyIdx := historyOffset + rowIdx*bs.Cols[id]
 		xCursor := bs.XCursors[xCursorOffset+rowIdx]
 
-		fmt.Printf("GetBRVals rowIdx: %d ;; HO: %d ;; XCO: %d ;; HIdx: %d ;; XCur: %d \n", rowIdx, historyOffset, xCursorOffset, historyIdx, xCursor)
-
-		return bs.Histories[historyIdx:xCursor], true
+		return bs.Histories[historyIdx : historyIdx+xCursor], nil
 	}
 
-	return []byte{}, false
+	return []byte{}, fmt.Errorf("GetBufferRow: rowIdx(%d) exceeds total rows(%d)\n", rowIdx, bs.TotalRows[id])
 }
 
-func (bs *BufferSystem) GetLastBufferLine(id BufferID) ([]byte, bool) {
+func (bs *BufferSystem) GetLastBufferLine(id BufferID) ([]byte, error) {
 	if bs.YCursor[id] > 1 {
 		lastY := bs.YCursor[id] - 2
 
 		return bs.GetBufferRow(id, lastY)
 	}
 
-	return []byte{}, false
+	return []byte{}, fmt.Errorf("GetLastBufferLine: Last buffer does not exist\n-> YCursor: %d", bs.YCursor[id])
 }
 
-func (bs *BufferSystem) DrawToGrid(bufferId BufferID, gridId GridID, x, y int, gs *GridSystem) {
+func (bs *BufferSystem) DrawToGrid(bufferId BufferID, gridId GridID, x, y int, gs *GridSystem) error {
 	historyOffset := bs.HistoryOffsets[bufferId]
 	rowStart := historyOffset + bs.ActiveRowHead[bufferId]
-
-	fmt.Printf("Drw:: rowStart %d ;; histOff %d\n", rowStart, historyOffset)
 
 	for r := 0; r < bs.YCursor[bufferId]; r++ {
 		rowIdx := rowStart + r
 
-		bufferBytes, valid := bs.GetBufferRow(bufferId, rowIdx)
+		bufferBytes, error := bs.GetBufferRow(bufferId, rowIdx)
 
-		if !valid {
-			continue
+		if error != nil {
+			return error
 		}
 
 		for i := 0; i < len(bufferBytes); i++ {
 			gs.Set(gridId, x+i, y+r, CellTypeChar, bufferBytes[i])
 		}
 	}
+
+	return nil
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -42,33 +43,75 @@ func Scene2_HandleInit(current, next GameState, game *Game) GameState {
 	game.GridSystem.Set(game.Bucket.GridStartScene, 1, 1, CellTypeEmpty, ' ')
 	// /Clean Up Previous Grid
 
+	game.GridSystem.EnableGrid(game.Bucket.GridDialogScene)
+
 	// Set iterator for dialog animations
 	game.Bucket.SceneStateItr[next] = 0
 
-	game.GridSystem.EnableGrid(game.Bucket.GridDialogScene)
-
-	// s2_AddRipMsgBuffer(game.GridSystem, game.Bucket.GridDialogScene, 0)
-
-	// PlayDialogAnimation(game.GridSystem, game.Animations)
-
-	// bucket.GridDialogScene = bucket.Grid40x30x32x16
-	// bucket.BufferDialogScene = bucket.Buffer40x30x30xfalse
-
-	txt := DialogText[0]
-
-	for i := 0; i < len(txt); i++ {
-		game.Buffers.AppendWithDecor(game.Bucket.BufferDialogScene, txt[i], DecorMap[0])
-	}
-
-	game.Buffers.DrawToGrid(game.Bucket.BufferDialogScene, game.Bucket.GridDialogScene, 0, 0, game.GridSystem)
+	game.Animations.Delay[AnimationDialog] = 1.0
+	game.Animations.Timers[AnimationDialog] = 0.0
+	game.Animations.Durations[AnimationDialog] = 3.0
+	game.Animations.IsPlaying[AnimationDialog] = true
 
 	return next
 }
 
 func Scene2_HandleAllDialog(current, next GameState, game *Game) GameState {
+	txt := DialogText[game.Bucket.SceneStateItr[current]]
+	speaker := Scene2_DialogSpeaker[game.Bucket.SceneStateItr[current]]
+	decor := DecorMap[speaker]
 
-	// return current //
-	return next
+	delay := game.Animations.Delay[AnimationDialog]
+	completed := game.Animations.Timers[AnimationDialog]
+	duration := game.Animations.Durations[AnimationDialog]
+
+	ratio := (completed - delay) / duration
+
+	if !game.Animations.IsPlaying[AnimationDialog] {
+		game.Bucket.SceneStateItr[current]++
+		game.Buffers.NewLine(game.Bucket.BufferDialogScene)
+
+		if game.Bucket.SceneStateItr[current] >= len(Scene2_DialogIdx) {
+			return next
+		}
+
+		game.Animations.Timers[AnimationDialog] = 0.0
+		game.Animations.Durations[AnimationDialog] = 3.0
+		game.Animations.IsPlaying[AnimationDialog] = true
+
+		return current
+	}
+
+	xCursor := game.Buffers.GetXCursor(game.Bucket.BufferDialogScene)
+
+	if xCursor == 0 {
+		game.Buffers.AppendDecorators(game.Bucket.BufferDialogScene, decor)
+		xCursor = game.Buffers.GetXCursor(game.Bucket.BufferDialogScene)
+	}
+
+	prefixLen := len(decor.Prefix)
+	appendedByteSize := float32(xCursor - prefixLen - 1)
+	totalTxtSize := float32(len(txt))
+
+	var appendError error
+
+	for (appendedByteSize / totalTxtSize) < ratio {
+		appendError = game.Buffers.AppendWithDecor(game.Bucket.BufferDialogScene, txt[int(appendedByteSize)], decor)
+		if appendError != nil {
+			panic(fmt.Sprintf("ErrorAppending: %v", appendError))
+			break
+		}
+
+		xCursor = game.Buffers.GetXCursor(game.Bucket.BufferDialogScene)
+		appendedByteSize = float32(xCursor - prefixLen)
+	}
+
+	drawError := game.Buffers.DrawToGrid(game.Bucket.BufferDialogScene, game.Bucket.GridDialogScene, 0, 0, game.GridSystem)
+	if drawError != nil {
+		panic(drawError)
+	}
+
+	return current
 }
 
 func Scene2_WaitForEnter(current, next GameState) GameState {

@@ -11,17 +11,7 @@ const (
 	Scene1_Exiting
 
 	Scene2_Init
-	Scene2_Dialog_1
-	Scene2_Init_Dialog_2
-	Scene2_Dialog_2
-	Scene2_Init_Dialog_3
-	Scene2_Dialog_3
-	Scene2_Init_Dialog_4
-	Scene2_Dialog_4
-	Scene2_Init_Dialog_5
-	Scene2_Dialog_5
-	Scene2_Init_Dialog_6
-	Scene2_Dialog_6
+	Scene2_Dialog
 	Scene2_Waiting
 	Scene2_CleanUp
 
@@ -56,7 +46,10 @@ func (game *Game) UpdateState() {
 	case Scene1_Exiting:
 		game.State = Scene1_UpdateAnimatedGridExit(Scene1_Exiting, Scene2_Init, game.GridSystem, game.Animations)
 	case Scene2_Init:
-		game.State = Scene2_HandleInit(Scene2_Init, Scene2_Dialog_1, game)
+		game.State = Scene2_HandleInit(Scene2_Init, Scene2_Dialog, game)
+	case Scene2_Dialog:
+		game.State = Scene2_HandleAllDialog(Scene2_Dialog, End, game)
+
 		// case Scene2_Dialog_1:
 		// 	game.State = Scene2_HandleDialog1(game.GridSystem, game.Animations)
 		// case Scene2_Init_Dialog_2:

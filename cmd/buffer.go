@@ -21,6 +21,11 @@ type Buffer struct {
 	internalCapacity     int
 }
 
+/*
+Developed this way so that we don't have to pass around pointers.  We can just pass around IDs.
+
+IMPORTANT: Cursors are were the Next value goes i.e. current row would be YCursor-1
+*/
 type BufferSystem struct {
 	MaxTotalBytes int
 	MasterChunk   []byte // All histories for every buffer
@@ -146,6 +151,7 @@ func (bs *BufferSystem) DecrementXCursor(id BufferID) int {
 
 func (bs *BufferSystem) NextBuffer(id BufferID) {
 	bs.YCursor[id]++
+	bs.IncrementXCursor(id) // Always start cursor at 1
 }
 
 func (bs *BufferSystem) NewLine(id BufferID) {

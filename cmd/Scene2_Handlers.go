@@ -99,7 +99,6 @@ func Scene2_HandleAllDialog(current, next GameState, game *Game) GameState {
 		appendError = game.Buffers.AppendWithDecor(game.Bucket.BufferDialogScene, txt[int(appendedByteSize)], decor)
 		if appendError != nil {
 			panic(fmt.Sprintf("ErrorAppending: %v", appendError))
-			break
 		}
 
 		xCursor = game.Buffers.GetXCursor(game.Bucket.BufferDialogScene)

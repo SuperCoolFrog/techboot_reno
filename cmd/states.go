@@ -49,37 +49,7 @@ func (game *Game) UpdateState() {
 		game.State = Scene2_HandleInit(Scene2_Init, Scene2_Dialog, game)
 	case Scene2_Dialog:
 		game.State = Scene2_HandleAllDialog(Scene2_Dialog, End, game)
-
-		// case Scene2_Dialog_1:
-		// 	game.State = Scene2_HandleDialog1(game.GridSystem, game.Animations)
-		// case Scene2_Init_Dialog_2:
-		// 	Scene2_InitDialog(1, game.GridSystem, game.Animations)
-		// 	game.State = Scene2_Dialog_2
-		// case Scene2_Dialog_2:
-		// game.State = Scene2_HandleDialog(1, []byte("I don't think she ran..."), Scene2_Dialog_2, Scene2_Init_Dialog_3, gs, anims)
 		/**
-		case Scene2_Init_Dialog_3:
-			Scene2_InitDialog(2, game.GridSystem, game.Animations)
-			game.State = Scene2_Dialog_3
-		case Scene2_Dialog_3:
-			game.State = Scene2_HandleDialog(2, []byte("I found an open door"), Scene2_Dialog_3, Scene2_Init_Dialog_4, gs, anims)
-		case Scene2_Init_Dialog_4:
-			Scene2_InitDialog(3, game.GridSystem, game.Animations)
-			game.State = Scene2_Dialog_4
-		case Scene2_Dialog_4:
-			game.State = Scene2_HandleDialog(3, []byte("CONNECT to RABBIT"), Scene2_Dialog_4, Scene2_Init_Dialog_5, gs, anims)
-		case Scene2_Init_Dialog_5:
-			Scene2_InitDialog(4, game.GridSystem, game.Animations)
-			game.State = Scene2_Dialog_5
-		case Scene2_Dialog_5:
-			game.State = Scene2_HandleDialog(4, []byte("Good Luck..."), Scene2_Dialog_5, Scene2_Init_Dialog_6, gs, anims)
-		case Scene2_Init_Dialog_6:
-			gridId := anims.GridId[AnimationDialog]
-			s2_AddTRenoMsgBuffer(gs, gridId, 5)
-			PlayDialogAnimation(gs, anims)
-			game.State = Scene2_Dialog_6
-		case Scene2_Dialog_6:
-			game.State = Scene2_HandleDialog(5, []byte("thanks"), Scene2_Dialog_6, Scene2_Waiting, gs, anims)
 		case Scene2_Waiting:
 			game.State = Scene2_WaitForEnter(Scene2_Waiting, Scene2_CleanUp)
 		case Scene2_CleanUp:

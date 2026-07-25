@@ -44,6 +44,8 @@ type Game struct {
 	GridSystem             *GridSystem
 	inputRunes             []rune
 	Animations             *AnimationSystem
+	Buffers                *BufferSystem
+	Bucket                 Bucket
 	MouseMoved             bool
 	LastMouseX, LastMouseY int
 	Exit                   bool
@@ -119,20 +121,20 @@ func main() {
 	const MaxGrids = 15
 
 	game := &Game{
-		State:        Scene1_Init, //Scene1_Init,
+		State:        Scene2_Init, //Scene1_Init,
 		GridSystem:   NewGridSystem(MaxTotalCells, MaxGrids),
 		Animations:   NewAnimationSystem(),
+		Buffers:      NewBufferSystem(250000, 10),
 		parserpl:     string(parserpl),
 		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
 		prologOutput: make(chan trealla.Atom, 128),
 	}
+	game.Bucket = InitBucketItems(game.GridSystem, game.Animations, game.Buffers)
 
 	// Initialize parser
 	go game.prologWorker()
 
 	assets.Load()
-
-	InitBucketItems(game.GridSystem, game.Animations)
 
 	if err := ebiten.RunGame(game); err != nil && err != ebiten.Termination {
 		if err != nil {

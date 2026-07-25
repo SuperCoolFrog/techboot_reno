@@ -6,21 +6,21 @@ import (
 	"image"
 )
 
-func Scene1_HandleAnimationComplete(gs *GridSystem) {
-	gs.EnableGrid(GridStartScene)
-	gs.Set(GridStartScene, 9, 3, CellTypeChar, 'T')
-	gs.Set(GridStartScene, 10, 3, CellTypeChar, 'E')
-	gs.Set(GridStartScene, 11, 3, CellTypeChar, 'C')
-	gs.Set(GridStartScene, 12, 3, CellTypeChar, 'H')
-	gs.Set(GridStartScene, 13, 3, CellTypeChar, 'B')
-	gs.Set(GridStartScene, 14, 3, CellTypeChar, '0')
-	gs.Set(GridStartScene, 15, 3, CellTypeChar, '0')
-	gs.Set(GridStartScene, 16, 3, CellTypeChar, 'T')
+func Scene1_HandleAnimationComplete(game *Game) {
+	game.GridSystem.EnableGrid(game.Bucket.GridStartScene)
+	game.GridSystem.Set(game.Bucket.GridStartScene, 9, 3, CellTypeChar, 'T')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 10, 3, CellTypeChar, 'E')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 11, 3, CellTypeChar, 'C')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 12, 3, CellTypeChar, 'H')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 13, 3, CellTypeChar, 'B')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 14, 3, CellTypeChar, '0')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 15, 3, CellTypeChar, '0')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 16, 3, CellTypeChar, 'T')
 
-	gs.Set(GridStartScene, 11, 4, CellTypeChar, 'R')
-	gs.Set(GridStartScene, 12, 4, CellTypeChar, 'E')
-	gs.Set(GridStartScene, 13, 4, CellTypeChar, 'N')
-	gs.Set(GridStartScene, 14, 4, CellTypeChar, '0')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 11, 4, CellTypeChar, 'R')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 12, 4, CellTypeChar, 'E')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 13, 4, CellTypeChar, 'N')
+	game.GridSystem.Set(game.Bucket.GridStartScene, 14, 4, CellTypeChar, '0')
 }
 
 func Scene1_HandleButtonList(current, next GameState, game *Game) GameState {

@@ -9,9 +9,12 @@ func Scene1_PlayAnimatedGridIntro(current, next GameState, anims *AnimationSyste
 	return next
 }
 
-func Scene1_UpdateAnimatedGridIntro(current, next GameState, gridSystem *GridSystem, anims *AnimationSystem) GameState {
+func Scene1_UpdateAnimatedGridIntro(current, next GameState, game *Game) GameState {
+	gridSystem := game.GridSystem
+	anims := game.Animations
+
 	if !anims.IsPlaying[AnimationStartScene] {
-		Scene1_HandleAnimationComplete(gridSystem)
+		Scene1_HandleAnimationComplete(game)
 		return next
 	}
 

@@ -129,12 +129,13 @@ func main() {
 		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
 		prologOutput: make(chan trealla.Atom, 128),
 	}
+
+	assets.Load() // Load Assets before init bucket
+
 	game.Bucket = InitBucketItems(game.GridSystem, game.Animations, game.Buffers)
 
 	// Initialize parser
 	go game.prologWorker()
-
-	assets.Load()
 
 	if err := ebiten.RunGame(game); err != nil && err != ebiten.Termination {
 		if err != nil {

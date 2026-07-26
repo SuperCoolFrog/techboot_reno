@@ -147,11 +147,7 @@ func Scene2_WaitForEnter(current, next GameState, game *Game) GameState {
 	return current
 }
 
-func Scene2_CleanUpScene(next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
-	dialogGridId := anims.GridId[AnimationDialog]
-	gs.DisableGrid(dialogGridId)
-	// @TODO this also sets the buffers CellTypes.  Need to consider how to handle that
-	// gs.SetAllCells(dialogGridId, CellTypeEmpty, ' ')
-
+func Scene2_CleanUpScene(next GameState, game *Game) GameState {
+	game.GridSystem.DisableGrid(game.Bucket.GridDialogScene)
 	return next
 }

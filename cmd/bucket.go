@@ -1,5 +1,7 @@
 package main
 
+import "techboot_reno/cmd/assets"
+
 // Animations
 const (
 	AnimationStartScene AnimationId = iota
@@ -11,16 +13,29 @@ const (
 )
 
 type Bucket struct {
-	Grid27x21x48x12 GridID
-	Grid42x30x30x16 GridID
+	Grid27x21x48x12     GridID
+	Grid42x30x30x16     GridID
+	Grid64x48x20x0      GridID
+	Grid26x36x29x740x20 GridID
+
 	/* Grid27x21x48x12 */
 	GridStartScene GridID
 	/* Grid40x30x32x16 */
 	GridDialogScene GridID
+	/* Grid64x48x20x0 */
+	GridMainUI GridID
+	/* Grid26x36x29x740x20 */
+	GridOutput GridID
 
-	Buffer42x30x30xfalse BufferID
+	Buffer42x30x30xfalse   BufferID
+	Buffer35x46x2000xfalse BufferID
+	Buffer26x9x200xtrue    BufferID //48-48-11-2
+
 	/* Buffer for Scene2 Dialog */
 	BufferDialogScene BufferID
+	/* Buffer for entering Commands */
+	BufferCommands BufferID
+	BufferLogs     BufferID
 
 	/* This is GameState as Idx, some repeating states need iterator i.e. animations/cutscenes */
 	SceneStateItr []int
@@ -30,10 +45,15 @@ func InitBucketItems(gs *GridSystem, anims *AnimationSystem, bs *BufferSystem) B
 	bucket := &Bucket{
 		SceneStateItr: make([]int, GameStateCount),
 	}
+
 	bucketInitGrids(gs, bucket)
 	bucketInitBuffers(bs, bucket)
+
 	bucketInitIntroAnimation(gs, anims, bucket)
 	bucketInitDialogAnimation(gs, anims, bucket)
+	bucketInitScannerAnimations(gs, anims, bucket)
+
+	bucketInitMainUI(gs, bs, bucket)
 
 	return *bucket
 }
@@ -44,10 +64,15 @@ func bucketInitGrids(gs *GridSystem, bucket *Bucket) {
 
 	bucket.Grid42x30x30x16 = gs.AllocateGrid(42, 30, 30, 16, 16)
 	gs.SetAllCells(bucket.Grid42x30x30x16, CellTypeNone, 0)
+
+	bucket.Grid64x48x20x0 = gs.AllocateGrid(64, 48, 20, 0, 0)
+	gs.SetAllCells(bucket.Grid42x30x30x16, CellTypeNone, 0)
 }
 
 func bucketInitBuffers(bs *BufferSystem, bucket *Bucket) {
 	bucket.Buffer42x30x30xfalse = bs.AllocateBuffer(42, 30, 30, false)
+	bucket.Buffer35x46x2000xfalse = bs.AllocateBuffer(35, 46, 2000, false)
+	bucket.Buffer26x9x200xtrue = bs.AllocateBuffer(26, 9, 200, true)
 }
 
 func bucketInitIntroAnimation(gs *GridSystem, anims *AnimationSystem, bucket *Bucket) {
@@ -77,4 +102,100 @@ func bucketInitDialogAnimation(gs *GridSystem, anims *AnimationSystem, bucket *B
 
 	anims.HasGrid[AnimationDialog] = true
 	anims.GridId[AnimationDialog] = bucket.GridDialogScene
+}
+
+func bucketInitScannerAnimations(gs *GridSystem, anims *AnimationSystem, bucket *Bucket) {
+	anims.IsPlaying[AnimationScanner] = true
+	anims.Loop[AnimationScanner] = true
+	anims.Durations[AnimationScanner] = 10.0
+	anims.Timers[AnimationScanner] = 0.0
+	anims.Delay[AnimationScanner] = 0
+}
+
+func bucketInitMainUI(gs *GridSystem, bs *BufferSystem, bucket *Bucket) {
+	bucket.GridMainUI = bucket.Grid64x48x20x0
+	bucket.GridOutput = bucket.Grid26x36x29x740x20
+
+	gs.SetAllCells(bucket.GridMainUI, CellTypeEmpty, 0)
+	gs.EnableGrid(bucket.GridMainUI)
+
+	rows := gs.Rows[bucket.GridMainUI]
+	cols := gs.Cols[bucket.GridMainUI]
+
+	// Border
+
+	// .Corners
+	gs.SetCellSprite(bucket.GridMainUI, 0, 0, assets.SpriteIDCornerTopLeft)
+	gs.SetCellSprite(bucket.GridMainUI, 0, rows-1, assets.SpriteIDCornerBottomLeft)
+	gs.SetCellSprite(bucket.GridMainUI, cols-1, 0, assets.SpriteIDCornerTopRight)
+	gs.SetCellSprite(bucket.GridMainUI, cols-1, rows-1, assets.SpriteIDCornerBottomRight)
+
+	// .Walls
+	// ..Left
+	for i := 1; i < rows-1; i++ {
+		gs.SetCellSprite(bucket.GridMainUI, 0, i, assets.SpriteIDVerticalBar)
+	}
+	// ..Right
+	for i := 1; i < rows-1; i++ {
+		gs.SetCellSprite(bucket.GridMainUI, cols-1, i, assets.SpriteIDVerticalBar)
+	}
+	// ..Top
+	for i := 1; i < cols-1; i++ {
+		gs.SetCellSprite(bucket.GridMainUI, i, 0, assets.SpriteIDHorizontalBar)
+	}
+
+	DividerX := 36
+	DividerY := S3GridYCount - 11
+
+	// ...Commands
+	hdrCmdX := DividerX/2 - 4
+	gs.Set(bucket.GridMainUI, hdrCmdX+1, 0, CellTypeChar, 'C')
+	gs.Set(bucket.GridMainUI, hdrCmdX+2, 0, CellTypeChar, 'O')
+	gs.Set(bucket.GridMainUI, hdrCmdX+3, 0, CellTypeChar, 'M')
+	gs.Set(bucket.GridMainUI, hdrCmdX+4, 0, CellTypeChar, 'M')
+	gs.Set(bucket.GridMainUI, hdrCmdX+5, 0, CellTypeChar, 'A')
+	gs.Set(bucket.GridMainUI, hdrCmdX+6, 0, CellTypeChar, 'N')
+	gs.Set(bucket.GridMainUI, hdrCmdX+7, 0, CellTypeChar, 'D')
+	gs.Set(bucket.GridMainUI, hdrCmdX+8, 0, CellTypeChar, 'S')
+
+	// ...Output
+	rightPanelHeaderX := cols - DividerX/2
+	gs.Set(bucket.GridMainUI, rightPanelHeaderX+1, 0, CellTypeChar, 'O')
+	gs.Set(bucket.GridMainUI, rightPanelHeaderX+2, 0, CellTypeChar, 'U')
+	gs.Set(bucket.GridMainUI, rightPanelHeaderX+3, 0, CellTypeChar, 'T')
+	gs.Set(bucket.GridMainUI, rightPanelHeaderX+4, 0, CellTypeChar, 'P')
+	gs.Set(bucket.GridMainUI, rightPanelHeaderX+5, 0, CellTypeChar, 'U')
+	gs.Set(bucket.GridMainUI, rightPanelHeaderX+6, 0, CellTypeChar, 'T')
+
+	// ..Bottom
+	for i := 1; i < cols-1; i++ {
+		gs.SetCellSprite(bucket.GridMainUI, i, rows-1, assets.SpriteIDHorizontalBar)
+	}
+
+	// Dividers
+	// .Vertical
+	gs.SetCellSprite(bucket.GridMainUI, DividerX, 0, assets.SpriteIDDownConnectBar)
+	for i := 1; i < S3GridYCount-1; i++ {
+		gs.SetCellSprite(bucket.GridMainUI, DividerX, i, assets.SpriteIDVerticalBar)
+	}
+	gs.SetCellSprite(bucket.GridMainUI, DividerX, rows-1, assets.SpriteIDUpConnectBar)
+	// .Horizontal
+	// verticalY := S3GridYCount - 11
+	gs.SetCellSprite(bucket.GridMainUI, DividerX, DividerY, assets.SpriteIDRightConnectBar)
+	for i := 1; i < cols-DividerX; i++ {
+		gs.SetCellSprite(bucket.GridMainUI, DividerX+i, DividerY, assets.SpriteIDHorizontalBar)
+	}
+	gs.SetCellSprite(bucket.GridMainUI, cols-1, DividerY, assets.SpriteIDLeftConnectBar)
+	// ...Logs
+	gs.Set(bucket.GridMainUI, rightPanelHeaderX+1, DividerY, CellTypeChar, 'L')
+	gs.Set(bucket.GridMainUI, rightPanelHeaderX+2, DividerY, CellTypeChar, 'O')
+	gs.Set(bucket.GridMainUI, rightPanelHeaderX+3, DividerY, CellTypeChar, 'G')
+	gs.Set(bucket.GridMainUI, rightPanelHeaderX+4, DividerY, CellTypeChar, 'S')
+
+	bucket.BufferCommands = bucket.Buffer35x46x2000xfalse
+	bucket.BufferLogs = bucket.Buffer26x9x200xtrue
+
+	/* Did not add these in.  I feel that should  be part of init */
+	// CommandBuffer.AppendDecorators(CmdBufferDecor)
+	// LogBuffer.AppendAll([]byte("Type: connect rabbit="))
 }

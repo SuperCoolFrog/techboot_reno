@@ -51,9 +51,9 @@ func (game *Game) UpdateState() {
 		game.State = Scene2_HandleAllDialog(Scene2_Dialog, Scene2_Waiting, game)
 	case Scene2_Waiting:
 		game.State = Scene2_WaitForEnter(Scene2_Waiting, Scene2_CleanUp, game)
+	case Scene2_CleanUp:
+		game.State = Scene2_CleanUpScene(Scene3_Init, game)
 		/**
-		case Scene2_CleanUp:
-			game.State = Scene2_CleanUpScene(Scene3_Init, gs, anims)
 		case Scene3_Init:
 			game.State = Scene3_HandleInit(Scene3_Init, Scene3_InputHandlingLoop, gs, anims)
 		case Scene3_InputHandlingLoop:

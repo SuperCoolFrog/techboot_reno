@@ -48,10 +48,10 @@ func (game *Game) UpdateState() {
 	case Scene2_Init:
 		game.State = Scene2_HandleInit(Scene2_Init, Scene2_Dialog, game)
 	case Scene2_Dialog:
-		game.State = Scene2_HandleAllDialog(Scene2_Dialog, End, game)
+		game.State = Scene2_HandleAllDialog(Scene2_Dialog, Scene2_Waiting, game)
+	case Scene2_Waiting:
+		game.State = Scene2_WaitForEnter(Scene2_Waiting, Scene2_CleanUp, game)
 		/**
-		case Scene2_Waiting:
-			game.State = Scene2_WaitForEnter(Scene2_Waiting, Scene2_CleanUp)
 		case Scene2_CleanUp:
 			game.State = Scene2_CleanUpScene(Scene3_Init, gs, anims)
 		case Scene3_Init:

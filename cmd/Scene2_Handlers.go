@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"image"
 )
 
 const Scene2SpeakerR = 0
@@ -113,7 +114,29 @@ func Scene2_HandleAllDialog(current, next GameState, game *Game) GameState {
 	return current
 }
 
-func Scene2_WaitForEnter(current, next GameState) GameState {
+func Scene2_WaitForEnter(current, next GameState, game *Game) GameState {
+
+	game.GridSystem.Set(game.Bucket.GridDialogScene, 16, 15, CellTypeChar, '[')
+	game.GridSystem.Set(game.Bucket.GridDialogScene, 17, 15, CellTypeChar, 'E')
+	game.GridSystem.Set(game.Bucket.GridDialogScene, 18, 15, CellTypeChar, 'N')
+	game.GridSystem.Set(game.Bucket.GridDialogScene, 19, 15, CellTypeChar, 'T')
+	game.GridSystem.Set(game.Bucket.GridDialogScene, 20, 15, CellTypeChar, 'E')
+	game.GridSystem.Set(game.Bucket.GridDialogScene, 21, 15, CellTypeChar, 'R')
+	game.GridSystem.Set(game.Bucket.GridDialogScene, 22, 15, CellTypeChar, ']')
+
+	if game.MouseMoved {
+		mx, my := ebiten.CursorPosition()
+		mouseRect := image.Rect(mx, my, mx+1, my+1)
+
+		if mouseRect.Overlaps(game.GridSystem.GridRectangle(game.Bucket.GridDialogScene, 16, 15, 7, 1)) {
+			game.GridSystem.Set(game.Bucket.GridDialogScene, 15, 15, CellTypeChar, ':')
+			game.GridSystem.Set(game.Bucket.GridDialogScene, 23, 15, CellTypeChar, '|')
+		} else {
+			game.GridSystem.Set(game.Bucket.GridDialogScene, 15, 15, CellTypeEmpty, ' ')
+			game.GridSystem.Set(game.Bucket.GridDialogScene, 23, 15, CellTypeEmpty, ' ')
+		}
+	}
+
 	acceptSelected := inpututil.IsKeyJustPressed(ebiten.KeyEnter) ||
 		inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
 

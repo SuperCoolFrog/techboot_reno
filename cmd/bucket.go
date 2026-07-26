@@ -12,13 +12,13 @@ const (
 
 type Bucket struct {
 	Grid27x21x48x12 GridID
-	Grid40x30x32x16 GridID
+	Grid42x30x30x16 GridID
 	/* Grid27x21x48x12 */
 	GridStartScene GridID
 	/* Grid40x30x32x16 */
 	GridDialogScene GridID
 
-	Buffer40x30x30xfalse BufferID
+	Buffer42x30x30xfalse BufferID
 	/* Buffer for Scene2 Dialog */
 	BufferDialogScene BufferID
 
@@ -42,12 +42,12 @@ func bucketInitGrids(gs *GridSystem, bucket *Bucket) {
 	bucket.Grid27x21x48x12 = gs.AllocateGrid(27, 21, 48, 12, 12)
 	gs.SetAllCells(bucket.Grid27x21x48x12, CellTypeNone, 0)
 
-	bucket.Grid40x30x32x16 = gs.AllocateGrid(42, 30, 30, 16, 16)
-	gs.SetAllCells(bucket.Grid40x30x32x16, CellTypeNone, 0)
+	bucket.Grid42x30x30x16 = gs.AllocateGrid(42, 30, 30, 16, 16)
+	gs.SetAllCells(bucket.Grid42x30x30x16, CellTypeNone, 0)
 }
 
 func bucketInitBuffers(bs *BufferSystem, bucket *Bucket) {
-	bucket.Buffer40x30x30xfalse = bs.AllocateBuffer(42, 30, 30, false)
+	bucket.Buffer42x30x30xfalse = bs.AllocateBuffer(42, 30, 30, false)
 }
 
 func bucketInitIntroAnimation(gs *GridSystem, anims *AnimationSystem, bucket *Bucket) {
@@ -64,8 +64,8 @@ func bucketInitIntroAnimation(gs *GridSystem, anims *AnimationSystem, bucket *Bu
 }
 
 func bucketInitDialogAnimation(gs *GridSystem, anims *AnimationSystem, bucket *Bucket) {
-	bucket.GridDialogScene = bucket.Grid40x30x32x16
-	bucket.BufferDialogScene = bucket.Buffer40x30x30xfalse
+	bucket.GridDialogScene = bucket.Grid42x30x30x16
+	bucket.BufferDialogScene = bucket.Buffer42x30x30xfalse
 
 	anims.IsPlaying[AnimationDialog] = false
 	anims.Loop[AnimationDialog] = false

@@ -338,8 +338,7 @@ func (bs *BufferSystem) GetLastBufferLine(id BufferID) ([]byte, error) {
 }
 
 func (bs *BufferSystem) DrawToGrid(bufferId BufferID, gridId GridID, x, y int, gs *GridSystem) error {
-	historyOffset := bs.HistoryOffsets[bufferId]
-	rowStart := historyOffset + bs.ActiveRowHead[bufferId]
+	rowStart := bs.ActiveRowHead[bufferId]
 
 	for r := 0; r < bs.YCursor[bufferId]; r++ {
 		rowIdx := rowStart + r

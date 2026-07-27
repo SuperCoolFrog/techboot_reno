@@ -55,7 +55,6 @@ func InitBucketItems(gs *GridSystem, anims *AnimationSystem, bs *BufferSystem) B
 	bucketInitIntroAnimation(gs, anims, bucket)
 	bucketInitDialogAnimation(gs, anims, bucket)
 	bucketInitScannerAnimations(gs, anims, bucket)
-	bucketInitScannerAnimations(gs, anims, bucket)
 
 	bucketInitMainUI(gs, bs, bucket)
 
@@ -124,6 +123,8 @@ func bucketInitMainUI(gs *GridSystem, bs *BufferSystem, bucket *Bucket) {
 	bucket.GridMainUI = bucket.Grid64x48x20x0
 	bucket.GridOutput = bucket.Grid26x36x20x740x20
 	bucket.GridOutputPrecision = bucket.Grid104x144x5x740x20
+	bucket.BufferCommands = bucket.Buffer35x46x2000xfalse
+	bucket.BufferLogs = bucket.Buffer26x9x200xtrue
 
 	gs.SetAllCells(bucket.GridMainUI, CellTypeEmpty, 0)
 	// gs.EnableGrid(bucket.GridMainUI)
@@ -200,9 +201,6 @@ func bucketInitMainUI(gs *GridSystem, bs *BufferSystem, bucket *Bucket) {
 	gs.Set(bucket.GridMainUI, rightPanelHeaderX+2, DividerY, CellTypeChar, 'O')
 	gs.Set(bucket.GridMainUI, rightPanelHeaderX+3, DividerY, CellTypeChar, 'G')
 	gs.Set(bucket.GridMainUI, rightPanelHeaderX+4, DividerY, CellTypeChar, 'S')
-
-	bucket.BufferCommands = bucket.Buffer35x46x2000xfalse
-	bucket.BufferLogs = bucket.Buffer26x9x200xtrue
 
 	/* Did not add these in.  I feel that should  be part of init */
 	// CommandBuffer.AppendDecorators(CmdBufferDecor)

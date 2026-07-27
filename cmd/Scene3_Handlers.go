@@ -28,6 +28,7 @@ func Scene3_HandleInit(current, next GameState, game *Game) GameState {
 	// Border
 
 	game.Buffers.AppendDecorators(game.Bucket.BufferCommands, CmdBufferDecor)
+
 	game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Type: connect rabbit="))
 
 	game.Animations.IsPlaying[AnimationScanner] = true
@@ -39,7 +40,10 @@ func Scene3_HandleInit(current, next GameState, game *Game) GameState {
 func Scene3_Update(current, next GameState, game *Game) GameState {
 
 	for i := 0; i < len(game.inputRunes); i++ {
-		game.Buffers.AppendWithDecor(game.Bucket.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
+		err := game.Buffers.AppendWithDecor(game.Bucket.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
+		if err != nil {
+			fmt.Printf("Error Appending Last Rune: %v\n", err)
+		}
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
@@ -55,7 +59,10 @@ func Scene3_Update(current, next GameState, game *Game) GameState {
 		game.Buffers.DecrementCursorWithDecor(game.Bucket.BufferCommands, CmdBufferDecor)
 	}
 
-	game.Buffers.DrawToGrid(game.Bucket.BufferCommands, game.Bucket.GridMainUI, 1, 1, game.GridSystem)
+	err := game.Buffers.DrawToGrid(game.Bucket.BufferCommands, game.Bucket.GridMainUI, 1, 1, game.GridSystem)
+	if err != nil {
+		fmt.Printf("Error Drawing to BufferCommands: %v", err)
+	}
 
 	// LogBuff
 	game.Buffers.DrawToGrid(game.Bucket.BufferLogs, game.Bucket.GridMainUI, 37, 38, game.GridSystem)

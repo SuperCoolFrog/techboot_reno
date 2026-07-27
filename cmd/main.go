@@ -121,10 +121,10 @@ func main() {
 	const MaxGrids = 15
 
 	game := &Game{
-		State:        Scene3_Init, //Scene1_Init,
+		State:        Scene1_Init, //Scene1_Init,
 		GridSystem:   NewGridSystem(MaxTotalCells, MaxGrids),
 		Animations:   NewAnimationSystem(),
-		Buffers:      NewBufferSystem(250000, 10),
+		Buffers:      NewBufferSystem(500_000, 10),
 		parserpl:     string(parserpl),
 		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
 		prologOutput: make(chan trealla.Atom, 128),

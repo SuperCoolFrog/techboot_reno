@@ -24,7 +24,7 @@ func Scene1_HandleAnimationComplete(game *Game) {
 }
 
 func Scene1_HandleButtonList(current, next GameState, game *Game) GameState {
-	gridId := game.Animations.GridId[AnimationStartScene]
+	gridId := game.Bucket.GridStartScene
 
 	startFocusCellType, _ := game.GridSystem.Get(gridId, 7, 8)
 	exitFocusCellType, _ := game.GridSystem.Get(gridId, 7, 9)

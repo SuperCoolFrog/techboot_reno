@@ -18,8 +18,8 @@ type AnimationSystem struct {
 	Timers    []float32
 	Durations []float32
 	HasGrid   []bool
-	GridId    []GridID
-	Offset    int
+	// GridId    []GridID
+	Offset int
 }
 
 func NewAnimationSystem() *AnimationSystem {
@@ -42,8 +42,8 @@ func NewAnimationSystem() *AnimationSystem {
 		Timers:    make([]float32, AnimationCount),
 		Durations: make([]float32, AnimationCount),
 		HasGrid:   make([]bool, AnimationCount),
-		GridId:    make([]GridID, AnimationCount),
-		Offset:    0,
+		// GridId:    make([]GridID, AnimationCount),
+		Offset: 0,
 	}
 
 	return a
@@ -83,10 +83,10 @@ func (anims *AnimationSystem) Render(screen *ebiten.Image, gridSystem *GridSyste
 			continue
 		}
 
-		if anims.HasGrid[animation] {
-			gridId := anims.GridId[animation]
-			gridSystem.RenderGrid(screen, gridId)
-		}
+		// if anims.HasGrid[animation] {
+		// 	gridId := anims.GridId[animation]
+		// 	gridSystem.RenderGrid(screen, gridId)
+		// }
 	}
 }
 

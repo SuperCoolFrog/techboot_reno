@@ -13,10 +13,11 @@ const (
 )
 
 type Bucket struct {
-	Grid27x21x48x12     GridID
-	Grid42x30x30x16     GridID
-	Grid64x48x20x0      GridID
-	Grid26x36x29x740x20 GridID
+	Grid27x21x48x12      GridID
+	Grid42x30x30x16      GridID
+	Grid64x48x20x0       GridID
+	Grid26x36x20x740x20  GridID
+	Grid104x144x5x740x20 GridID
 
 	/* Grid27x21x48x12 */
 	GridStartScene GridID
@@ -26,6 +27,8 @@ type Bucket struct {
 	GridMainUI GridID
 	/* Grid26x36x29x740x20 */
 	GridOutput GridID
+	/* Grid52x72x5x740x20 */
+	GridOutputPrecision GridID
 
 	Buffer42x30x30xfalse   BufferID
 	Buffer35x46x2000xfalse BufferID
@@ -52,6 +55,7 @@ func InitBucketItems(gs *GridSystem, anims *AnimationSystem, bs *BufferSystem) B
 	bucketInitIntroAnimation(gs, anims, bucket)
 	bucketInitDialogAnimation(gs, anims, bucket)
 	bucketInitScannerAnimations(gs, anims, bucket)
+	bucketInitScannerAnimations(gs, anims, bucket)
 
 	bucketInitMainUI(gs, bs, bucket)
 
@@ -66,7 +70,13 @@ func bucketInitGrids(gs *GridSystem, bucket *Bucket) {
 	gs.SetAllCells(bucket.Grid42x30x30x16, CellTypeNone, 0)
 
 	bucket.Grid64x48x20x0 = gs.AllocateGrid(64, 48, 20, 0, 0)
-	gs.SetAllCells(bucket.Grid42x30x30x16, CellTypeNone, 0)
+	gs.SetAllCells(bucket.Grid64x48x20x0, CellTypeNone, 0)
+
+	bucket.Grid26x36x20x740x20 = gs.AllocateGrid(26, 36, 20, 740, 20)
+	gs.SetAllCells(bucket.Grid26x36x20x740x20, CellTypeNone, 0)
+
+	bucket.Grid104x144x5x740x20 = gs.AllocateGrid(104, 144, 5, 740, 20)
+	gs.SetAllCells(bucket.Grid104x144x5x740x20, CellTypeNone, 0)
 }
 
 func bucketInitBuffers(bs *BufferSystem, bucket *Bucket) {
@@ -85,7 +95,6 @@ func bucketInitIntroAnimation(gs *GridSystem, anims *AnimationSystem, bucket *Bu
 	// anims.Delay[AnimationGridIntro] = 5.0 // Tried to fix vsync at the beginning but just live with it
 
 	anims.HasGrid[AnimationStartScene] = true
-	anims.GridId[AnimationStartScene] = bucket.Grid27x21x48x12
 }
 
 func bucketInitDialogAnimation(gs *GridSystem, anims *AnimationSystem, bucket *Bucket) {
@@ -101,11 +110,10 @@ func bucketInitDialogAnimation(gs *GridSystem, anims *AnimationSystem, bucket *B
 	//gs.EnableGrid(GridDialogScene)
 
 	anims.HasGrid[AnimationDialog] = true
-	anims.GridId[AnimationDialog] = bucket.GridDialogScene
 }
 
 func bucketInitScannerAnimations(gs *GridSystem, anims *AnimationSystem, bucket *Bucket) {
-	anims.IsPlaying[AnimationScanner] = true
+	anims.IsPlaying[AnimationScanner] = false
 	anims.Loop[AnimationScanner] = true
 	anims.Durations[AnimationScanner] = 10.0
 	anims.Timers[AnimationScanner] = 0.0
@@ -114,10 +122,11 @@ func bucketInitScannerAnimations(gs *GridSystem, anims *AnimationSystem, bucket 
 
 func bucketInitMainUI(gs *GridSystem, bs *BufferSystem, bucket *Bucket) {
 	bucket.GridMainUI = bucket.Grid64x48x20x0
-	bucket.GridOutput = bucket.Grid26x36x29x740x20
+	bucket.GridOutput = bucket.Grid26x36x20x740x20
+	bucket.GridOutputPrecision = bucket.Grid104x144x5x740x20
 
 	gs.SetAllCells(bucket.GridMainUI, CellTypeEmpty, 0)
-	gs.EnableGrid(bucket.GridMainUI)
+	// gs.EnableGrid(bucket.GridMainUI)
 
 	rows := gs.Rows[bucket.GridMainUI]
 	cols := gs.Cols[bucket.GridMainUI]
@@ -145,7 +154,7 @@ func bucketInitMainUI(gs *GridSystem, bs *BufferSystem, bucket *Bucket) {
 	}
 
 	DividerX := 36
-	DividerY := S3GridYCount - 11
+	DividerY := rows - 11
 
 	// ...Commands
 	hdrCmdX := DividerX/2 - 4
@@ -175,7 +184,7 @@ func bucketInitMainUI(gs *GridSystem, bs *BufferSystem, bucket *Bucket) {
 	// Dividers
 	// .Vertical
 	gs.SetCellSprite(bucket.GridMainUI, DividerX, 0, assets.SpriteIDDownConnectBar)
-	for i := 1; i < S3GridYCount-1; i++ {
+	for i := 1; i < rows-1; i++ {
 		gs.SetCellSprite(bucket.GridMainUI, DividerX, i, assets.SpriteIDVerticalBar)
 	}
 	gs.SetCellSprite(bucket.GridMainUI, DividerX, rows-1, assets.SpriteIDUpConnectBar)

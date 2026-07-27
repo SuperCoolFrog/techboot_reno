@@ -4,159 +4,70 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/trealla-prolog/go/trealla"
+	// "github.com/trealla-prolog/go/trealla"
+	"math"
 	"techboot_reno/cmd/assets"
 )
 
-const (
-	S3GridXCount   int = 64
-	S3GridYCount   int = 48
-	S3GridCellSize int = 20
-
-	CommandBufferCapacity int = 2000 // @TODO Ring Buffer
-	CommandBufferCols     int = 35
-	CommandBufferRows     int = S3GridYCount - 2
-	CommandBufferX        int = 1
-	CommandBufferY        int = 1
-
-	DividerX int = 36
-	DividerY int = S3GridYCount - 11
-
-	LogBufferCapacity int = 1000
-	LogBufferCols     int = S3GridXCount - DividerX - 2
-	LogBufferRows     int = S3GridYCount - DividerY - 2
-	LogBufferX        int = DividerX + 1
-	LogBufferY        int = DividerY + 1
-)
-
 var (
-	GridIdFullScene GridID
-	CommandBuffer   *Buffer
-	CmdBufferDecor  = BufferDecorator{
+	CmdBufferDecor = BufferDecorator{
 		Prefix:  []byte{':'},
 		Postfix: []byte{'|'},
 	}
-
-	LogBuffer *Buffer
 )
 
-func Scene3_HandleInit(current, next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
-	gridId := gs.AllocateGrid(S3GridXCount, S3GridYCount, S3GridCellSize, 0, 0)
-	gs.SetAllCells(gridId, CellTypeEmpty, 0)
-	gs.EnableGrid(gridId)
+func Scene3_HandleInit(current, next GameState, game *Game) GameState {
+	game.GridSystem.EnableGrid(game.Bucket.GridMainUI)
 
-	InitOutputGrid(gs, anims)
+	game.GridSystem.SetAllCells(game.Bucket.GridOutput, CellTypeSquare, 0)
+	game.GridSystem.EnableGrid(game.Bucket.GridOutput)
+
+	game.GridSystem.SetAllCells(game.Bucket.GridOutputPrecision, CellTypeEmpty, 0)
+	game.GridSystem.EnableGrid(game.Bucket.GridOutputPrecision)
 
 	// Border
 
-	// .Corners
-	gs.SetCellSprite(gridId, 0, 0, assets.SpriteIDCornerTopLeft)
-	gs.SetCellSprite(gridId, 0, S3GridYCount-1, assets.SpriteIDCornerBottomLeft)
-	gs.SetCellSprite(gridId, S3GridXCount-1, 0, assets.SpriteIDCornerTopRight)
-	gs.SetCellSprite(gridId, S3GridXCount-1, S3GridYCount-1, assets.SpriteIDCornerBottomRight)
+	game.Buffers.AppendDecorators(game.Bucket.BufferCommands, CmdBufferDecor)
+	game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Type: connect rabbit="))
 
-	// .Walls
-	// ..Left
-	for i := 1; i < S3GridYCount-1; i++ {
-		gs.SetCellSprite(gridId, 0, i, assets.SpriteIDVerticalBar)
-	}
-	// ..Right
-	for i := 1; i < S3GridYCount-1; i++ {
-		gs.SetCellSprite(gridId, S3GridXCount-1, i, assets.SpriteIDVerticalBar)
-	}
-	// ..Top
-	for i := 1; i < S3GridXCount-1; i++ {
-		gs.SetCellSprite(gridId, i, 0, assets.SpriteIDHorizontalBar)
-	}
-	// ...Commands
-	hdrCmdX := DividerX/2 - 4
-	gs.Set(gridId, hdrCmdX+1, 0, CellTypeChar, 'C')
-	gs.Set(gridId, hdrCmdX+2, 0, CellTypeChar, 'O')
-	gs.Set(gridId, hdrCmdX+3, 0, CellTypeChar, 'M')
-	gs.Set(gridId, hdrCmdX+4, 0, CellTypeChar, 'M')
-	gs.Set(gridId, hdrCmdX+5, 0, CellTypeChar, 'A')
-	gs.Set(gridId, hdrCmdX+6, 0, CellTypeChar, 'N')
-	gs.Set(gridId, hdrCmdX+7, 0, CellTypeChar, 'D')
-	gs.Set(gridId, hdrCmdX+8, 0, CellTypeChar, 'S')
-
-	// ...Output
-	rightPanelHeaderX := S3GridXCount - DividerX/2
-	gs.Set(gridId, rightPanelHeaderX+1, 0, CellTypeChar, 'O')
-	gs.Set(gridId, rightPanelHeaderX+2, 0, CellTypeChar, 'U')
-	gs.Set(gridId, rightPanelHeaderX+3, 0, CellTypeChar, 'T')
-	gs.Set(gridId, rightPanelHeaderX+4, 0, CellTypeChar, 'P')
-	gs.Set(gridId, rightPanelHeaderX+5, 0, CellTypeChar, 'U')
-	gs.Set(gridId, rightPanelHeaderX+6, 0, CellTypeChar, 'T')
-
-	// ..Bottom
-	for i := 1; i < S3GridXCount-1; i++ {
-		gs.SetCellSprite(gridId, i, S3GridYCount-1, assets.SpriteIDHorizontalBar)
-	}
-
-	// Dividers
-	// .Vertical
-	gs.SetCellSprite(gridId, DividerX, 0, assets.SpriteIDDownConnectBar)
-	for i := 1; i < S3GridYCount-1; i++ {
-		gs.SetCellSprite(gridId, DividerX, i, assets.SpriteIDVerticalBar)
-	}
-	gs.SetCellSprite(gridId, DividerX, S3GridYCount-1, assets.SpriteIDUpConnectBar)
-	// .Horizontal
-	// verticalY := S3GridYCount - 11
-	gs.SetCellSprite(gridId, DividerX, DividerY, assets.SpriteIDRightConnectBar)
-	for i := 1; i < S3GridXCount-DividerX; i++ {
-		gs.SetCellSprite(gridId, DividerX+i, DividerY, assets.SpriteIDHorizontalBar)
-	}
-	gs.SetCellSprite(gridId, S3GridXCount-1, DividerY, assets.SpriteIDLeftConnectBar)
-	// ...Logs
-	gs.Set(gridId, rightPanelHeaderX+1, DividerY, CellTypeChar, 'L')
-	gs.Set(gridId, rightPanelHeaderX+2, DividerY, CellTypeChar, 'O')
-	gs.Set(gridId, rightPanelHeaderX+3, DividerY, CellTypeChar, 'G')
-	gs.Set(gridId, rightPanelHeaderX+4, DividerY, CellTypeChar, 'S')
-
-	GridIdFullScene = gridId
-
-	CommandBuffer = NewBuffer(CommandBufferCols, CommandBufferRows, CommandBufferCapacity, false)
-	CommandBuffer.AppendDecorators(CmdBufferDecor)
-
-	LogBuffer = NewBuffer(LogBufferCols, LogBufferRows, LogBufferCapacity, false)
-	LogBuffer.AppendAll([]byte("Type: connect rabbit="))
-	LogBuffer.NewLine()
+	game.Animations.IsPlaying[AnimationScanner] = true
+	game.Animations.Loop[AnimationScanner] = true
 
 	return next
 }
 
-func Scene3_Update(runes []rune, current, next GameState, input chan []byte, commands chan trealla.Atom, gs *GridSystem, anims *AnimationSystem) GameState {
-	for i := 0; i < len(runes); i++ {
-		CommandBuffer.AppendWithDecor(byte(runes[i]), CmdBufferDecor)
+func Scene3_Update(current, next GameState, game *Game) GameState {
+
+	for i := 0; i < len(game.inputRunes); i++ {
+		game.Buffers.AppendWithDecor(game.Bucket.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		CommandBuffer.TrimDecor(CmdBufferDecor)
-		CommandBuffer.NewLine()
-		CommandBuffer.AppendDecorators(CmdBufferDecor)
+		game.Buffers.TrimDecor(game.Bucket.BufferCommands, CmdBufferDecor)
+		game.Buffers.NewLine(game.Bucket.BufferCommands)
+		game.Buffers.AppendDecorators(game.Bucket.BufferCommands, CmdBufferDecor)
 
-		fmt.Printf("Enter\n")
-		// ParseInput([]byte("CONNECT 42="), input)
-		if lastLine, exists := CommandBuffer.GetLastBufferLine(); exists {
-			ParseInput(lastLine, input)
+		if lastLine, lineError := game.Buffers.GetLastBufferLine(game.Bucket.BufferCommands); lineError != nil {
+			ParseInput(lastLine, game.prologInput)
 		}
 	}
 	if utilDebouncedKeyPressed(ebiten.KeyBackspace) {
-		CommandBuffer.DecrementCursorWithDecor(CmdBufferDecor)
+		game.Buffers.DecrementCursorWithDecor(game.Bucket.BufferCommands, CmdBufferDecor)
 	}
 
-	CommandBuffer.DrawToGrid(GridIdFullScene, CommandBufferX, CommandBufferY, gs)
+	game.Buffers.DrawToGrid(game.Bucket.BufferCommands, game.Bucket.GridMainUI, 1, 1, game.GridSystem)
 
-	LogBuffer.DrawToGrid(GridIdFullScene, LogBufferX, LogBufferY, gs)
+	// LogBuff
+	game.Buffers.DrawToGrid(game.Bucket.BufferLogs, game.Bucket.GridMainUI, 37, 38, game.GridSystem)
 
-	UpdateAnimationGrid(gs, anims)
+	scene3UpdateAnimationGrid(game)
 
 	state := current
 
 loop:
 	for {
 		select {
-		case cmd := <-commands:
+		case cmd := <-game.prologOutput:
 			fmt.Printf("Commands: %v\n", cmd)
 
 			switch cmd {
@@ -165,12 +76,12 @@ loop:
 				state = next
 			case AtomConnectFalse:
 				// fmt.Printf("Connection Failed!\n")
-				LogBuffer.AppendAll([]byte("Connection Failed"))
-				LogBuffer.NewLine()
+				game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Connection Failed"))
+				game.Buffers.NewLine(game.Bucket.BufferLogs)
 			case AtomInvalid:
 				// fmt.Printf("Invalid!\n")
-				LogBuffer.AppendAll([]byte("Invalid Command"))
-				LogBuffer.NewLine()
+				game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Invalid Command"))
+				game.Buffers.NewLine(game.Bucket.BufferLogs)
 			}
 		default:
 			break loop // nothing left in the queue for this frame
@@ -205,14 +116,39 @@ func ParseInput(input []byte, parserInput chan []byte) {
 	// Placeholder for now until using prolog parsing
 }
 
-func Scene3_HandleCleaUp(next GameState, gs *GridSystem, anims *AnimationSystem) GameState {
+func Scene3_HandleCleaUp(next GameState, game *Game) GameState {
 
-	anims.IsPlaying[GridIdAnimationScanner] = false
-	anims.Loop[GridIdAnimationScanner] = false
+	game.Animations.IsPlaying[AnimationScanner] = false
+	game.Animations.Loop[AnimationScanner] = false
 
-	gs.SetAllCells(GridIdOutput, CellTypeEmpty, 0)
-	gs.SetAllCells(GridIdAnimationScanner, CellTypeEmpty, 0)
-	gs.DisableGrid(GridIdAnimationScanner)
+	game.GridSystem.SetAllCells(game.Bucket.GridOutput, CellTypeEmpty, 0)
+	game.GridSystem.DisableGrid(game.Bucket.GridOutput)
 
 	return next
+}
+
+func scene3UpdateAnimationGrid(game *Game) {
+	timer := game.Animations.Timers[AnimationScanner]
+	duration := game.Animations.Durations[AnimationScanner]
+	delay := game.Animations.Delay[AnimationScanner]
+
+	trueTime := float32(math.Max(float64(timer-delay), 0))
+	completedTime := trueTime / duration
+
+	game.GridSystem.SetAllCells(game.Bucket.GridOutputPrecision, CellTypeEmpty, 0)
+
+	scannerGridRows := game.GridSystem.Rows[game.Bucket.GridOutputPrecision]
+	scannerGridCols := game.GridSystem.Cols[game.Bucket.GridOutputPrecision]
+
+	if completedTime <= 0.5 {
+		y := int(float32(scannerGridRows-1) * (completedTime / .5))
+		for i := 0; i < scannerGridCols; i++ {
+			game.GridSystem.SetCellSprite(game.Bucket.GridOutputPrecision, i, y, assets.SpriteIDHorizontalBar)
+		}
+	} else {
+		y := int(float32(scannerGridRows-1) * ((completedTime - .5) / .5))
+		for i := 0; i < scannerGridCols; i++ {
+			game.GridSystem.SetCellSprite(game.Bucket.GridOutputPrecision, i, scannerGridRows-1-y, assets.SpriteIDHorizontalBar)
+		}
+	}
 }

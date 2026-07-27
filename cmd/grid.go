@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -157,7 +158,7 @@ func (gs *GridSystem) Set(gridId GridID, x int, y int, flag GridCellType, char b
 func (gs *GridSystem) SetCellSprite(gridId GridID, x int, y int, spriteId assets.SpriteID) {
 	// Guard rails to protect neighboring grid data
 	if x < 0 || x >= gs.Cols[gridId] || y < 0 || y >= gs.Rows[gridId] {
-		panic("Grid cell coordinates out of bounds!")
+		panic(fmt.Sprintf("Grid cell coordinates out of bounds! X: %d, Y: %d ;; Cols: %d, Rows: %d", x, y, gs.Cols[gridId], gs.Rows[gridId]))
 	}
 
 	idx := gs.IdxFromXY(gridId, x, y)

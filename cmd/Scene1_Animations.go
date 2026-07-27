@@ -1,10 +1,11 @@
 package main
 
-func Scene1_PlayAnimatedGridIntro(current, next GameState, anims *AnimationSystem) GameState {
-	if anims.IsPlaying[AnimationStartScene] {
+func Scene1_PlayAnimatedGridIntro(current, next GameState, game *Game) GameState {
+	if game.Animations.IsPlaying[AnimationStartScene] {
 		return next
 	}
-	anims.IsPlaying[AnimationStartScene] = true
+	game.Animations.IsPlaying[AnimationStartScene] = true
+	game.GridSystem.EnableGrid(game.Bucket.GridStartScene)
 
 	return next
 }
@@ -21,9 +22,8 @@ func Scene1_UpdateAnimatedGridIntro(current, next GameState, game *Game) GameSta
 	timer := anims.Timers[AnimationStartScene]
 	duration := float64(anims.Durations[AnimationStartScene])
 	delay := anims.Delay[AnimationStartScene]
-	gridId := anims.GridId[AnimationStartScene]
-	cols := gridSystem.Cols[gridId]
-	rows := gridSystem.Rows[gridId]
+	cols := gridSystem.Cols[game.Bucket.GridStartScene]
+	rows := gridSystem.Rows[game.Bucket.GridStartScene]
 
 	// steps := 2.0
 	//stepDuration := duration / steps
@@ -41,7 +41,7 @@ func Scene1_UpdateAnimatedGridIntro(current, next GameState, game *Game) GameSta
 		for x := 0; x < maxCol; x++ {
 			// grid.Set(x, 0, RenderFlagCellSquare, 0)
 			for y := 0; y < maxRow; y++ {
-				gridSystem.Set(gridId, x, y, CellTypeSquare, 0)
+				gridSystem.Set(game.Bucket.GridStartScene, x, y, CellTypeSquare, 0)
 			}
 		}
 
@@ -72,7 +72,7 @@ func Scene1_UpdateAnimatedGridIntro(current, next GameState, game *Game) GameSta
 
 		for x := minCol; x < maxCol; x++ {
 			for y := minRow; y < maxRow; y++ {
-				gridSystem.Set(gridId, x, y, CellTypeEmpty, 0)
+				gridSystem.Set(game.Bucket.GridStartScene, x, y, CellTypeEmpty, 0)
 			}
 		}
 	}
@@ -93,18 +93,19 @@ func Scene1_PlayAnimatedGridExit(current, next GameState, anims *AnimationSystem
 	return next
 }
 
-func Scene1_UpdateAnimatedGridExit(current, next GameState, gridSystem *GridSystem, anims *AnimationSystem) GameState {
+func Scene1_UpdateAnimatedGridExit(current, next GameState, game *Game) GameState {
 
-	if !anims.IsPlaying[AnimationStartScene] {
+	if !game.Animations.IsPlaying[AnimationStartScene] {
 		return next
 	}
 
-	timer := anims.Timers[AnimationStartScene]
-	duration := float64(anims.Durations[AnimationStartScene])
-	delay := anims.Delay[AnimationStartScene]
-	gridId := anims.GridId[AnimationStartScene]
-	cols := gridSystem.Cols[gridId]
-	rows := gridSystem.Rows[gridId]
+	timer := game.Animations.Timers[AnimationStartScene]
+	duration := float64(game.Animations.Durations[AnimationStartScene])
+	delay := game.Animations.Delay[AnimationStartScene]
+	gridId := game.Bucket.GridStartScene
+	gridSystem := game.GridSystem
+	cols := game.GridSystem.Cols[game.Bucket.GridStartScene]
+	rows := game.GridSystem.Rows[game.Bucket.GridStartScene]
 
 	trueTime := float64(timer - delay)
 

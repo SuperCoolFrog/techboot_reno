@@ -57,16 +57,14 @@ func (game *Game) UpdateState() {
 		game.State = Scene3_HandleInit(Scene3_Init, Scene3_UpdateLoop, game)
 	case Scene3_UpdateLoop:
 		game.State = Scene3_Update(Scene3_UpdateLoop, Scene3_CleanUp, game)
-		/**
-		case Scene3_CleanUp:
-			game.State = Scene3_HandleCleaUp(Scene4_Init, gs, anims)
-		case Scene4_Init:
-			game.State = Scene4_HandleInit(Scene4_Init, Scene4_StackAnim, gs, anims)
-		case Scene4_StackAnim:
-			game.State = Scene4_UpdateStackAnimation(Scene4_StackAnim, Scene4_Run, gs, anims)
-		case Scene4_Run:
-			game.State = Scene4_Update(Scene4_Run, End, game.inputRunes, game.prologInput, game.prologOutput, gs, anims)
-			**/
+	case Scene3_CleanUp:
+		game.State = Scene3_HandleCleaUp(Scene4_Init, game)
+	case Scene4_Init:
+		game.State = Scene4_HandleInit(Scene4_Init, Scene4_StackAnim, game)
+	case Scene4_StackAnim:
+		game.State = Scene4_UpdateStackAnimation(Scene4_StackAnim, Scene4_Run, game)
+	case Scene4_Run:
+		game.State = Scene4_Update(Scene4_Run, End, game)
 	}
 
 }

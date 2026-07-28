@@ -127,12 +127,12 @@ func ParseInput(input []byte, parserInput chan []byte) {
 }
 
 func Scene3_HandleCleaUp(next GameState, game *Game) GameState {
-
 	game.Animations.IsPlaying[AnimationScanner] = false
 	game.Animations.Loop[AnimationScanner] = false
 
 	game.GridSystem.SetAllCells(game.Bucket.GridOutput, CellTypeEmpty, 0)
 	game.GridSystem.DisableGrid(game.Bucket.GridOutput)
+	game.GridSystem.DisableGrid(game.Bucket.GridOutputPrecision)
 
 	return next
 }

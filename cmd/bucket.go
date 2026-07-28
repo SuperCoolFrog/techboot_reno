@@ -40,13 +40,19 @@ type Bucket struct {
 	BufferCommands BufferID
 	BufferLogs     BufferID
 
+	/* Stick it in here for now until I think more about these type of values */
+	LogBufferColIdx int
+	LogBufferRowIdx int
+
 	/* This is GameState as Idx, some repeating states need iterator i.e. animations/cutscenes */
 	SceneStateItr []int
 }
 
 func InitBucketItems(gs *GridSystem, anims *AnimationSystem, bs *BufferSystem) Bucket {
 	bucket := &Bucket{
-		SceneStateItr: make([]int, GameStateCount),
+		SceneStateItr:   make([]int, GameStateCount),
+		LogBufferColIdx: 37,
+		LogBufferRowIdx: 38,
 	}
 
 	bucketInitGrids(gs, bucket)

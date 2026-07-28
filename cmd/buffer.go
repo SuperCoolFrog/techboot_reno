@@ -200,8 +200,6 @@ func (bs *BufferSystem) AppendDecorators(id BufferID, decor BufferDecorator) err
 	postCount := len(decor.Postfix)
 	xCursor := bs.GetXCursor(id)
 
-	fmt.Printf("Starting cursor %d\n", xCursor)
-
 	if preCount+postCount+xCursor > bs.Cols[id] {
 		if bs.LineOverflow[id] {
 			bs.NewLine(id)
@@ -220,27 +218,18 @@ func (bs *BufferSystem) AppendDecorators(id BufferID, decor BufferDecorator) err
 	}
 
 	for bs.GetXCursor(id) < len(decor.Prefix) {
-		fmt.Printf("Inc Loop: %d ;; %d \n", bs.GetXCursor(id), len(decor.Prefix))
 		bs.IncrementXCursor(id)
 	}
 
-	fmt.Printf("Cursor after prefix %d\n", bs.GetXCursor(id))
-
-	fmt.Printf("History Value before postfix %d\n", bs.Histories[historyIdxRow0+1])
-
 	// Postfix is added but doesn't effect XCursor.  Meant to be overwritten
-	fmt.Printf("Applying postfix\n")
 	for i := 0; i < len(decor.Postfix); i++ {
 		if bs.GetXCursor(id) < bs.Cols[id] {
-			fmt.Printf("-> postfix %d ;; %d ;; %d \n", historyIdxRow0, bs.GetXCursor(id), i)
 			postFixIdx := historyIdxRow0 + bs.GetXCursor(id) + i
 			bs.Histories[postFixIdx] = decor.Postfix[i]
 		} else {
 			break
 		}
 	}
-
-	fmt.Printf("History Value After postfix %d\n", bs.Histories[historyIdxRow0+1])
 
 	return nil
 }

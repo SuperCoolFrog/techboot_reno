@@ -14,52 +14,52 @@ var (
 
 func Scene4_HandleInit(current, next GameState, game *Game) GameState {
 
-	game.GridSystem.EnableGrid(game.Bucket.GridOutput)
+	game.gs.EnableGrid(game.b.GridOutput)
 
-	game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Connecting..."))
-	game.Buffers.NewLine(game.Bucket.BufferLogs)
-	game.Buffers.DrawToGrid(game.Bucket.BufferLogs, game.Bucket.GridMainUI, game.Bucket.LogBufferColIdx, game.Bucket.LogBufferRowIdx, game.GridSystem)
+	game.bs.AppendAll(game.b.BufferLogs, []byte("Connecting..."))
+	game.bs.NewLine(game.b.BufferLogs)
+	game.bs.DrawToGrid(game.b.BufferLogs, game.b.GridMainUI, game.b.LogBufferColIdx, game.b.LogBufferRowIdx, game.gs)
 
-	game.Animations.IsPlaying[AnimationMemoryStack] = true
-	game.Animations.Loop[AnimationMemoryStack] = false
-	game.Animations.Durations[AnimationMemoryStack] = 5.0
-	game.Animations.Timers[AnimationMemoryStack] = 0.0
-	game.Animations.Delay[AnimationMemoryStack] = 0
+	game.ans.IsPlaying[AnimationMemoryStack] = true
+	game.ans.Loop[AnimationMemoryStack] = false
+	game.ans.Durations[AnimationMemoryStack] = 5.0
+	game.ans.Timers[AnimationMemoryStack] = 0.0
+	game.ans.Delay[AnimationMemoryStack] = 0
 
 	return next
 }
 
 func Scene4_UpdateStackAnimation(current, next GameState, game *Game) GameState {
-	timer := game.Animations.Timers[AnimationMemoryStack]
-	duration := game.Animations.Durations[AnimationMemoryStack]
-	delay := game.Animations.Delay[AnimationMemoryStack]
+	timer := game.ans.Timers[AnimationMemoryStack]
+	duration := game.ans.Durations[AnimationMemoryStack]
+	delay := game.ans.Delay[AnimationMemoryStack]
 
 	trueTime := float32(math.Max(float64(timer-delay), 0))
 	completedTime := trueTime / duration
 
 	// gs.SetAllCells(AnimationScannerGrid, CellTypeEmpty, 0)
-	OutputGridCols := game.GridSystem.Cols[game.Bucket.GridOutput]
-	OutputGridRows := game.GridSystem.Rows[game.Bucket.GridOutput]
+	OutputGridCols := game.gs.Cols[game.b.GridOutput]
+	OutputGridRows := game.gs.Rows[game.b.GridOutput]
 
 	x := OutputGridCols / 2
 	y := int(float32(OutputGridRows-1) * completedTime)
 	for i := 0; i < OutputGridRows; i++ {
 		iy := OutputGridRows - 1 - y
-		game.GridSystem.SetCellSprite(game.Bucket.GridOutput, x-1, iy, assets.SpriteIDSquare)
-		game.GridSystem.SetCellSprite(game.Bucket.GridOutput, x, iy, assets.SpriteIDSquare)
-		game.GridSystem.SetCellSprite(game.Bucket.GridOutput, x+1, iy, assets.SpriteIDSquare)
+		game.gs.SetCellSprite(game.b.GridOutput, x-1, iy, assets.SpriteIDSquare)
+		game.gs.SetCellSprite(game.b.GridOutput, x, iy, assets.SpriteIDSquare)
+		game.gs.SetCellSprite(game.b.GridOutput, x+1, iy, assets.SpriteIDSquare)
 	}
 
-	if game.Animations.IsPlaying[AnimationMemoryStack] {
-		game.Buffers.DrawToGrid(game.Bucket.BufferLogs, game.Bucket.GridMainUI, game.Bucket.LogBufferColIdx, game.Bucket.LogBufferRowIdx, game.GridSystem)
+	if game.ans.IsPlaying[AnimationMemoryStack] {
+		game.bs.DrawToGrid(game.b.BufferLogs, game.b.GridMainUI, game.b.LogBufferColIdx, game.b.LogBufferRowIdx, game.gs)
 		return current
 	}
 
 	// LogBuffer.AppendAll([]byte("Connection Successful"))
-	game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Connection Successful"))
-	game.Buffers.NewLine(game.Bucket.BufferLogs)
+	game.bs.AppendAll(game.b.BufferLogs, []byte("Connection Successful"))
+	game.bs.NewLine(game.b.BufferLogs)
 
-	game.GridSystem.SetAllCells(game.Bucket.GridOutput, CellTypeEmpty, 0)
+	game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
 
 	return next
 }
@@ -67,27 +67,27 @@ func Scene4_UpdateStackAnimation(current, next GameState, game *Game) GameState 
 // func Scene4_Update(current, next GameState, runes []rune, input chan []byte, commands chan trealla.Atom, gs *GridSystem, anims *AnimationSystem) GameState {
 func Scene4_Update(current, next GameState, game *Game) GameState {
 	for i := 0; i < len(game.inputRunes); i++ {
-		game.Buffers.AppendWithDecor(game.Bucket.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
+		game.bs.AppendWithDecor(game.b.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 		//CommandBuffer
-		game.Buffers.TrimDecor(game.Bucket.BufferCommands, CmdBufferDecor)
-		game.Buffers.NewLine(game.Bucket.BufferCommands)
-		game.Buffers.AppendDecorators(game.Bucket.BufferCommands, CmdBufferDecor)
+		game.bs.TrimDecor(game.b.BufferCommands, CmdBufferDecor)
+		game.bs.NewLine(game.b.BufferCommands)
+		game.bs.AppendDecorators(game.b.BufferCommands, CmdBufferDecor)
 
 		fmt.Printf("Enter\n")
-		if lastLine, lineError := game.Buffers.GetLastBufferLine(game.Bucket.BufferCommands); lineError == nil {
+		if lastLine, lineError := game.bs.GetLastBufferLine(game.b.BufferCommands); lineError == nil {
 			ParseInput(lastLine, game.prologInput)
 		}
 	}
 	if utilDebouncedKeyPressed(ebiten.KeyBackspace) {
-		game.Buffers.DecrementCursorWithDecor(game.Bucket.BufferCommands, CmdBufferDecor)
+		game.bs.DecrementCursorWithDecor(game.b.BufferCommands, CmdBufferDecor)
 	}
 
-	game.Buffers.DrawToGrid(game.Bucket.BufferCommands, game.Bucket.GridMainUI, 1, 1, game.GridSystem)
+	game.bs.DrawToGrid(game.b.BufferCommands, game.b.GridMainUI, 1, 1, game.gs)
 
-	game.Buffers.DrawToGrid(game.Bucket.BufferLogs, game.Bucket.GridMainUI, game.Bucket.LogBufferColIdx, game.Bucket.LogBufferRowIdx, game.GridSystem)
+	game.bs.DrawToGrid(game.b.BufferLogs, game.b.GridMainUI, game.b.LogBufferColIdx, game.b.LogBufferRowIdx, game.gs)
 
 	state := current
 
@@ -102,8 +102,8 @@ loop:
 				// Display list items
 			case AtomInvalid:
 				// fmt.Printf("Invalid!\n")
-				game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Invalid Command"))
-				game.Buffers.NewLine(game.Bucket.BufferLogs)
+				game.bs.AppendAll(game.b.BufferLogs, []byte("Invalid Command"))
+				game.bs.NewLine(game.b.BufferLogs)
 			}
 		default:
 			break loop // nothing left in the queue for this frame

@@ -41,11 +41,11 @@ func init() {
 
 type Game struct {
 	State                  GameState
-	GridSystem             *GridSystem
+	gs                     *GridSystem
 	inputRunes             []rune
-	Animations             *AnimationSystem
-	Buffers                *BufferSystem
-	Bucket                 Bucket
+	ans                    *AnimationSystem
+	bs                     *BufferSystem
+	b                      Bucket
 	MouseMoved             bool
 	LastMouseX, LastMouseY int
 	Exit                   bool
@@ -69,7 +69,7 @@ func (g *Game) Update() error {
 	// }
 
 	g.UpdateState()
-	g.Animations.Update()
+	g.ans.Update()
 
 	if g.Exit {
 		return ebiten.Termination
@@ -88,8 +88,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// 	log.Fatal(err)
 	// }
 
-	g.GridSystem.Render(screen)
-	g.Animations.Render(screen, g.GridSystem)
+	g.gs.Render(screen)
+	g.ans.Render(screen, g.gs)
 
 	// Test
 	// op := &ebiten.DrawImageOptions{}
@@ -122,9 +122,9 @@ func main() {
 
 	game := &Game{
 		State:        Scene3_Init, //Scene1_Init,
-		GridSystem:   NewGridSystem(MaxTotalCells, MaxGrids),
-		Animations:   NewAnimationSystem(),
-		Buffers:      NewBufferSystem(500_000, 10),
+		gs:           NewGridSystem(MaxTotalCells, MaxGrids),
+		ans:          NewAnimationSystem(),
+		bs:           NewBufferSystem(500_000, 10),
 		parserpl:     string(parserpl),
 		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
 		prologOutput: make(chan trealla.Atom, 128),
@@ -132,7 +132,7 @@ func main() {
 
 	assets.Load() // Load Assets before init bucket
 
-	game.Bucket = InitBucketItems(game.GridSystem, game.Animations, game.Buffers)
+	game.b = InitBucketItems(game.gs, game.ans, game.bs)
 
 	// Initialize parser
 	go game.prologWorker()

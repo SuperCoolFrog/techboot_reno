@@ -17,23 +17,23 @@ var (
 )
 
 func Scene3_HandleInit(current, next GameState, game *Game) GameState {
-	game.GridSystem.EnableGrid(game.Bucket.GridMainUI)
+	game.gs.EnableGrid(game.b.GridMainUI)
 
-	game.GridSystem.SetAllCells(game.Bucket.GridOutput, CellTypeSquare, 0)
-	game.GridSystem.EnableGrid(game.Bucket.GridOutput)
+	game.gs.SetAllCells(game.b.GridOutput, CellTypeSquare, 0)
+	game.gs.EnableGrid(game.b.GridOutput)
 
-	game.GridSystem.SetAllCells(game.Bucket.GridOutputPrecision, CellTypeEmpty, 0)
-	game.GridSystem.EnableGrid(game.Bucket.GridOutputPrecision)
+	game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
+	game.gs.EnableGrid(game.b.GridOutputPrecision)
 
 	// Border
 
-	game.Buffers.AppendDecorators(game.Bucket.BufferCommands, CmdBufferDecor)
+	game.bs.AppendDecorators(game.b.BufferCommands, CmdBufferDecor)
 
-	game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Type: connect rabbit="))
-	game.Buffers.NewLine(game.Bucket.BufferLogs)
+	game.bs.AppendAll(game.b.BufferLogs, []byte("Type: connect rabbit="))
+	game.bs.NewLine(game.b.BufferLogs)
 
-	game.Animations.IsPlaying[AnimationScanner] = true
-	game.Animations.Loop[AnimationScanner] = true
+	game.ans.IsPlaying[AnimationScanner] = true
+	game.ans.Loop[AnimationScanner] = true
 
 	return next
 }
@@ -41,34 +41,34 @@ func Scene3_HandleInit(current, next GameState, game *Game) GameState {
 func Scene3_Update(current, next GameState, game *Game) GameState {
 
 	for i := 0; i < len(game.inputRunes); i++ {
-		err := game.Buffers.AppendWithDecor(game.Bucket.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
+		err := game.bs.AppendWithDecor(game.b.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
 		if err != nil {
 			fmt.Printf("Error Appending Last Rune: %v\n", err)
 		}
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		game.Buffers.TrimDecor(game.Bucket.BufferCommands, CmdBufferDecor)
-		game.Buffers.NewLine(game.Bucket.BufferCommands)
-		game.Buffers.AppendDecorators(game.Bucket.BufferCommands, CmdBufferDecor)
+		game.bs.TrimDecor(game.b.BufferCommands, CmdBufferDecor)
+		game.bs.NewLine(game.b.BufferCommands)
+		game.bs.AppendDecorators(game.b.BufferCommands, CmdBufferDecor)
 
-		if lastLine, lineError := game.Buffers.GetLastBufferLine(game.Bucket.BufferCommands); lineError == nil {
+		if lastLine, lineError := game.bs.GetLastBufferLine(game.b.BufferCommands); lineError == nil {
 			ParseInput(lastLine, game.prologInput)
 		} else {
 			fmt.Printf("Error Getting lastLine: %v", lineError)
 		}
 	}
 	if utilDebouncedKeyPressed(ebiten.KeyBackspace) {
-		game.Buffers.DecrementCursorWithDecor(game.Bucket.BufferCommands, CmdBufferDecor)
+		game.bs.DecrementCursorWithDecor(game.b.BufferCommands, CmdBufferDecor)
 	}
 
-	err := game.Buffers.DrawToGridWithDecor(game.Bucket.BufferCommands, game.Bucket.GridMainUI, 1, 1, CmdBufferDecor, game.GridSystem)
+	err := game.bs.DrawToGridWithDecor(game.b.BufferCommands, game.b.GridMainUI, 1, 1, CmdBufferDecor, game.gs)
 	if err != nil {
 		fmt.Printf("Error Drawing to BufferCommands: %v", err)
 	}
 
 	// LogBuff
-	game.Buffers.DrawToGrid(game.Bucket.BufferLogs, game.Bucket.GridMainUI, 37, 38, game.GridSystem)
+	game.bs.DrawToGrid(game.b.BufferLogs, game.b.GridMainUI, 37, 38, game.gs)
 
 	scene3UpdateAnimationGrid(game)
 
@@ -86,12 +86,12 @@ loop:
 				state = next
 			case AtomConnectFalse:
 				// fmt.Printf("Connection Failed!\n")
-				game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Connection Failed"))
-				game.Buffers.NewLine(game.Bucket.BufferLogs)
+				game.bs.AppendAll(game.b.BufferLogs, []byte("Connection Failed"))
+				game.bs.NewLine(game.b.BufferLogs)
 			case AtomInvalid:
 				// fmt.Printf("Invalid!\n")
-				game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Invalid Command"))
-				game.Buffers.NewLine(game.Bucket.BufferLogs)
+				game.bs.AppendAll(game.b.BufferLogs, []byte("Invalid Command"))
+				game.bs.NewLine(game.b.BufferLogs)
 			}
 		default:
 			break loop // nothing left in the queue for this frame
@@ -127,38 +127,38 @@ func ParseInput(input []byte, parserInput chan []byte) {
 }
 
 func Scene3_HandleCleaUp(next GameState, game *Game) GameState {
-	game.Animations.IsPlaying[AnimationScanner] = false
-	game.Animations.Loop[AnimationScanner] = false
+	game.ans.IsPlaying[AnimationScanner] = false
+	game.ans.Loop[AnimationScanner] = false
 
-	game.GridSystem.SetAllCells(game.Bucket.GridOutput, CellTypeEmpty, 0)
-	game.GridSystem.DisableGrid(game.Bucket.GridOutput)
-	game.GridSystem.DisableGrid(game.Bucket.GridOutputPrecision)
+	game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
+	game.gs.DisableGrid(game.b.GridOutput)
+	game.gs.DisableGrid(game.b.GridOutputPrecision)
 
 	return next
 }
 
 func scene3UpdateAnimationGrid(game *Game) {
-	timer := game.Animations.Timers[AnimationScanner]
-	duration := game.Animations.Durations[AnimationScanner]
-	delay := game.Animations.Delay[AnimationScanner]
+	timer := game.ans.Timers[AnimationScanner]
+	duration := game.ans.Durations[AnimationScanner]
+	delay := game.ans.Delay[AnimationScanner]
 
 	trueTime := float32(math.Max(float64(timer-delay), 0))
 	completedTime := trueTime / duration
 
-	game.GridSystem.SetAllCells(game.Bucket.GridOutputPrecision, CellTypeEmpty, 0)
+	game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
 
-	scannerGridRows := game.GridSystem.Rows[game.Bucket.GridOutputPrecision]
-	scannerGridCols := game.GridSystem.Cols[game.Bucket.GridOutputPrecision]
+	scannerGridRows := game.gs.Rows[game.b.GridOutputPrecision]
+	scannerGridCols := game.gs.Cols[game.b.GridOutputPrecision]
 
 	if completedTime <= 0.5 {
 		y := int(float32(scannerGridRows-1) * (completedTime / .5))
 		for i := 0; i < scannerGridCols; i++ {
-			game.GridSystem.SetCellSprite(game.Bucket.GridOutputPrecision, i, y, assets.SpriteIDHorizontalBar)
+			game.gs.SetCellSprite(game.b.GridOutputPrecision, i, y, assets.SpriteIDHorizontalBar)
 		}
 	} else {
 		y := int(float32(scannerGridRows-1) * ((completedTime - .5) / .5))
 		for i := 0; i < scannerGridCols; i++ {
-			game.GridSystem.SetCellSprite(game.Bucket.GridOutputPrecision, i, scannerGridRows-1-y, assets.SpriteIDHorizontalBar)
+			game.gs.SetCellSprite(game.b.GridOutputPrecision, i, scannerGridRows-1-y, assets.SpriteIDHorizontalBar)
 		}
 	}
 }

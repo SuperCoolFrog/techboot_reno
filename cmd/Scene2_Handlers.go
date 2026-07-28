@@ -39,55 +39,55 @@ var (
 
 func Scene2_HandleInit(current, next GameState, game *Game) GameState {
 	// Clean Up Previous Grid
-	game.GridSystem.DisableGrid(game.Bucket.GridStartScene)
-	game.GridSystem.Set(game.Bucket.GridStartScene, 0, 1, CellTypeEmpty, ' ')
-	game.GridSystem.Set(game.Bucket.GridStartScene, 1, 1, CellTypeEmpty, ' ')
+	game.gs.DisableGrid(game.b.GridStartScene)
+	game.gs.Set(game.b.GridStartScene, 0, 1, CellTypeEmpty, ' ')
+	game.gs.Set(game.b.GridStartScene, 1, 1, CellTypeEmpty, ' ')
 	// /Clean Up Previous Grid
 
-	game.GridSystem.EnableGrid(game.Bucket.GridDialogScene)
+	game.gs.EnableGrid(game.b.GridDialogScene)
 
 	// Set iterator for dialog animations
-	game.Bucket.SceneStateItr[next] = 0
+	game.b.SceneStateItr[next] = 0
 
-	game.Animations.Delay[AnimationDialog] = 1.0
-	game.Animations.Timers[AnimationDialog] = 0.0
-	game.Animations.Durations[AnimationDialog] = 3.0
-	game.Animations.IsPlaying[AnimationDialog] = true
+	game.ans.Delay[AnimationDialog] = 1.0
+	game.ans.Timers[AnimationDialog] = 0.0
+	game.ans.Durations[AnimationDialog] = 3.0
+	game.ans.IsPlaying[AnimationDialog] = true
 
 	return next
 }
 
 func Scene2_HandleAllDialog(current, next GameState, game *Game) GameState {
-	txt := DialogText[game.Bucket.SceneStateItr[current]]
-	speaker := Scene2_DialogSpeaker[game.Bucket.SceneStateItr[current]]
+	txt := DialogText[game.b.SceneStateItr[current]]
+	speaker := Scene2_DialogSpeaker[game.b.SceneStateItr[current]]
 	decor := DecorMap[speaker]
 
-	delay := game.Animations.Delay[AnimationDialog]
-	completed := game.Animations.Timers[AnimationDialog]
-	duration := game.Animations.Durations[AnimationDialog]
+	delay := game.ans.Delay[AnimationDialog]
+	completed := game.ans.Timers[AnimationDialog]
+	duration := game.ans.Durations[AnimationDialog]
 
 	ratio := (completed - delay) / duration
 
-	if !game.Animations.IsPlaying[AnimationDialog] {
-		game.Bucket.SceneStateItr[current]++
-		game.Buffers.NewLine(game.Bucket.BufferDialogScene)
+	if !game.ans.IsPlaying[AnimationDialog] {
+		game.b.SceneStateItr[current]++
+		game.bs.NewLine(game.b.BufferDialogScene)
 
-		if game.Bucket.SceneStateItr[current] >= len(Scene2_DialogIdx) {
+		if game.b.SceneStateItr[current] >= len(Scene2_DialogIdx) {
 			return next
 		}
 
-		game.Animations.Timers[AnimationDialog] = 0.0
-		game.Animations.Durations[AnimationDialog] = 3.0
-		game.Animations.IsPlaying[AnimationDialog] = true
+		game.ans.Timers[AnimationDialog] = 0.0
+		game.ans.Durations[AnimationDialog] = 3.0
+		game.ans.IsPlaying[AnimationDialog] = true
 
 		return current
 	}
 
-	xCursor := game.Buffers.GetXCursor(game.Bucket.BufferDialogScene)
+	xCursor := game.bs.GetXCursor(game.b.BufferDialogScene)
 
 	if xCursor == 0 {
-		game.Buffers.AppendDecorators(game.Bucket.BufferDialogScene, decor)
-		xCursor = game.Buffers.GetXCursor(game.Bucket.BufferDialogScene)
+		game.bs.AppendDecorators(game.b.BufferDialogScene, decor)
+		xCursor = game.bs.GetXCursor(game.b.BufferDialogScene)
 	}
 
 	prefixLen := len(decor.Prefix)
@@ -97,16 +97,16 @@ func Scene2_HandleAllDialog(current, next GameState, game *Game) GameState {
 	var appendError error
 
 	for (appendedByteSize / totalTxtSize) < ratio {
-		appendError = game.Buffers.AppendWithDecor(game.Bucket.BufferDialogScene, txt[int(appendedByteSize)], decor)
+		appendError = game.bs.AppendWithDecor(game.b.BufferDialogScene, txt[int(appendedByteSize)], decor)
 		if appendError != nil {
 			panic(fmt.Sprintf("ErrorAppending: %v", appendError))
 		}
 
-		xCursor = game.Buffers.GetXCursor(game.Bucket.BufferDialogScene)
+		xCursor = game.bs.GetXCursor(game.b.BufferDialogScene)
 		appendedByteSize = float32(xCursor - prefixLen)
 	}
 
-	drawError := game.Buffers.DrawToGrid(game.Bucket.BufferDialogScene, game.Bucket.GridDialogScene, 0, 0, game.GridSystem)
+	drawError := game.bs.DrawToGrid(game.b.BufferDialogScene, game.b.GridDialogScene, 0, 0, game.gs)
 	if drawError != nil {
 		panic(drawError)
 	}
@@ -116,24 +116,24 @@ func Scene2_HandleAllDialog(current, next GameState, game *Game) GameState {
 
 func Scene2_WaitForEnter(current, next GameState, game *Game) GameState {
 
-	game.GridSystem.Set(game.Bucket.GridDialogScene, 16, 15, CellTypeChar, '[')
-	game.GridSystem.Set(game.Bucket.GridDialogScene, 17, 15, CellTypeChar, 'E')
-	game.GridSystem.Set(game.Bucket.GridDialogScene, 18, 15, CellTypeChar, 'N')
-	game.GridSystem.Set(game.Bucket.GridDialogScene, 19, 15, CellTypeChar, 'T')
-	game.GridSystem.Set(game.Bucket.GridDialogScene, 20, 15, CellTypeChar, 'E')
-	game.GridSystem.Set(game.Bucket.GridDialogScene, 21, 15, CellTypeChar, 'R')
-	game.GridSystem.Set(game.Bucket.GridDialogScene, 22, 15, CellTypeChar, ']')
+	game.gs.Set(game.b.GridDialogScene, 16, 15, CellTypeChar, '[')
+	game.gs.Set(game.b.GridDialogScene, 17, 15, CellTypeChar, 'E')
+	game.gs.Set(game.b.GridDialogScene, 18, 15, CellTypeChar, 'N')
+	game.gs.Set(game.b.GridDialogScene, 19, 15, CellTypeChar, 'T')
+	game.gs.Set(game.b.GridDialogScene, 20, 15, CellTypeChar, 'E')
+	game.gs.Set(game.b.GridDialogScene, 21, 15, CellTypeChar, 'R')
+	game.gs.Set(game.b.GridDialogScene, 22, 15, CellTypeChar, ']')
 
 	if game.MouseMoved {
 		mx, my := ebiten.CursorPosition()
 		mouseRect := image.Rect(mx, my, mx+1, my+1)
 
-		if mouseRect.Overlaps(game.GridSystem.GridRectangle(game.Bucket.GridDialogScene, 16, 15, 7, 1)) {
-			game.GridSystem.Set(game.Bucket.GridDialogScene, 15, 15, CellTypeChar, ':')
-			game.GridSystem.Set(game.Bucket.GridDialogScene, 23, 15, CellTypeChar, '|')
+		if mouseRect.Overlaps(game.gs.GridRectangle(game.b.GridDialogScene, 16, 15, 7, 1)) {
+			game.gs.Set(game.b.GridDialogScene, 15, 15, CellTypeChar, ':')
+			game.gs.Set(game.b.GridDialogScene, 23, 15, CellTypeChar, '|')
 		} else {
-			game.GridSystem.Set(game.Bucket.GridDialogScene, 15, 15, CellTypeEmpty, ' ')
-			game.GridSystem.Set(game.Bucket.GridDialogScene, 23, 15, CellTypeEmpty, ' ')
+			game.gs.Set(game.b.GridDialogScene, 15, 15, CellTypeEmpty, ' ')
+			game.gs.Set(game.b.GridDialogScene, 23, 15, CellTypeEmpty, ' ')
 		}
 	}
 
@@ -148,6 +148,6 @@ func Scene2_WaitForEnter(current, next GameState, game *Game) GameState {
 }
 
 func Scene2_CleanUpScene(next GameState, game *Game) GameState {
-	game.GridSystem.DisableGrid(game.Bucket.GridDialogScene)
+	game.gs.DisableGrid(game.b.GridDialogScene)
 	return next
 }

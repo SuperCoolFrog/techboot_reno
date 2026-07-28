@@ -42,7 +42,7 @@ func (game *Game) UpdateState() {
 	case Scene1_Waiting:
 		game.State = Scene1_HandleButtonList(Scene1_Waiting, Scene1_ExitAnimation, game)
 	case Scene1_ExitAnimation:
-		game.State = Scene1_PlayAnimatedGridExit(Scene1_ExitAnimation, Scene1_Exiting, game.Animations)
+		game.State = Scene1_PlayAnimatedGridExit(Scene1_ExitAnimation, Scene1_Exiting, game.ans)
 	case Scene1_Exiting:
 		game.State = Scene1_UpdateAnimatedGridExit(Scene1_Exiting, Scene2_Init, game)
 	case Scene2_Init:

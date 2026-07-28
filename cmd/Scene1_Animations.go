@@ -1,18 +1,18 @@
 package main
 
 func Scene1_PlayAnimatedGridIntro(current, next GameState, game *Game) GameState {
-	if game.Animations.IsPlaying[AnimationStartScene] {
+	if game.ans.IsPlaying[AnimationStartScene] {
 		return next
 	}
-	game.Animations.IsPlaying[AnimationStartScene] = true
-	game.GridSystem.EnableGrid(game.Bucket.GridStartScene)
+	game.ans.IsPlaying[AnimationStartScene] = true
+	game.gs.EnableGrid(game.b.GridStartScene)
 
 	return next
 }
 
 func Scene1_UpdateAnimatedGridIntro(current, next GameState, game *Game) GameState {
-	gridSystem := game.GridSystem
-	anims := game.Animations
+	gridSystem := game.gs
+	anims := game.ans
 
 	if !anims.IsPlaying[AnimationStartScene] {
 		Scene1_HandleAnimationComplete(game)
@@ -22,8 +22,8 @@ func Scene1_UpdateAnimatedGridIntro(current, next GameState, game *Game) GameSta
 	timer := anims.Timers[AnimationStartScene]
 	duration := float64(anims.Durations[AnimationStartScene])
 	delay := anims.Delay[AnimationStartScene]
-	cols := gridSystem.Cols[game.Bucket.GridStartScene]
-	rows := gridSystem.Rows[game.Bucket.GridStartScene]
+	cols := gridSystem.Cols[game.b.GridStartScene]
+	rows := gridSystem.Rows[game.b.GridStartScene]
 
 	// steps := 2.0
 	//stepDuration := duration / steps
@@ -41,7 +41,7 @@ func Scene1_UpdateAnimatedGridIntro(current, next GameState, game *Game) GameSta
 		for x := 0; x < maxCol; x++ {
 			// grid.Set(x, 0, RenderFlagCellSquare, 0)
 			for y := 0; y < maxRow; y++ {
-				gridSystem.Set(game.Bucket.GridStartScene, x, y, CellTypeSquare, 0)
+				gridSystem.Set(game.b.GridStartScene, x, y, CellTypeSquare, 0)
 			}
 		}
 
@@ -72,7 +72,7 @@ func Scene1_UpdateAnimatedGridIntro(current, next GameState, game *Game) GameSta
 
 		for x := minCol; x < maxCol; x++ {
 			for y := minRow; y < maxRow; y++ {
-				gridSystem.Set(game.Bucket.GridStartScene, x, y, CellTypeEmpty, 0)
+				gridSystem.Set(game.b.GridStartScene, x, y, CellTypeEmpty, 0)
 			}
 		}
 	}
@@ -95,17 +95,17 @@ func Scene1_PlayAnimatedGridExit(current, next GameState, anims *AnimationSystem
 
 func Scene1_UpdateAnimatedGridExit(current, next GameState, game *Game) GameState {
 
-	if !game.Animations.IsPlaying[AnimationStartScene] {
+	if !game.ans.IsPlaying[AnimationStartScene] {
 		return next
 	}
 
-	timer := game.Animations.Timers[AnimationStartScene]
-	duration := float64(game.Animations.Durations[AnimationStartScene])
-	delay := game.Animations.Delay[AnimationStartScene]
-	gridId := game.Bucket.GridStartScene
-	gridSystem := game.GridSystem
-	cols := game.GridSystem.Cols[game.Bucket.GridStartScene]
-	rows := game.GridSystem.Rows[game.Bucket.GridStartScene]
+	timer := game.ans.Timers[AnimationStartScene]
+	duration := float64(game.ans.Durations[AnimationStartScene])
+	delay := game.ans.Delay[AnimationStartScene]
+	gridId := game.b.GridStartScene
+	gridSystem := game.gs
+	cols := game.gs.Cols[game.b.GridStartScene]
+	rows := game.gs.Rows[game.b.GridStartScene]
 
 	trueTime := float64(timer - delay)
 

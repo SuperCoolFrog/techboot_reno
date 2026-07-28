@@ -200,6 +200,8 @@ func (bs *BufferSystem) AppendDecorators(id BufferID, decor BufferDecorator) err
 	postCount := len(decor.Postfix)
 	xCursor := bs.GetXCursor(id)
 
+	fmt.Printf("Starting cursor %d\n", xCursor)
+
 	if preCount+postCount+xCursor > bs.Cols[id] {
 		if bs.LineOverflow[id] {
 			bs.NewLine(id)
@@ -217,19 +219,28 @@ func (bs *BufferSystem) AppendDecorators(id BufferID, decor BufferDecorator) err
 
 	}
 
-	for bs.GetXCursor(id) <= len(decor.Prefix) {
+	for bs.GetXCursor(id) < len(decor.Prefix) {
+		fmt.Printf("Inc Loop: %d ;; %d \n", bs.GetXCursor(id), len(decor.Prefix))
 		bs.IncrementXCursor(id)
 	}
 
+	fmt.Printf("Cursor after prefix %d\n", bs.GetXCursor(id))
+
+	fmt.Printf("History Value before postfix %d\n", bs.Histories[historyIdxRow0+1])
+
 	// Postfix is added but doesn't effect XCursor.  Meant to be overwritten
+	fmt.Printf("Applying postfix\n")
 	for i := 0; i < len(decor.Postfix); i++ {
-		postFixIdx := historyIdxRow0 + bs.GetXCursor(id) + i
-		if postFixIdx < bs.Cols[id] {
+		if bs.GetXCursor(id) < bs.Cols[id] {
+			fmt.Printf("-> postfix %d ;; %d ;; %d \n", historyIdxRow0, bs.GetXCursor(id), i)
+			postFixIdx := historyIdxRow0 + bs.GetXCursor(id) + i
 			bs.Histories[postFixIdx] = decor.Postfix[i]
 		} else {
 			break
 		}
 	}
+
+	fmt.Printf("History Value After postfix %d\n", bs.Histories[historyIdxRow0+1])
 
 	return nil
 }
@@ -257,14 +268,15 @@ func (bs *BufferSystem) AppendWithDecor(id BufferID, char byte, decor BufferDeco
 	}
 
 	err := bs.Append(id, char)
+
 	if err != nil {
 		return err
 	}
 
 	// Postfix is added but doesn't effect XCursor.  Meant to be overwritten
 	for i := 0; i < len(decor.Postfix); i++ {
-		postFixIdx := historyIdxRow0 + bs.GetXCursor(id) + i
-		if postFixIdx < bs.Cols[id] {
+		if bs.GetXCursor(id) < bs.Cols[id] {
+			postFixIdx := historyIdxRow0 + bs.GetXCursor(id) + i
 			bs.Histories[postFixIdx] = decor.Postfix[i]
 		} else {
 			break
@@ -327,6 +339,20 @@ func (bs *BufferSystem) GetBufferRow(id BufferID, rowIdx int) ([]byte, error) {
 	return []byte{}, fmt.Errorf("GetBufferRow: rowIdx(%d) exceeds total rows(%d)\n", rowIdx, bs.TotalRows[id])
 }
 
+func (bs *BufferSystem) GetBufferRowWithDecor(id BufferID, rowIdx int, decor BufferDecorator) ([]byte, error) {
+	if rowIdx < bs.TotalRows[id] {
+		historyOffset := bs.HistoryOffsets[id]
+		xCursorOffset := bs.XCursorsOffsets[id]
+
+		historyIdx := historyOffset + rowIdx*bs.Cols[id]
+		xCursor := bs.XCursors[xCursorOffset+rowIdx]
+
+		return bs.Histories[historyIdx : historyIdx+xCursor+len(decor.Postfix)], nil
+	}
+
+	return []byte{}, fmt.Errorf("GetBufferRow: rowIdx(%d) exceeds total rows(%d)\n", rowIdx, bs.TotalRows[id])
+}
+
 func (bs *BufferSystem) GetLastBufferLine(id BufferID) ([]byte, error) {
 	if bs.YCursor[id] > 1 {
 		lastY := bs.YCursor[id] - 2
@@ -344,6 +370,26 @@ func (bs *BufferSystem) DrawToGrid(bufferId BufferID, gridId GridID, x, y int, g
 		rowIdx := rowStart + r
 
 		bufferBytes, error := bs.GetBufferRow(bufferId, rowIdx)
+
+		if error != nil {
+			return error
+		}
+
+		for i := 0; i < len(bufferBytes); i++ {
+			gs.Set(gridId, x+i, y+r, CellTypeChar, bufferBytes[i])
+		}
+	}
+
+	return nil
+}
+
+func (bs *BufferSystem) DrawToGridWithDecor(bufferId BufferID, gridId GridID, x, y int, decor BufferDecorator, gs *GridSystem) error {
+	rowStart := bs.ActiveRowHead[bufferId]
+
+	for r := 0; r < bs.YCursor[bufferId]; r++ {
+		rowIdx := rowStart + r
+
+		bufferBytes, error := bs.GetBufferRowWithDecor(bufferId, rowIdx, decor)
 
 		if error != nil {
 			return error

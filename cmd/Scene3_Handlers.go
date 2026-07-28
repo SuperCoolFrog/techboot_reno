@@ -59,7 +59,7 @@ func Scene3_Update(current, next GameState, game *Game) GameState {
 		game.Buffers.DecrementCursorWithDecor(game.Bucket.BufferCommands, CmdBufferDecor)
 	}
 
-	err := game.Buffers.DrawToGrid(game.Bucket.BufferCommands, game.Bucket.GridMainUI, 1, 1, game.GridSystem)
+	err := game.Buffers.DrawToGridWithDecor(game.Bucket.BufferCommands, game.Bucket.GridMainUI, 1, 1, CmdBufferDecor, game.GridSystem)
 	if err != nil {
 		fmt.Printf("Error Drawing to BufferCommands: %v", err)
 	}

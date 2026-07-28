@@ -276,10 +276,12 @@ func (bs *BufferSystem) AppendWithDecor(id BufferID, char byte, decor BufferDeco
 }
 
 func (bs *BufferSystem) DecrementCursor(id BufferID) {
-	if bs.GetXCursor(id) > 0 {
+	xCursor := bs.GetXCursor(id)
+
+	if xCursor > 0 {
 		historyIdx := bs.GetCurrentHistoryIdx(id)
-		for i := 0; i < bs.Cols[id]-bs.GetXCursor(id); i++ {
-			bs.Histories[historyIdx+bs.GetXCursor(id)+i] = ' '
+		for i := xCursor - 1; i < bs.Cols[id]; i++ {
+			bs.Histories[historyIdx+i] = 0
 		}
 		bs.DecrementXCursor(id)
 	}
@@ -299,18 +301,11 @@ func (bs *BufferSystem) TrimDecor(id BufferID, decor BufferDecorator) {
 }
 
 func (bs *BufferSystem) DecrementCursorWithDecor(id BufferID, decor BufferDecorator) {
-	historyIdx := bs.GetCurrentHistoryIdx(id)
+	xCursor := bs.GetXCursor(id)
 
-	if bs.GetXCursor(id) > len(decor.Prefix) {
-		for i := 0; i < bs.Cols[id]-bs.GetXCursor(id); i++ {
-			bs.Histories[historyIdx+bs.GetXCursor(id)+i] = ' '
-		}
-
-		bs.DecrementXCursor(id)
-
-		for i := 0; i < len(decor.Postfix); i++ {
-			bs.Histories[historyIdx+bs.GetXCursor(id)+i] = decor.Postfix[i]
-		}
+	if xCursor > len(decor.Prefix) {
+		bs.DecrementCursor(id)
+		bs.AppendDecorators(id, decor)
 	}
 }
 
@@ -386,6 +381,10 @@ func (bs *BufferSystem) DrawToGridWithDecor(bufferId BufferID, gridId GridID, x,
 
 		for i := 0; i < len(bufferBytes); i++ {
 			gs.Set(gridId, x+i, y+r, CellTypeChar, bufferBytes[i])
+		}
+
+		for i := len(bufferBytes); i < bs.Cols[bufferId]; i++ {
+			gs.Set(gridId, x+i, y+r, CellTypeEmpty, 0)
 		}
 	}
 

@@ -30,6 +30,7 @@ func Scene3_HandleInit(current, next GameState, game *Game) GameState {
 	game.Buffers.AppendDecorators(game.Bucket.BufferCommands, CmdBufferDecor)
 
 	game.Buffers.AppendAll(game.Bucket.BufferLogs, []byte("Type: connect rabbit="))
+	game.Buffers.NewLine(game.Bucket.BufferLogs)
 
 	game.Animations.IsPlaying[AnimationScanner] = true
 	game.Animations.Loop[AnimationScanner] = true
@@ -51,8 +52,10 @@ func Scene3_Update(current, next GameState, game *Game) GameState {
 		game.Buffers.NewLine(game.Bucket.BufferCommands)
 		game.Buffers.AppendDecorators(game.Bucket.BufferCommands, CmdBufferDecor)
 
-		if lastLine, lineError := game.Buffers.GetLastBufferLine(game.Bucket.BufferCommands); lineError != nil {
+		if lastLine, lineError := game.Buffers.GetLastBufferLine(game.Bucket.BufferCommands); lineError == nil {
 			ParseInput(lastLine, game.prologInput)
+		} else {
+			fmt.Printf("Error Getting lastLine: %v", lineError)
 		}
 	}
 	if utilDebouncedKeyPressed(ebiten.KeyBackspace) {

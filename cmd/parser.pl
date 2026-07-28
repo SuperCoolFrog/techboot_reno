@@ -4,29 +4,29 @@
 
 shape(1, square).
 
-state(21).
-state(25).
+state(11).
+state(15).
 
 % Scene3_InputHandlingLoop :: 21
-connection(state(21), rabbit).
+connection(state(11), rabbit).
 
 % Scene4_Run :: 25
-crawl(state(25), [files, programs, networks]).
+crawl(state(15), [files, programs, networks]).
 crawl(StateId, result(list, List)) :-
     state(StateId),
     info(state(StateId), List),!.
 
-files(state(25), [roy_1_fn, roy_2_fn, roy_3_fn]).
+files(state(15), [roy_1_fn, roy_2_fn, roy_3_fn]).
 files(StateId, result(list, List)) :-
     state(StateId),
     files(state(StateId), List), !.
 
-programs(state(25), [breach, mem, memcopy]).
+programs(state(15), [breach, mem, memcopy]).
 programs(StateId, result(list, List)) :-
     state(StateId),
     programs(state(StateId), List), !.
 
-networks(state(25), [lobby]).
+networks(state(15), [lobby]).
 networks(StateId, result(list, List)) :-
     state(StateId),
     networks(state(StateId), List), !.

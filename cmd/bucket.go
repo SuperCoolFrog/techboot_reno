@@ -247,7 +247,7 @@ func (bucket *Bucket) CommandBytes(commandId CommandId, bs *BufferSystem) []byte
 	row := bucket.CommandOutputStartRowIdx[commandId]
 	d, err := bs.GetBufferRow(bucket.BufferCommandOutputs, row)
 
-	if err != nil {
+	if err == nil {
 		return d
 	}
 
@@ -262,8 +262,6 @@ func bucketInitCommandStrings(bs *BufferSystem, bucket *Bucket) {
 
 func bucketAddCommandStrings(commandId CommandId, val []byte, bs *BufferSystem, bucket *Bucket) {
 	bucket.CommandOutputStartRowIdx[commandId] = bs.YCursor[bucket.BufferCommandOutputs] - 1
-
-	fmt.Printf("Command Added to buffer: %d\n", bucket.CommandOutputStartRowIdx[commandId])
 
 	bs.AppendAll(bucket.BufferCommandOutputs, val)
 	bs.NewLine(bucket.BufferCommandOutputs)

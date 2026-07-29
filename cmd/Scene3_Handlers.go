@@ -80,15 +80,15 @@ loop:
 		case cmd := <-game.prologOutput:
 			fmt.Printf("Commands: %v\n", cmd)
 
-			switch cmd {
-			case AtomConnectTrue:
+			switch cmd.ResultType {
+			case CommandConnectTrue:
 				fmt.Printf("Connection Made!\n")
 				state = next
-			case AtomConnectFalse:
+			case CommandConnectFalse:
 				// fmt.Printf("Connection Failed!\n")
 				game.bs.AppendAll(game.b.BufferLogs, []byte("Connection Failed"))
 				game.bs.NewLine(game.b.BufferLogs)
-			case AtomInvalid:
+			case CommandInvalid:
 				// fmt.Printf("Invalid!\n")
 				game.bs.AppendAll(game.b.BufferLogs, []byte("Invalid Command"))
 				game.bs.NewLine(game.b.BufferLogs)

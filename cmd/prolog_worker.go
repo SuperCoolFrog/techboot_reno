@@ -8,10 +8,15 @@ import (
 	"strings"
 )
 
+type CommandResponse struct {
+	ResultType CommandId
+	Items      []CommandId
+}
+
 type OutResult struct {
 	trealla.Functor `prolog:"/2"`
-	ResultType      trealla.Atom
-	Items           []trealla.Atom
+	ResultType      CommandId
+	Items           []CommandId
 }
 
 type Result struct {
@@ -68,7 +73,12 @@ func (g *Game) prologWorker() {
 		// 	fmt.Printf("Matches atom")
 		// }
 
-		g.prologOutput <- r.Out.ResultType
+		fmt.Printf("Output: %v\n", r.Out)
+
+		g.prologOutput <- CommandResponse{
+			ResultType: r.Out.ResultType,
+			Items:      r.Out.Items,
+		}
 
 		// if query.Next(ctx) {
 		// 	answer := query.Current()

@@ -1,6 +1,9 @@
 package main
 
-import "github.com/trealla-prolog/go/trealla"
+import (
+	// "fmt"
+	"github.com/trealla-prolog/go/trealla"
+)
 
 const AtomInvalid = trealla.Atom("invalid")
 const AtomConnectTrue = trealla.Atom("connect_true")
@@ -16,25 +19,6 @@ const AtomBreach = trealla.Atom("breach")
 const AtomMem = trealla.Atom("mem")
 const AtomMemCopy = trealla.Atom("memcopy")
 const AtomLobby = trealla.Atom("lobby")
-
-type CommandId uint32
-
-var AtomCommandIds = map[trealla.Atom]CommandId{
-	AtomInvalid:      0,
-	AtomConnectTrue:  1,
-	AtomConnectFalse: 2,
-	AtomList:         3,
-	AtomFiles:        4,
-	AtomPrograms:     5,
-	AtomNetworks:     6,
-	AtomRoy1Fn:       7,
-	AtomRoy2Fn:       8,
-	AtomRoy3Fn:       9,
-	AtomBreach:       10,
-	AtomMem:          11,
-	AtomMemCopy:      12,
-	AtomLobby:        13,
-}
 
 // var CommandBytes = make([][]byte, len(AtomCommandIds))
 var CommandBytes = [][]byte{
@@ -52,8 +36,6 @@ var CommandBytes = [][]byte{
 	[]byte("[Email]: RE: RE: Sorry About Breakfast"),
 
 	[]byte("`BREACH {name}`: Hack into Network"),
-	[]byte("`MEM`: Display your local memory data"),
-	[]byte("`MEMCOPY {fromId} {toId}`: copy memory data"),
 	[]byte("[Lobby]: connection"),
 }
 

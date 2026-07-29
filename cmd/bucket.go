@@ -1,6 +1,9 @@
 package main
 
-import "techboot_reno/cmd/assets"
+import (
+	"fmt"
+	"techboot_reno/cmd/assets"
+)
 
 // Animations
 const (
@@ -10,6 +13,25 @@ const (
 	AnimationMemoryStack
 
 	AnimationCount
+)
+
+type CommandId uint32
+
+const (
+	CommandInvalid CommandId = iota
+	CommandConnectTrue
+	CommandConnectFalse
+	CommandList
+	CommandFiles
+	CommandPrograms
+	CommandNetworks
+	CommandRoy1Fn
+	CommandRoy2Fn
+	CommandRoy3Fn
+	CommandBreach
+	CommandLobby
+
+	CommandsCount
 )
 
 type Bucket struct {
@@ -37,8 +59,12 @@ type Bucket struct {
 	/* Buffer for Scene2 Dialog */
 	BufferDialogScene BufferID
 	/* Buffer for entering Commands */
-	BufferCommands BufferID
-	BufferLogs     BufferID
+	BufferCommands       BufferID
+	BufferLogs           BufferID
+	BufferCommandOutputs BufferID // Grid26x36x20x740x20
+
+	/* Row mapping for command output list values */
+	CommandOutputStartRowIdx []int // CommandId -> rowIdx
 
 	/* Stick it in here for now until I think more about these type of values */
 	LogBufferColIdx int
@@ -50,9 +76,10 @@ type Bucket struct {
 
 func InitBucketItems(gs *GridSystem, anims *AnimationSystem, bs *BufferSystem) Bucket {
 	bucket := &Bucket{
-		SceneStateItr:   make([]int, GameStateCount),
-		LogBufferColIdx: 37,
-		LogBufferRowIdx: 38,
+		SceneStateItr:            make([]int, GameStateCount),
+		CommandOutputStartRowIdx: make([]int, int(CommandsCount)),
+		LogBufferColIdx:          37,
+		LogBufferRowIdx:          38,
 	}
 
 	bucketInitGrids(gs, bucket)
@@ -63,6 +90,8 @@ func InitBucketItems(gs *GridSystem, anims *AnimationSystem, bs *BufferSystem) B
 	bucketInitScannerAnimations(gs, anims, bucket)
 
 	bucketInitMainUI(gs, bs, bucket)
+
+	bucketInitCommandStrings(bs, bucket)
 
 	return *bucket
 }
@@ -88,6 +117,7 @@ func bucketInitBuffers(bs *BufferSystem, bucket *Bucket) {
 	bucket.Buffer42x30x30xfalse = bs.AllocateBuffer(42, 30, 30, false)
 	bucket.Buffer35x46x2000xfalse = bs.AllocateBuffer(35, 46, 2000, false)
 	bucket.Buffer26x9x200xtrue = bs.AllocateBuffer(26, 9, 200, true)
+	bucket.BufferCommandOutputs = bs.AllocateBuffer(26, int(CommandsCount), int(CommandsCount), false)
 }
 
 func bucketInitIntroAnimation(gs *GridSystem, anims *AnimationSystem, bucket *Bucket) {
@@ -211,4 +241,30 @@ func bucketInitMainUI(gs *GridSystem, bs *BufferSystem, bucket *Bucket) {
 	/* Did not add these in.  I feel that should  be part of init */
 	// CommandBuffer.AppendDecorators(CmdBufferDecor)
 	// LogBuffer.AppendAll([]byte("Type: connect rabbit="))
+}
+
+func (bucket *Bucket) CommandBytes(commandId CommandId, bs *BufferSystem) []byte {
+	row := bucket.CommandOutputStartRowIdx[commandId]
+	d, err := bs.GetBufferRow(bucket.BufferCommandOutputs, row)
+
+	if err != nil {
+		return d
+	}
+
+	return []byte{}
+}
+
+func bucketInitCommandStrings(bs *BufferSystem, bucket *Bucket) {
+	bucketAddCommandStrings(CommandFiles, []byte("[Files]:"), bs, bucket)
+	bucketAddCommandStrings(CommandPrograms, []byte("[Programs]:"), bs, bucket)
+	bucketAddCommandStrings(CommandNetworks, []byte("[Networks]:"), bs, bucket)
+}
+
+func bucketAddCommandStrings(commandId CommandId, val []byte, bs *BufferSystem, bucket *Bucket) {
+	bucket.CommandOutputStartRowIdx[commandId] = bs.YCursor[bucket.BufferCommandOutputs] - 1
+
+	fmt.Printf("Command Added to buffer: %d\n", bucket.CommandOutputStartRowIdx[commandId])
+
+	bs.AppendAll(bucket.BufferCommandOutputs, val)
+	bs.NewLine(bucket.BufferCommandOutputs)
 }

@@ -67,27 +67,34 @@ func Scene4_UpdateStackAnimation(current, next GameState, game *Game) GameState 
 // func Scene4_Update(current, next GameState, runes []rune, input chan []byte, commands chan trealla.Atom, gs *GridSystem, anims *AnimationSystem) GameState {
 func Scene4_Update(current, next GameState, game *Game) GameState {
 	for i := 0; i < len(game.inputRunes); i++ {
-		game.bs.AppendWithDecor(game.b.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
+		err := game.bs.AppendWithDecor(game.b.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
+		if err != nil {
+			fmt.Printf("Error Appending Last Rune: %v\n", err)
+		}
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		//CommandBuffer
 		game.bs.TrimDecor(game.b.BufferCommands, CmdBufferDecor)
 		game.bs.NewLine(game.b.BufferCommands)
 		game.bs.AppendDecorators(game.b.BufferCommands, CmdBufferDecor)
 
-		fmt.Printf("Enter\n")
 		if lastLine, lineError := game.bs.GetLastBufferLine(game.b.BufferCommands); lineError == nil {
 			ParseInput(lastLine, game.prologInput)
+		} else {
+			fmt.Printf("Error Getting lastLine: %v", lineError)
 		}
 	}
 	if utilDebouncedKeyPressed(ebiten.KeyBackspace) {
 		game.bs.DecrementCursorWithDecor(game.b.BufferCommands, CmdBufferDecor)
 	}
 
-	game.bs.DrawToGrid(game.b.BufferCommands, game.b.GridMainUI, 1, 1, game.gs)
+	err := game.bs.DrawToGridWithDecor(game.b.BufferCommands, game.b.GridMainUI, 1, 1, CmdBufferDecor, game.gs)
+	if err != nil {
+		fmt.Printf("Error Drawing to BufferCommands: %v", err)
+	}
 
-	game.bs.DrawToGrid(game.b.BufferLogs, game.b.GridMainUI, game.b.LogBufferColIdx, game.b.LogBufferRowIdx, game.gs)
+	// LogBuff
+	game.bs.DrawToGrid(game.b.BufferLogs, game.b.GridMainUI, 37, 38, game.gs)
 
 	state := current
 
@@ -97,10 +104,13 @@ loop:
 		case cmd := <-game.prologOutput:
 			fmt.Printf("Commands: %v\n", cmd)
 
-			switch cmd {
-			case AtomList:
-				// Display list items
-			case AtomInvalid:
+			switch cmd.ResultType {
+			case CommandList:
+				for i := 0; i < len(cmd.Items); i++ {
+					b := game.b.CommandBytes(cmd.Items[i], game.bs)
+					fmt.Printf("%d: %d: %s\n", i, len(b), b)
+				}
+			case CommandInvalid:
 				// fmt.Printf("Invalid!\n")
 				game.bs.AppendAll(game.b.BufferLogs, []byte("Invalid Command"))
 				game.bs.NewLine(game.b.BufferLogs)

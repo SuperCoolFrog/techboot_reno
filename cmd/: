@@ -76,11 +76,10 @@ out_value([H|_], Out) :- Out = H.
 % Pattern-match result directly in the head to force early unification
 connect(Name, StateId, result(ConnectType, [])) :-
     state(StateId),
-    command_id(connect_true, ConnectType),
+    command_id(connect_true, ListType),
     connection(state(StateId), Name), !.
 
-connect(_, _, result(ConnectType, [])) :- 
-    command_id(connect_false, ConnectType).
+connect(_, _, result(connect_false, [])).
 
 % =========================================================================
 % Parser
@@ -109,9 +108,7 @@ process_command(List, Out) :-
     !.
 
 % Any commands that fail or do not exist return invalid
-process_command(_, Out) :- Out = 
-    result(InvalidType, []),
-    command_id(invalid, InvalidType).
+process_command(_, Out) :- Out = result(invalid, []).
 
 % =========================================================================
 % Helpers

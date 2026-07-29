@@ -8,7 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/ichiban/prolog"
-	"github.com/trealla-prolog/go/trealla"
+	// "github.com/trealla-prolog/go/trealla"
 	"image/color"
 	"techboot_reno/cmd/assets"
 )
@@ -50,8 +50,8 @@ type Game struct {
 	LastMouseX, LastMouseY int
 	Exit                   bool
 	parserpl               string
-	prologInput            chan []byte       // Channel sending raw bytes to Prolog thread
-	prologOutput           chan trealla.Atom // Channel receiving parsed commands from Prolog thread
+	prologInput            chan []byte          // Channel sending raw bytes to Prolog thread
+	prologOutput           chan CommandResponse // Channel receiving parsed commands from Prolog thread
 }
 
 func (g *Game) Update() error {
@@ -127,7 +127,7 @@ func main() {
 		bs:           NewBufferSystem(500_000, 10),
 		parserpl:     string(parserpl),
 		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
-		prologOutput: make(chan trealla.Atom, 128),
+		prologOutput: make(chan CommandResponse, 128),
 	}
 
 	assets.Load() // Load Assets before init bucket

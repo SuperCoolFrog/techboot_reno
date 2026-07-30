@@ -13,36 +13,35 @@ command_id(connect_true,  1).
 command_id(connect_false, 2).
 command_id(list,          3).
 command_id(files,         4).
-command_id(programs,      5).
-command_id(networks,      6).
-command_id(roy_1_fn,      7).
-command_id(roy_2_fn,      8).
-command_id(roy_3_fn,      9).
-command_id(breach,       10).
-command_id(lobby,        13).
+command_id(networks,      5).
+command_id(roy_1_fn,      6).
+command_id(roy_2_fn,      7).
+command_id(roy_3_fn,      8).
+command_id(breach,        9).
+command_id(lobby,        10).
+
+
+% Common
+commands(_, result(ListType, List)) :-
+    command_id(list, ListType),
+    maplist(command_id, [list], List),!.
 
 
 % Scene3_InputHandlingLoop :: 21
 connection(state(11), rabbit).
 
 % Scene4_Run :: 25
-list(state(15), [files, programs, networks]).
+list(state(15), [files, networks]).
 list(StateId, result(ListType, List)) :-
     state(StateId),
     command_id(list, ListType),
     list(state(StateId), CommandNames),
     maplist(command_id, CommandNames, List),!.
 
-commands(state(15), [roy_1_fn, roy_2_fn, roy_3_fn]).
-commands(StateId, result(list, List)) :-
+files(state(15), [roy_1_fn, roy_2_fn, roy_3_fn]).
+files(StateId, result(list, List)) :-
     state(StateId),
     files(state(StateId), CommandNames), 
-    maplist(command_id, CommandNames, List),!.
-
-programs(state(15), [breach, mem, memcopy]).
-programs(StateId, result(list, List)) :-
-    state(StateId),
-    programs(state(StateId), CommandNames),
     maplist(command_id, CommandNames, List),!.
 
 networks(state(15), [lobby]).

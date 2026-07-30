@@ -23,7 +23,6 @@ const (
 	CommandConnectFalse
 	CommandList
 	CommandFiles
-	CommandPrograms
 	CommandNetworks
 	CommandRoy1Fn
 	CommandRoy2Fn
@@ -258,7 +257,6 @@ func (bucket *Bucket) CommandBytes(commandId CommandId, bs *BufferSystem) []byte
 
 func bucketInitCommandStrings(bs *BufferSystem, bucket *Bucket) {
 	bucketAddCommandStrings(CommandFiles, []byte("[Files]:"), bs, bucket)
-	bucketAddCommandStrings(CommandPrograms, []byte("[Programs]:"), bs, bucket)
 	bucketAddCommandStrings(CommandNetworks, []byte("[Networks]:"), bs, bucket)
 }
 

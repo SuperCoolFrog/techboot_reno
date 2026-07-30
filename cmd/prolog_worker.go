@@ -11,6 +11,7 @@ import (
 type CommandResponse struct {
 	ResultType CommandId
 	Items      []CommandId
+	Command    []byte
 }
 
 type OutResult struct {
@@ -76,6 +77,7 @@ func (g *Game) prologWorker() {
 		fmt.Printf("Output: %v\n", r.Out)
 
 		g.prologOutput <- CommandResponse{
+			Command:    []byte(normalizedStr + "="),
 			ResultType: r.Out.ResultType,
 			Items:      r.Out.Items,
 		}

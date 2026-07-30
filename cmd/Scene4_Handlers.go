@@ -106,9 +106,12 @@ loop:
 
 			switch cmd.ResultType {
 			case CommandList:
+				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
+
 				for i := 0; i < len(cmd.Items); i++ {
 					b := game.b.CommandBytes(cmd.Items[i], game.bs)
-					fmt.Printf("%d: %d: %s\n", i, len(b), b)
+					// fmt.Printf("%d: %d: %s\n", i, len(b), b)
+					game.gs.SetRowCells(game.b.GridOutput, i, CellTypeChar, b)
 				}
 			case CommandInvalid:
 				// fmt.Printf("Invalid!\n")

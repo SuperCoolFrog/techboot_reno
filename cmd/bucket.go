@@ -251,6 +251,8 @@ func (bucket *Bucket) CommandBytes(commandId CommandId, bs *BufferSystem) []byte
 		return d
 	}
 
+	fmt.Printf("Error Retrieving Command Bytes: %d : %v\n", commandId, err)
+
 	return []byte{}
 }
 

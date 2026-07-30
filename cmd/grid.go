@@ -180,6 +180,12 @@ func (gs *GridSystem) SetAllCells(gridId GridID, cellType GridCellType, char byt
 	}
 }
 
+func (gs *GridSystem) SetRowCells(gridId GridID, row int, cellType GridCellType, chars []byte) {
+	for i := 0; i < len(chars); i++ {
+		gs.Set(gridId, i, row, CellTypeChar, chars[i])
+	}
+}
+
 func (gs *GridSystem) Get(gridId GridID, x int, y int) (cellType GridCellType, char byte) {
 	idx := gs.IdxFromXY(gridId, x, y)
 	cellType = gs.CellTypes[idx]

@@ -21,7 +21,14 @@ command_id(breach,          9).
 command_id(lobby,          10).
 command_id(connect,        11).
 command_id(list_specific,  12).
-
+command_id(connect_puzzle, 13).
+% intro is just the very first puzzle.
+% Others would be generated.
+% Bosses may be a special - TODO think more about it
+command_id(puzzle_intro,   14). 
+command_id(puzzle_easy,    15).
+command_id(puzzle_med,     16).
+command_id(puzzle_hard,    17).
 
 % Common
 commands(_, result(ListType, List)) :-
@@ -31,6 +38,7 @@ commands(_, result(ListType, List)) :-
 
 % Scene3_InputHandlingLoop :: 21
 connection(state(11), rabbit).
+secured_connection(state(15), lobby, puzzle_intro).
 
 % Scene4_Run :: 25
 list(state(15), [files, networks]).
@@ -85,6 +93,11 @@ connect(Name, StateId, result(ConnectType, [])) :-
     state(StateId),
     command_id(connect_true, ConnectType),
     connection(state(StateId), Name), !.
+
+connect(Name, StateId, result(ConnectType, [Puzzle])) :-
+    state(StateId),
+    command_id(connect_puzzle, ConnectType),
+    secured_connection(state(StateId), Name, Puzzle), !.
 
 connect(_, _, result(ConnectType, [])) :- 
     command_id(connect_false, ConnectType).

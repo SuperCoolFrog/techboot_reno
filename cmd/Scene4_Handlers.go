@@ -8,10 +8,6 @@ import (
 	"techboot_reno/cmd/assets"
 )
 
-var (
-	OutputBuffer *Buffer
-)
-
 func Scene4_HandleInit(current, next GameState, game *Game) GameState {
 
 	game.gs.EnableGrid(game.b.GridOutput)

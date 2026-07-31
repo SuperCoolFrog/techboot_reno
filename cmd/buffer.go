@@ -12,15 +12,6 @@ type BufferDecorator struct {
 	Postfix []byte
 }
 
-type Buffer struct {
-	Cols, Rows, Capacity int
-	Head, YCursor        int
-	LineOverflow         bool
-	History              [][]byte
-	XCursors             []int
-	internalCapacity     int
-}
-
 /*
 Developed this way so that we don't have to pass around pointers.  We can just pass around IDs.
 

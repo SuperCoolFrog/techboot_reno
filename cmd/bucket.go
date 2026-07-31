@@ -31,6 +31,11 @@ const (
 	CommandLobby
 	CommandConnect
 	CommandListSpecific
+	CommandPuzzle
+	CommandPuzzleIntro
+	CommandPuzzleEasy
+	CommandPuzzleMed
+	CommandPuzzleHard
 
 	CommandsCount
 )

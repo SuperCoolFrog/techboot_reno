@@ -11,22 +11,52 @@ cell_state(gate_or).
 cell_state(current_vertical).
 cell_state(current_horizontal).
 
+
+p(out_of_bounds, x).
+p(super_position, s).
+p(empty, e).
+p(gate_and, a).
+p(gate_or, o).
+p(current_vertical, v).
+p(current_horizontal, h).
+
 % mod X, // Y
-setup(TotalCells, Rows, Grid) :-
-    grid_rows(TotalCells, Rows, TotalCells, Grid).
+setup(TotalCells, RowCount, Grid) :-
+    grid_rows(TotalCells, RowCount, TotalCells, Grid).
 
-
-grid_rows(TotalCells, Rows, Remaining, Counter) :-
+grid_rows(_, _, 0, []).
+grid_rows(TotalCells, RowCount, Remaining, [Row | Rest]) :-
     Remaining > 0,
-    Consume is TotalCells // Rows,
-    NuRemaining is Remaining - Consume,  
-    grid_rows(TotalCells, Rows, NuRemaining, RestCounter),
-    Counter is RestCounter + 1.
+    Cols is TotalCells // RowCount,
+    NuRemaining is Remaining - Cols,  
+    row(Cols, Row),
+    grid_rows(TotalCells, RowCount, NuRemaining, Rest), !.
 
 
-grid_rows(_, _, 0, 0).
+
+row(0, []).
+row(CellCounter, [cell_state(super_position) | Rest]) :-
+    CellCounter > 0,
+    NextCellCounter is CellCounter - 1,
+    row(NextCellCounter, Rest).
 
 
+% 1. Main Predicate: Loops through each row
+print_matrix([]). % Base case: nothing left to print
+print_matrix([Row|Rest]) :-
+    print_row(Row),
+    nl,               % Move to the next line after finishing a row
+    print_matrix(Rest).
+
+% 2. Helper Predicate: Loops through elements in a single row
+print_row([]).    % Base case: row is empty
+print_row([cell_state(X)|Xs]) :-
+    p(X, V),
+    format('~w', [V]), % Prints element followed by a tab (~w = write, \t = tab)
+    print_row(Xs).
+
+% noop(Any) :- Any = [].
+noop(_) :- nl, write('NOOP False: '), false.
 % grid_rows(TotalCells, Rows, Remaining, Counter) :-
 %     Remaining > 0,
 %     Consume is TotalCells // Rows,

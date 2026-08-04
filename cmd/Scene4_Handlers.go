@@ -110,6 +110,8 @@ loop:
 					// fmt.Printf("%d: %d: %s\n", i, len(b), b)
 					game.gs.SetRowCells(game.b.GridOutput, i+1, CellTypeChar, b)
 				}
+			case CommandPuzzle:
+				state = next
 			case CommandInvalid:
 				// fmt.Printf("Invalid!\n")
 				game.bs.AppendAll(game.b.BufferLogs, []byte("Invalid Command"))
@@ -121,4 +123,12 @@ loop:
 	}
 
 	return state
+}
+
+func Scene4_Puzzling(current, next GameState, game *Game) GameState {
+	game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
+
+	fmt.Printf("4 Puzzling\n")
+
+	return current
 }

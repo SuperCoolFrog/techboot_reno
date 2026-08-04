@@ -41,10 +41,11 @@ func init() {
 
 type Game struct {
 	State                  GameState
-	gs                     *GridSystem
 	inputRunes             []rune
 	ans                    *AnimationSystem
 	bs                     *BufferSystem
+	gs                     *GridSystem
+	pz                     *PuzzleSystem
 	b                      Bucket
 	MouseMoved             bool
 	LastMouseX, LastMouseY int
@@ -125,6 +126,7 @@ func main() {
 		gs:           NewGridSystem(MaxTotalCells, MaxGrids),
 		ans:          NewAnimationSystem(),
 		bs:           NewBufferSystem(500_000, 10),
+		pz:           NewPuzzleSystem(10, 1, 0, 0, 0),
 		parserpl:     string(parserpl),
 		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
 		prologOutput: make(chan CommandResponse, 128),

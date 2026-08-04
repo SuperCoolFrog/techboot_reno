@@ -94,10 +94,11 @@ connect(Name, StateId, result(ConnectType, [])) :-
     command_id(connect_true, ConnectType),
     connection(state(StateId), Name), !.
 
-connect(Name, StateId, result(ConnectType, [Puzzle])) :-
+connect(Name, StateId, result(ConnectType, [PuzzleCommandId])) :-
     state(StateId),
     command_id(connect_puzzle, ConnectType),
-    secured_connection(state(StateId), Name, Puzzle), !.
+    secured_connection(state(StateId), Name, Puzzle),
+    command_id(Puzzle, PuzzleCommandId), !.
 
 connect(_, _, result(ConnectType, [])) :- 
     command_id(connect_false, ConnectType).

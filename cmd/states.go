@@ -22,6 +22,7 @@ const (
 	Scene4_Init
 	Scene4_StackAnim
 	Scene4_Run
+	Scene4_Puzzle
 
 	End // End
 
@@ -64,7 +65,9 @@ func (game *Game) UpdateState() {
 	case Scene4_StackAnim:
 		game.State = Scene4_UpdateStackAnimation(Scene4_StackAnim, Scene4_Run, game)
 	case Scene4_Run:
-		game.State = Scene4_Update(Scene4_Run, End, game)
+		game.State = Scene4_Update(Scene4_Run, Scene4_Puzzle, game)
+	case Scene4_Puzzle:
+		game.State = Scene4_Puzzling(Scene4_Puzzle, End, game)
 	}
 
 }

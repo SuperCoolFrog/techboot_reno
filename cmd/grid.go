@@ -22,6 +22,8 @@ const (
 	CellTypeReserved
 	CellTypeSquare
 	CellTypeSprite
+	CellTypeRouteVertical
+	CellTypeRouteHorizontal
 )
 
 type GridSystem struct {

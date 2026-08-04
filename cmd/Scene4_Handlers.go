@@ -149,13 +149,20 @@ func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 	fmt.Printf("%v ; %v ; %v\n", gates, gatesX, gatesY)
 
 	for i := 0; i < len(gates); i++ {
-		// gate := gates[i]
+		gateType := gates[i]
 		x := gatesX[i]
 		y := gatesY[i]
 
 		fmt.Printf("x %d, y %d\n", x, y)
 
-		game.gs.SetCellSprite(game.b.GridOutput, x, y, assets.SpriteIDSquare)
+		switch gateType {
+		case GateUnknown:
+			game.gs.Set(game.b.GridOutput, x, y, CellTypeChar, '?')
+		case GateAnd:
+			game.gs.Set(game.b.GridOutput, x, y, CellTypeChar, 'A')
+		case GateOr:
+			game.gs.Set(game.b.GridOutput, x, y, CellTypeChar, 'O')
+		}
 	}
 
 	return next

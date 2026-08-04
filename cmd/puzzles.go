@@ -307,13 +307,28 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 		gs.SetCellSprite(gridId, x+1, y-1, assets.SpriteIDHorizontalBar)
 		gs.SetCellSprite(gridId, x-1, y+1, assets.SpriteIDHorizontalBar)
 
-		gs.SetCellSprite(gridId, x-2, y-1, assets.SpriteIDCarrotNW)
 		gs.SetCellSprite(gridId, x-2, y, assets.SpriteIDVerticalBar)
-		gs.SetCellSprite(gridId, x-2, y+1, assets.SpriteIDCarrotSW)
-
-		gs.SetCellSprite(gridId, x+2, y-1, assets.SpriteIDCarrotNE)
 		gs.SetCellSprite(gridId, x+2, y, assets.SpriteIDVerticalBar)
-		gs.SetCellSprite(gridId, x+2, y+1, assets.SpriteIDCarrotSE)
+
+		// gs.SetCellSprite(gridId, x-2, y-1, assets.SpriteIDCarrotNW)
+		// gs.SetCellSprite(gridId, x-2, y+1, assets.SpriteIDCarrotSW)
+		// gs.SetCellSprite(gridId, x+2, y-1, assets.SpriteIDCarrotNE)
+		// gs.SetCellSprite(gridId, x+2, y+1, assets.SpriteIDCarrotSE)
+
+		// And Symbol
+		// gs.SetCellSprite(gridId, x-2, y-1, assets.SpriteIDSquare)
+		// gs.SetCellSprite(gridId, x-2, y+1, assets.SpriteIDSquare)
+		// gs.SetCellSprite(gridId, x+2, y-1, assets.SpriteIDSquare)
+		// gs.SetCellSprite(gridId, x+2, y+1, assets.SpriteIDSquare)
+
+		// Or Symbol
+		// gs.SetCellSprite(gridId, x-2, y-1, assets.SpriteIDDiamond)
+		// gs.SetCellSprite(gridId, x-2, y+1, assets.SpriteIDDiamond)
+		// gs.SetCellSprite(gridId, x+2, y-1, assets.SpriteIDDiamond)
+		// gs.SetCellSprite(gridId, x+2, y+1, assets.SpriteIDDiamond)
+
+		hasSymbol := false
+		var cornerSprite assets.SpriteID
 
 		switch gateType {
 		case GateUnknown:
@@ -322,9 +337,20 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 			gs.Set(gridId, x-1, y, CellTypeChar, 'A')
 			gs.Set(gridId, x, y, CellTypeChar, 'N')
 			gs.Set(gridId, x+1, y, CellTypeChar, 'D')
+			hasSymbol = true
+			cornerSprite = assets.SpriteIDSquare
 		case GateOr:
 			gs.Set(gridId, x-1, y, CellTypeChar, 'O')
 			gs.Set(gridId, x, y, CellTypeChar, 'R')
+			hasSymbol = true
+			cornerSprite = assets.SpriteIDDiamond
+		}
+
+		if hasSymbol {
+			gs.SetCellSprite(gridId, x-2, y-1, cornerSprite)
+			gs.SetCellSprite(gridId, x-2, y+1, cornerSprite)
+			gs.SetCellSprite(gridId, x+2, y-1, cornerSprite)
+			gs.SetCellSprite(gridId, x+2, y+1, cornerSprite)
 		}
 	}
 

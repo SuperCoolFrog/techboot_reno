@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"techboot_reno/cmd/assets"
 	"unsafe"
 )
 
@@ -118,9 +119,9 @@ func (ps *PuzzleSystem) InitializeGamePuzzles() error {
 
 	ps.IntroPuzzles[0] = id
 
-	ps.SetValidGate(id, 0, 10, 10, GateOr)
-	ps.SetPuzzleGate(id, 0, 10, 10, GateUnknown)
-	ps.SetAttemptedGate(id, 0, 10, 10, GateUnknown)
+	ps.SetValidGate(id, 0, 13, 16, GateOr)
+	ps.SetPuzzleGate(id, 0, 13, 16, GateUnknown)
+	ps.SetAttemptedGate(id, 0, 13, 16, GateUnknown)
 
 	ps.PuzzleGateCounts[id] = 1
 
@@ -162,8 +163,8 @@ func (ps *PuzzleSystem) SetValidGate(puzzleId PuzzleId, gateIdx, gateX, gateY in
 
 	idx := offset + gateIdx
 	ps.ValidGates[idx] = gate
-	ps.GateX[idx] = gateY
-	ps.GateY[idx] = gateX
+	ps.GateX[idx] = gateX
+	ps.GateY[idx] = gateY
 
 	return nil
 }
@@ -177,8 +178,8 @@ func (ps *PuzzleSystem) SetPuzzleGate(puzzleId PuzzleId, gateIdx, gateX, gateY i
 
 	idx := offset + gateIdx
 	ps.PuzzleGates[idx] = gate
-	ps.GateX[idx] = gateY
-	ps.GateY[idx] = gateX
+	ps.GateX[idx] = gateX
+	ps.GateY[idx] = gateY
 
 	return nil
 }
@@ -192,8 +193,8 @@ func (ps *PuzzleSystem) SetAttemptedGate(puzzleId PuzzleId, gateIdx, gateX, gate
 
 	idx := offset + gateIdx
 	ps.AttemptedGates[idx] = gate
-	ps.GateX[idx] = gateY
-	ps.GateY[idx] = gateX
+	ps.GateX[idx] = gateX
+	ps.GateY[idx] = gateY
 
 	return nil
 }
@@ -284,4 +285,48 @@ func (ps *PuzzleSystem) HasPuzzleAssignment(state GameState) bool {
 	return false
 }
 
-// func (ps *PuzzleSystem) GetGates(id PuzzleId) []
+func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, gs *GridSystem) error {
+
+	gates := ps.GetPuzzleGates(puzzleId)
+	gatesX := ps.GetGatesX(puzzleId)
+	gatesY := ps.GetGatesY(puzzleId)
+
+	fmt.Printf("%v ; %v ; %v\n", gates, gatesX, gatesY)
+
+	for i := 0; i < len(gates); i++ {
+		gateType := gates[i]
+		x := gatesX[i]
+		y := gatesY[i]
+
+		fmt.Printf("x %d, y %d\n", x, y)
+
+		gs.SetCellSprite(gridId, x, y-1, assets.SpriteIDHorizontalBar)
+		gs.SetCellSprite(gridId, x, y+1, assets.SpriteIDHorizontalBar)
+		gs.SetCellSprite(gridId, x-1, y-1, assets.SpriteIDHorizontalBar)
+		gs.SetCellSprite(gridId, x+1, y+1, assets.SpriteIDHorizontalBar)
+		gs.SetCellSprite(gridId, x+1, y-1, assets.SpriteIDHorizontalBar)
+		gs.SetCellSprite(gridId, x-1, y+1, assets.SpriteIDHorizontalBar)
+
+		gs.SetCellSprite(gridId, x-2, y-1, assets.SpriteIDCarrotNW)
+		gs.SetCellSprite(gridId, x-2, y, assets.SpriteIDVerticalBar)
+		gs.SetCellSprite(gridId, x-2, y+1, assets.SpriteIDCarrotSW)
+
+		gs.SetCellSprite(gridId, x+2, y-1, assets.SpriteIDCarrotNE)
+		gs.SetCellSprite(gridId, x+2, y, assets.SpriteIDVerticalBar)
+		gs.SetCellSprite(gridId, x+2, y+1, assets.SpriteIDCarrotSE)
+
+		switch gateType {
+		case GateUnknown:
+			gs.Set(gridId, x, y, CellTypeChar, '?')
+		case GateAnd:
+			gs.Set(gridId, x-1, y, CellTypeChar, 'A')
+			gs.Set(gridId, x, y, CellTypeChar, 'N')
+			gs.Set(gridId, x+1, y, CellTypeChar, 'D')
+		case GateOr:
+			gs.Set(gridId, x-1, y, CellTypeChar, 'O')
+			gs.Set(gridId, x, y, CellTypeChar, 'R')
+		}
+	}
+
+	return nil
+}

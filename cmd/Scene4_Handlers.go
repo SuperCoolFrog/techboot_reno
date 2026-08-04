@@ -143,26 +143,9 @@ func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 	game.pz.AssignPuzzle(puzzleId, next)
 
 	gates := game.pz.GetPuzzleGates(puzzleId)
-	gatesX := game.pz.GetGatesX(puzzleId)
-	gatesY := game.pz.GetGatesY(puzzleId)
-
-	fmt.Printf("%v ; %v ; %v\n", gates, gatesX, gatesY)
 
 	for i := 0; i < len(gates); i++ {
-		gateType := gates[i]
-		x := gatesX[i]
-		y := gatesY[i]
-
-		fmt.Printf("x %d, y %d\n", x, y)
-
-		switch gateType {
-		case GateUnknown:
-			game.gs.Set(game.b.GridOutput, x, y, CellTypeChar, '?')
-		case GateAnd:
-			game.gs.Set(game.b.GridOutput, x, y, CellTypeChar, 'A')
-		case GateOr:
-			game.gs.Set(game.b.GridOutput, x, y, CellTypeChar, 'O')
-		}
+		game.pz.DrawGate(puzzleId, i, game.b.GridOutput, game.gs)
 	}
 
 	return next

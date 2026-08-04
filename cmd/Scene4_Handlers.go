@@ -112,6 +112,10 @@ loop:
 				}
 			case CommandPuzzle:
 				state = next
+			case CommandConnectFalse:
+				// fmt.Printf("Connection Failed!\n")
+				game.bs.AppendAll(game.b.BufferLogs, []byte("Connection Failed"))
+				game.bs.NewLine(game.b.BufferLogs)
 			case CommandInvalid:
 				// fmt.Printf("Invalid!\n")
 				game.bs.AppendAll(game.b.BufferLogs, []byte("Invalid Command"))
@@ -125,10 +129,40 @@ loop:
 	return state
 }
 
-func Scene4_Puzzling(current, next GameState, game *Game) GameState {
-	game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
+func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
+	if game.pz.HasPuzzleAssignment(next) {
+		return next
+	}
 
-	fmt.Printf("4 Puzzling\n")
+	puzzleId, pzError := game.pz.GetUnassignedIntroPuzzle()
+
+	if pzError != nil {
+		panic(pzError)
+	}
+
+	game.pz.AssignPuzzle(puzzleId, next)
+
+	gates := game.pz.GetPuzzleGates(puzzleId)
+	gatesX := game.pz.GetGatesX(puzzleId)
+	gatesY := game.pz.GetGatesY(puzzleId)
+
+	fmt.Printf("%v ; %v ; %v\n", gates, gatesX, gatesY)
+
+	for i := 0; i < len(gates); i++ {
+		// gate := gates[i]
+		x := gatesX[i]
+		y := gatesY[i]
+
+		fmt.Printf("x %d, y %d\n", x, y)
+
+		game.gs.SetCellSprite(game.b.GridOutput, x, y, assets.SpriteIDSquare)
+	}
+
+	return next
+}
+
+func Scene4_Puzzling(current, next GameState, game *Game) GameState {
+	// game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
 
 	return current
 }

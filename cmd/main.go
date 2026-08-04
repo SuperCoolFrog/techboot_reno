@@ -136,6 +136,8 @@ func main() {
 
 	game.b = InitBucketItems(game.gs, game.ans, game.bs)
 
+	game.pz.InitializeGamePuzzles() // After bucket init
+
 	// Initialize parser
 	go game.prologWorker()
 

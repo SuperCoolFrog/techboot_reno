@@ -6,6 +6,7 @@ import (
 )
 
 type PuzzleId uint32
+
 type GateType uint32
 
 const (
@@ -30,16 +31,18 @@ type PuzzleSystem struct {
 	MedPuzzles   []PuzzleId
 	HardPuzzles  []PuzzleId
 
-	// --- Global Per-Puzzle Properties ---
+	// Per-Puzzle
 	PuzzleGateCounts []int // Tracks exactly how many gates a specific PuzzleId has
+	PuzzleIsAssigned []bool
+	PuzzleAssignment []GameState
 
+	// Stored in Chunk
 	ValidGates     []GateType // Valid Gates that solve the puzzle
 	PuzzleGates    []GateType // This is the gates presented to player
 	AttemptedGates []GateType // This is the player's last attempt
 	GatesOffsets   []int
-
-	GateX []int
-	GateY []int
+	GateX          []int
+	GateY          []int
 
 	NextPuzzleId PuzzleId
 }
@@ -62,6 +65,8 @@ func NewPuzzleSystem(totalGates, introPuzzles, easyPuzzles, medPuzzles, hardPuzz
 		NextPuzzleId: 0,
 
 		PuzzleGateCounts: make([]int, totalPuzzles),
+		PuzzleIsAssigned: make([]bool, totalPuzzles),
+		PuzzleAssignment: make([]GameState, totalPuzzles),
 
 		// Standard Go slice allocations for non-contiguous offsets
 		GatesOffsets: make([]int, totalGates),
@@ -116,6 +121,8 @@ func (ps *PuzzleSystem) InitializeGamePuzzles() error {
 	ps.SetValidGate(id, 0, 10, 10, GateOr)
 	ps.SetPuzzleGate(id, 0, 10, 10, GateUnknown)
 	ps.SetAttemptedGate(id, 0, 10, 10, GateUnknown)
+
+	ps.PuzzleGateCounts[id] = 1
 
 	return nil
 }
@@ -190,3 +197,91 @@ func (ps *PuzzleSystem) SetAttemptedGate(puzzleId PuzzleId, gateIdx, gateX, gate
 
 	return nil
 }
+
+func (ps *PuzzleSystem) GetValidGates(puzzleId PuzzleId) []GateType {
+	offset := ps.GatesOffsets[puzzleId]
+	count := ps.PuzzleGateCounts[puzzleId]
+
+	start := offset
+	end := start + count
+
+	return ps.ValidGates[start:end]
+}
+
+func (ps *PuzzleSystem) GetPuzzleGates(puzzleId PuzzleId) []GateType {
+	offset := ps.GatesOffsets[puzzleId]
+	count := ps.PuzzleGateCounts[puzzleId]
+
+	start := offset
+	end := start + count
+
+	return ps.PuzzleGates[start:end]
+}
+
+func (ps *PuzzleSystem) GetAttemptGates(puzzleId PuzzleId) []GateType {
+	offset := ps.GatesOffsets[puzzleId]
+	count := ps.PuzzleGateCounts[puzzleId]
+
+	start := offset
+	end := start + count
+
+	return ps.AttemptedGates[start:end]
+}
+
+func (ps *PuzzleSystem) GetGatesX(puzzleId PuzzleId) []int {
+	offset := ps.GatesOffsets[puzzleId]
+	count := ps.PuzzleGateCounts[puzzleId]
+
+	start := offset
+	end := start + count
+
+	return ps.GateX[start:end]
+}
+
+func (ps *PuzzleSystem) GetGatesY(puzzleId PuzzleId) []int {
+	offset := ps.GatesOffsets[puzzleId]
+	count := ps.PuzzleGateCounts[puzzleId]
+
+	start := offset
+	end := start + count
+
+	return ps.GateY[start:end]
+}
+
+func (ps *PuzzleSystem) GetUnassignedIntroPuzzle() (PuzzleId, error) {
+	for i := 0; i < len(ps.IntroPuzzles); i++ {
+		id := ps.IntroPuzzles[i]
+		if !ps.PuzzleIsAssigned[id] {
+			return id, nil
+		}
+	}
+
+	return 0, fmt.Errorf("No available intro puzzle")
+}
+
+func (ps *PuzzleSystem) AssignPuzzle(puzzleId PuzzleId, state GameState) {
+	ps.PuzzleIsAssigned[puzzleId] = true
+	ps.PuzzleAssignment[puzzleId] = state
+}
+
+func (ps *PuzzleSystem) GetPuzzleAssignment(state GameState) (PuzzleId, error) {
+	for i := PuzzleId(0); i < PuzzleId(ps.NextPuzzleId); i++ {
+		if ps.PuzzleIsAssigned[i] && ps.PuzzleAssignment[i] == state {
+			return i, nil
+		}
+	}
+
+	return 0, fmt.Errorf("No assignment for state")
+}
+
+func (ps *PuzzleSystem) HasPuzzleAssignment(state GameState) bool {
+	for i := PuzzleId(0); i < PuzzleId(ps.NextPuzzleId); i++ {
+		if ps.PuzzleIsAssigned[i] && ps.PuzzleAssignment[i] == state {
+			return true
+		}
+	}
+
+	return false
+}
+
+// func (ps *PuzzleSystem) GetGates(id PuzzleId) []

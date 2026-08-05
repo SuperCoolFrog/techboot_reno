@@ -157,6 +157,100 @@ func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 }
 
 func Scene4_Puzzling(current, next GameState, game *Game) GameState {
+	for i := 0; i < len(game.inputRunes); i++ {
+		err := game.bs.AppendWithDecor(game.b.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
+		if err != nil {
+			fmt.Printf("Error Appending Last Rune: %v\n", err)
+		}
+	}
 
-	return current
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		game.bs.TrimDecor(game.b.BufferCommands, CmdBufferDecor)
+		game.bs.NewLine(game.b.BufferCommands)
+		game.bs.AppendDecorators(game.b.BufferCommands, CmdBufferDecor)
+
+		if lastLine, lineError := game.bs.GetLastBufferLine(game.b.BufferCommands); lineError == nil {
+			ParseInput(lastLine, game.prologInput)
+		} else {
+			fmt.Printf("Error Getting lastLine: %v", lineError)
+		}
+	}
+	if utilDebouncedKeyPressed(ebiten.KeyBackspace) {
+		game.bs.DecrementCursorWithDecor(game.b.BufferCommands, CmdBufferDecor)
+	}
+
+	err := game.bs.DrawToGridWithDecor(game.b.BufferCommands, game.b.GridMainUI, 1, 1, CmdBufferDecor, game.gs)
+	if err != nil {
+		fmt.Printf("Error Drawing to BufferCommands: %v", err)
+	}
+
+	// LogBuff
+	game.bs.DrawToGrid(game.b.BufferLogs, game.b.GridMainUI, 37, 38, game.gs)
+
+	state := current
+
+loop:
+	for {
+		select {
+		case cmd := <-game.prologOutput:
+			fmt.Printf("Commands: %v\n", cmd)
+
+			switch cmd.ResultType {
+			case CommandList:
+				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
+
+				game.gs.SetRowCells(game.b.GridOutput, 0, CellTypeChar, cmd.Command)
+				for i := 0; i < len(cmd.Items); i++ {
+					b := game.b.CommandBytes(cmd.Items[i], game.bs)
+					// fmt.Printf("%d: %d: %s\n", i, len(b), b)
+					game.gs.SetRowCells(game.b.GridOutput, i+1, CellTypeChar, b)
+				}
+			case CommandSet:
+				fmt.Printf("CommandSet\n")
+				puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
+				if assignmentError != nil {
+					fmt.Printf("Error getting puzzle assigment: %v\n", assignmentError)
+					break loop
+				}
+
+				fmt.Printf("Len Items %d\n", len(cmd.Items))
+
+				for i := 0; i < len(cmd.Items); i++ {
+					var gateType GateType
+
+					switch CommandId(cmd.Items[i]) {
+
+					case CommandGateTypeAnd:
+						gateType = GateAnd
+					case CommandGateTypeOr:
+						gateType = GateOr
+					default:
+						gateType = GateUnknown
+					}
+
+					gateIdx := cmd.ValuesInt[i]
+
+					fmt.Printf("gateType %d ; idx %d\n", gateType, gateIdx)
+
+					err := game.pz.SetGateType(puzzleId, gateIdx, gateType)
+					if err != nil {
+						fmt.Printf("Error setting gatetype: %d ; %d ; %d ;\n%v\n", puzzleId, gateIdx, gateType, err)
+					}
+
+					game.pz.DrawGate(puzzleId, i, game.b.GridOutput, game.gs)
+				}
+			case CommandInvalid:
+				// fmt.Printf("Invalid!\n")
+				game.bs.AppendAll(game.b.BufferLogs, []byte("Invalid Command"))
+				game.bs.NewLine(game.b.BufferLogs)
+			default:
+				game.bs.AppendAll(game.b.BufferLogs, []byte("Command did nothing"))
+				game.bs.NewLine(game.b.BufferLogs)
+			}
+		default:
+			break loop // nothing left in the queue for this frame
+		}
+	}
+
+	return state
 }

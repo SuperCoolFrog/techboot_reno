@@ -37,6 +37,8 @@ const (
 	CommandPuzzleMed
 	CommandPuzzleHard
 	CommandSet
+	CommandGateTypeAnd
+	CommandGateTypeOr
 
 	CommandsCount
 )

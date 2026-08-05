@@ -184,6 +184,19 @@ func (ps *PuzzleSystem) SetPuzzleGate(puzzleId PuzzleId, gateIdx, gateX, gateY i
 	return nil
 }
 
+func (ps *PuzzleSystem) SetGateType(puzzleId PuzzleId, gateIdx int, gate GateType) error {
+	offset := ps.GatesOffsets[puzzleId]
+
+	if gateIdx >= ps.PuzzleGateCounts[puzzleId] {
+		return fmt.Errorf("GateIdx out of bounds: Given %d ; Count %d", gateIdx, ps.PuzzleGateCounts[puzzleId])
+	}
+
+	idx := offset + gateIdx
+	ps.PuzzleGates[idx] = gate
+
+	return nil
+}
+
 func (ps *PuzzleSystem) SetAttemptedGate(puzzleId PuzzleId, gateIdx, gateX, gateY int, gate GateType) error {
 	offset := ps.GatesOffsets[puzzleId]
 
@@ -342,6 +355,7 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 		case GateOr:
 			gs.Set(gridId, x-1, y, CellTypeChar, 'O')
 			gs.Set(gridId, x, y, CellTypeChar, 'R')
+			gs.Set(gridId, x+1, y, CellTypeEmpty, 0)
 			hasSymbol = true
 			cornerSprite = assets.SpriteIDDiamond
 		}

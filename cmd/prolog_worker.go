@@ -11,6 +11,7 @@ import (
 type CommandResponse struct {
 	ResultType CommandId
 	Items      []CommandId
+	ValuesInt  []int
 	Command    []byte
 }
 
@@ -18,6 +19,7 @@ type OutResult struct {
 	trealla.Functor `prolog:"/2"`
 	ResultType      CommandId
 	Items           []CommandId
+	ValuesInt       []int
 }
 
 type Result struct {
@@ -80,6 +82,7 @@ func (g *Game) prologWorker() {
 			Command:    []byte(normalizedStr + "="),
 			ResultType: r.Out.ResultType,
 			Items:      r.Out.Items,
+			ValuesInt:  r.Out.ValuesInt,
 		}
 
 		// if query.Next(ctx) {

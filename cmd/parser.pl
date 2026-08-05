@@ -32,18 +32,17 @@ command_id(puzzle_med,     16).
 command_id(puzzle_hard,    17).
 command_id(puzzle_hard,    17).
 command_id(set,            18).
-command_id(GateTypeAnd,    19).
-command_id(GateTypeOr,     20).
-
+command_id(gate_and,       19).
+command_id(gate_or,        20).
 
 
 % Matchs puzzles.go GateType
-gate_type(and, 2).
-gate_type(or, 3).
+gate_type(and, gate_and).
+gate_type(or, gate_or).
 
 
 % Common
-commands(_, result(ListType, List)) :-
+commands(_, result(ListType, List, [])) :-
     command_id(list, ListType),
     maplist(command_id, [connect, list, list_specific, set], List),!.
 
@@ -54,7 +53,7 @@ secured_connection(state(15), lobby, puzzle_intro).
 
 % Scene4_Run :: 25
 list(state(15), [files, networks]).
-list(StateId, result(ListType, List)) :-
+list(StateId, result(ListType, List, [])) :-
     state(StateId),
     command_id(list, ListType),
     list(state(StateId), CommandNames),
@@ -65,23 +64,24 @@ list(networks, StateId, Out) :-
     networks(StateId, Out), !.
 
 files(state(15), [roy_1_fn, roy_2_fn, roy_3_fn]).
-files(StateId, result(ListType, List)) :-
+files(StateId, result(ListType, List, [])) :-
     state(StateId),
     command_id(list, ListType),
     files(state(StateId), CommandNames), 
     maplist(command_id, CommandNames, List),!.
 
 networks(state(15), [lobby]).
-networks(StateId, result(ListType, List)) :-
+networks(StateId, result(ListType, List, [])) :-
     state(StateId),
     command_id(list, ListType),
     networks(state(StateId), CommandNames),
     maplist(command_id, CommandNames, List),!.
 
 
-set(GateIdxIn, GateType, StateId, result(SetType, [GateIdxOut, GateTypeId])) :-
+set(GateIdxIn, GateType, StateId, result(SetType, [GateTypeId], [GateIdxOut])) :-
     state(StateId),
-    gate_type(GateType, GateTypeId),
+    gate_type(GateType, GateCommand),
+    command_id(GateCommand, GateTypeId),
     command_id(set, SetType),
     GateIdxOut is GateIdxIn-1, !.
 
@@ -108,18 +108,18 @@ out_value([H|_], Out) :- Out = H.
 % =========================================================================
 
 % Pattern-match result directly in the head to force early unification
-connect(Name, StateId, result(ConnectType, [])) :-
+connect(Name, StateId, result(ConnectType, [], [])) :-
     state(StateId),
     command_id(connect_true, ConnectType),
     connection(state(StateId), Name), !.
 
-connect(Name, StateId, result(ConnectType, [PuzzleCommandId])) :-
+connect(Name, StateId, result(ConnectType, [PuzzleCommandId], [])) :-
     state(StateId),
     command_id(connect_puzzle, ConnectType),
     secured_connection(state(StateId), Name, Puzzle),
     command_id(Puzzle, PuzzleCommandId), !.
 
-connect(_, _, result(ConnectType, [])) :- 
+connect(_, _, result(ConnectType, [], [])) :- 
     command_id(connect_false, ConnectType).
 
 % =========================================================================
@@ -150,7 +150,7 @@ process_command(List, Out) :-
 
 % Any commands that fail or do not exist return invalid
 process_command(_, Out) :- Out = 
-    result(InvalidType, []),
+    result(InvalidType, [], []),
     command_id(invalid, InvalidType).
 
 % =========================================================================

@@ -6,6 +6,7 @@ shape(1, square).
 
 state(11).
 state(15).
+state(17).
 
 
 command_id(invalid,         0).
@@ -29,11 +30,22 @@ command_id(puzzle_intro,   14).
 command_id(puzzle_easy,    15).
 command_id(puzzle_med,     16).
 command_id(puzzle_hard,    17).
+command_id(puzzle_hard,    17).
+command_id(set,            18).
+command_id(GateTypeAnd,    19).
+command_id(GateTypeOr,     20).
+
+
+
+% Matchs puzzles.go GateType
+gate_type(and, 2).
+gate_type(or, 3).
+
 
 % Common
 commands(_, result(ListType, List)) :-
     command_id(list, ListType),
-    maplist(command_id, [connect, list, list_specific], List),!.
+    maplist(command_id, [connect, list, list_specific, set], List),!.
 
 
 % Scene3_InputHandlingLoop :: 21
@@ -65,6 +77,12 @@ networks(StateId, result(ListType, List)) :-
     command_id(list, ListType),
     networks(state(StateId), CommandNames),
     maplist(command_id, CommandNames, List),!.
+
+
+set(StateId, GateIdxIn, GateType, result(set, [GateIdxOut, GateTypeId])) :-
+    state(StateId),
+    gate_type(GateType, GateTypeId),
+    GateIdxOut is GateIdxIn-1, !.
 
 
 % =========================================================================

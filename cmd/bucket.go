@@ -36,6 +36,9 @@ const (
 	CommandPuzzleEasy
 	CommandPuzzleMed
 	CommandPuzzleHard
+	CommandSet
+	CommandGateTypeAnd
+	CommandGateTypeOr
 
 	CommandsCount
 )
@@ -265,13 +268,14 @@ func (bucket *Bucket) CommandBytes(commandId CommandId, bs *BufferSystem) []byte
 func bucketInitCommandStrings(bs *BufferSystem, bucket *Bucket) {
 	bucketAddCommandStrings(CommandFiles, []byte("[Files]:"), bs, bucket)
 	bucketAddCommandStrings(CommandNetworks, []byte("[Networks]:"), bs, bucket)
-	bucketAddCommandStrings(CommandConnect, []byte(":connect {0}="), bs, bucket)
+	bucketAddCommandStrings(CommandConnect, []byte(":connect {name}="), bs, bucket)
 	bucketAddCommandStrings(CommandList, []byte(":list="), bs, bucket)
-	bucketAddCommandStrings(CommandListSpecific, []byte(":list {0}="), bs, bucket)
+	bucketAddCommandStrings(CommandListSpecific, []byte(":list {name}="), bs, bucket)
 	bucketAddCommandStrings(CommandRoy1Fn, []byte("Email: Sorry"), bs, bucket)
 	bucketAddCommandStrings(CommandRoy2Fn, []byte("Email: RE: Sorry"), bs, bucket)
 	bucketAddCommandStrings(CommandRoy3Fn, []byte("Email: Miami"), bs, bucket)
 	bucketAddCommandStrings(CommandLobby, []byte("Lobby"), bs, bucket)
+	bucketAddCommandStrings(CommandSet, []byte(":set {gateId} {and;or}="), bs, bucket)
 }
 
 func bucketAddCommandStrings(commandId CommandId, val []byte, bs *BufferSystem, bucket *Bucket) {

@@ -50,6 +50,7 @@ commands(_, result(ListType, List, [])) :-
 % Scene3_InputHandlingLoop :: 21
 connection(state(11), rabbit).
 secured_connection(state(15), lobby, puzzle_intro).
+secured_connection(state(17), lobby, puzzle_intro).
 
 % Scene4_Run :: 25
 list(state(15), [files, networks]).

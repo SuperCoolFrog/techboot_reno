@@ -135,17 +135,17 @@ loop:
 func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 	game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
 
-	if game.pz.HasPuzzleAssignment(next) {
-		return next
+	var puzzleId PuzzleId
+
+	if !game.pz.HasPuzzleAssignment(next) {
+		puzzleId, pzError := game.pz.GetUnassignedIntroPuzzle()
+
+		if pzError != nil {
+			panic(pzError)
+		}
+
+		game.pz.AssignPuzzle(puzzleId, next)
 	}
-
-	puzzleId, pzError := game.pz.GetUnassignedIntroPuzzle()
-
-	if pzError != nil {
-		panic(pzError)
-	}
-
-	game.pz.AssignPuzzle(puzzleId, next)
 
 	gates := game.pz.GetPuzzleGates(puzzleId)
 
@@ -193,8 +193,6 @@ loop:
 	for {
 		select {
 		case cmd := <-game.prologOutput:
-			fmt.Printf("Commands: %v\n", cmd)
-
 			switch cmd.ResultType {
 			case CommandList:
 				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
@@ -205,15 +203,25 @@ loop:
 					// fmt.Printf("%d: %d: %s\n", i, len(b), b)
 					game.gs.SetRowCells(game.b.GridOutput, i+1, CellTypeChar, b)
 				}
-			case CommandSet:
-				fmt.Printf("CommandSet\n")
+			case CommandPuzzle:
+				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
 				puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
 				if assignmentError != nil {
 					fmt.Printf("Error getting puzzle assigment: %v\n", assignmentError)
 					break loop
 				}
+				gates := game.pz.GetPuzzleGates(puzzleId)
 
-				fmt.Printf("Len Items %d\n", len(cmd.Items))
+				for i := 0; i < len(gates); i++ {
+					game.pz.DrawGate(puzzleId, i, game.b.GridOutput, game.gs)
+				}
+
+			case CommandSet:
+				puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
+				if assignmentError != nil {
+					fmt.Printf("Error getting puzzle assigment: %v\n", assignmentError)
+					break loop
+				}
 
 				for i := 0; i < len(cmd.Items); i++ {
 					var gateType GateType
@@ -229,8 +237,6 @@ loop:
 					}
 
 					gateIdx := cmd.ValuesInt[i]
-
-					fmt.Printf("gateType %d ; idx %d\n", gateType, gateIdx)
 
 					err := game.pz.SetGateType(puzzleId, gateIdx, gateType)
 					if err != nil {

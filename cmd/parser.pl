@@ -79,9 +79,10 @@ networks(StateId, result(ListType, List)) :-
     maplist(command_id, CommandNames, List),!.
 
 
-set(StateId, GateIdxIn, GateType, result(set, [GateIdxOut, GateTypeId])) :-
+set(GateIdxIn, GateType, StateId, result(SetType, [GateIdxOut, GateTypeId])) :-
     state(StateId),
     gate_type(GateType, GateTypeId),
+    command_id(set, SetType),
     GateIdxOut is GateIdxIn-1, !.
 
 

@@ -120,6 +120,9 @@ loop:
 				// fmt.Printf("Invalid!\n")
 				game.bs.AppendAll(game.b.BufferLogs, []byte("Invalid Command"))
 				game.bs.NewLine(game.b.BufferLogs)
+			default:
+				game.bs.AppendAll(game.b.BufferLogs, []byte("Command did nothing"))
+				game.bs.NewLine(game.b.BufferLogs)
 			}
 		default:
 			break loop // nothing left in the queue for this frame
@@ -130,6 +133,8 @@ loop:
 }
 
 func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
+	game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
+
 	if game.pz.HasPuzzleAssignment(next) {
 		return next
 	}
@@ -152,7 +157,6 @@ func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 }
 
 func Scene4_Puzzling(current, next GameState, game *Game) GameState {
-	// game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
 
 	return current
 }

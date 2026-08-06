@@ -208,6 +208,18 @@ func (gs *GridSystem) GetCellSprite(gridId GridID, x int, y int) (image *ebiten.
 	return img
 }
 
+func (gs *GridSystem) GridXYToScreenSpace(gridID GridID, gridX, gridY int) (x, y float32) {
+
+	size := float32(gs.CellSizes[gridID])
+	offsetX := float32(gs.OffsetX[gridID])
+	offsetY := float32(gs.OffsetY[gridID])
+
+	x = x*size + offsetX
+	y = y*size + offsetY
+
+	return x, y
+}
+
 func (gs *GridSystem) RenderDebug(screen *ebiten.Image, gridID GridID) error {
 	offset := gs.Offsets[gridID]
 	count := gs.Counts[gridID]

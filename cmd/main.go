@@ -46,6 +46,8 @@ type Game struct {
 	bs                     *BufferSystem
 	gs                     *GridSystem
 	pz                     *PuzzleSystem
+	ps                     *PathSystem
+	jxpp                   *JunctionSystem //PuzzleId -> PathIds
 	b                      Bucket
 	MouseMoved             bool
 	LastMouseX, LastMouseY int
@@ -121,12 +123,16 @@ func main() {
 	const MaxTotalCells = 150_000
 	const MaxGrids = 15
 
+	puzzleSystem := NewPuzzleSystem(10, 1, 0, 0, 0)
+
 	game := &Game{
 		State:        Scene3_Init, //Scene1_Init,
 		gs:           NewGridSystem(MaxTotalCells, MaxGrids),
 		ans:          NewAnimationSystem(),
 		bs:           NewBufferSystem(500_000, 10),
-		pz:           NewPuzzleSystem(10, 1, 0, 0, 0),
+		ps:           NewPathSystem(200),
+		pz:           puzzleSystem,
+		jxpp:         NewJunctionSystem(puzzleSystem.TotalPuzzles, 20),
 		parserpl:     string(parserpl),
 		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
 		prologOutput: make(chan CommandResponse, 128),
@@ -134,9 +140,7 @@ func main() {
 
 	assets.Load() // Load Assets before init bucket
 
-	game.b = InitBucketItems(game.gs, game.ans, game.bs)
-
-	game.pz.InitializeGamePuzzles() // After bucket init
+	game.b = InitBucketItems(game)
 
 	// Initialize parser
 	go game.prologWorker()

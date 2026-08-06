@@ -108,26 +108,6 @@ func NewPuzzleSystem(totalGates, introPuzzles, easyPuzzles, medPuzzles, hardPuzz
 	return ps
 }
 
-func (ps *PuzzleSystem) InitializeGamePuzzles() error {
-	/* Placeholder for now until puzzle generator is created */
-
-	id, errorIntro := ps.AllocatePuzzle(1)
-
-	if errorIntro != nil {
-		return errorIntro
-	}
-
-	ps.IntroPuzzles[0] = id
-
-	ps.SetValidGate(id, 0, 13, 16, GateOr)
-	ps.SetPuzzleGate(id, 0, 13, 16, GateUnknown)
-	ps.SetAttemptedGate(id, 0, 13, 16, GateUnknown)
-
-	ps.PuzzleGateCounts[id] = 1
-
-	return nil
-}
-
 func (ps *PuzzleSystem) AllocatePuzzle(numberOfGates int) (PuzzleId, error) {
 	if int(ps.NextPuzzleId) >= ps.TotalPuzzles {
 		return 0, fmt.Errorf("Max Puzzles Reach, Unable to create new puzzle")

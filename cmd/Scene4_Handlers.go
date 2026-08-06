@@ -133,6 +133,9 @@ loop:
 }
 
 func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
+	game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
+	game.gs.EnableGrid(game.b.GridOutputPrecision)
+
 	game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
 
 	var puzzleId PuzzleId
@@ -151,6 +154,19 @@ func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 
 	for i := 0; i < len(gates); i++ {
 		game.pz.DrawGate(puzzleId, i, game.b.GridOutput, game.gs)
+	}
+
+	paths, errC := game.jxpp.GetChildren(uint32(puzzleId))
+	if errC != nil {
+		panic(errC)
+	}
+
+	for i := 0; i < len(paths); i++ {
+		pathId := paths[i]
+		pX := game.ps.StartX[pathId]
+		pY := game.ps.StartY[pathId]
+
+		game.gs.SetCellSprite(game.b.GridOutputPrecision, pX, pY, assets.SpriteIDSquare)
 	}
 
 	return next
@@ -196,6 +212,7 @@ loop:
 			switch cmd.ResultType {
 			case CommandList:
 				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
+				game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
 
 				game.gs.SetRowCells(game.b.GridOutput, 0, CellTypeChar, cmd.Command)
 				for i := 0; i < len(cmd.Items); i++ {
@@ -205,6 +222,8 @@ loop:
 				}
 			case CommandPuzzle:
 				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
+				game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
+
 				puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
 				if assignmentError != nil {
 					fmt.Printf("Error getting puzzle assigment: %v\n", assignmentError)
@@ -216,8 +235,22 @@ loop:
 					game.pz.DrawGate(puzzleId, i, game.b.GridOutput, game.gs)
 				}
 
+				paths, errC := game.jxpp.GetChildren(uint32(puzzleId))
+				if errC != nil {
+					panic(errC)
+				}
+
+				for i := 0; i < len(paths); i++ {
+					pathId := paths[i]
+					pX := game.ps.StartX[pathId]
+					pY := game.ps.StartY[pathId]
+
+					game.gs.SetCellSprite(game.b.GridOutputPrecision, pX, pY, assets.SpriteIDSquare)
+				}
+
 			case CommandSet:
 				puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
+
 				if assignmentError != nil {
 					fmt.Printf("Error getting puzzle assigment: %v\n", assignmentError)
 					break loop

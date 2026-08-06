@@ -83,7 +83,8 @@ type Bucket struct {
 	SceneStateItr []int
 }
 
-func InitBucketItems(gs *GridSystem, anims *AnimationSystem, bs *BufferSystem) Bucket {
+/* Pass in Game with Systems initialized*/
+func InitBucketItems(game *Game) Bucket {
 	bucket := &Bucket{
 		SceneStateItr:            make([]int, GameStateCount),
 		CommandOutputStartRowIdx: make([]int, int(CommandsCount)),
@@ -91,16 +92,18 @@ func InitBucketItems(gs *GridSystem, anims *AnimationSystem, bs *BufferSystem) B
 		LogBufferRowIdx:          38,
 	}
 
-	bucketInitGrids(gs, bucket)
-	bucketInitBuffers(bs, bucket)
+	bucketInitGrids(game.gs, bucket)
+	bucketInitBuffers(game.bs, bucket)
 
-	bucketInitIntroAnimation(gs, anims, bucket)
-	bucketInitDialogAnimation(gs, anims, bucket)
-	bucketInitScannerAnimations(gs, anims, bucket)
+	bucketInitIntroAnimation(game.gs, game.ans, bucket)
+	bucketInitDialogAnimation(game.gs, game.ans, bucket)
+	bucketInitScannerAnimations(game.gs, game.ans, bucket)
 
-	bucketInitMainUI(gs, bs, bucket)
+	bucketInitMainUI(game.gs, game.bs, bucket)
 
-	bucketInitCommandStrings(bs, bucket)
+	bucketInitCommandStrings(game.bs, bucket)
+
+	bucketInitializeGamePuzzles(game.pz, game.ps, game.jxpp, game.gs, bucket)
 
 	return *bucket
 }
@@ -283,4 +286,37 @@ func bucketAddCommandStrings(commandId CommandId, val []byte, bs *BufferSystem, 
 
 	bs.AppendAll(bucket.BufferCommandOutputs, val)
 	bs.NewLine(bucket.BufferCommandOutputs)
+}
+
+func bucketInitializeGamePuzzles(pz *PuzzleSystem, ps *PathSystem, jxpp *JunctionSystem, gs *GridSystem, bucket *Bucket) error {
+	/* Placeholder for now until puzzle generator is created */
+
+	id, errorIntro := pz.AllocatePuzzle(1)
+
+	if errorIntro != nil {
+		return errorIntro
+	}
+
+	pz.IntroPuzzles[0] = id
+
+	pz.SetValidGate(id, 0, 13, 16, GateOr)
+	pz.SetPuzzleGate(id, 0, 13, 16, GateUnknown)
+	pz.SetAttemptedGate(id, 0, 13, 16, GateUnknown)
+
+	pz.PuzzleGateCounts[id] = 1
+
+	cols := gs.Cols[bucket.GridOutputPrecision]
+	rows := gs.Rows[bucket.GridOutputPrecision]
+
+	// path1StartX, path1StartY := gs.GridXYToScreenSpace(bucket.GridOutput, cols/2-1, rows+1)
+	path1, err := ps.NewPath(cols/2+1, rows-1, 0.0, 0.0)
+
+	if err != nil {
+		return err
+	}
+
+	jxpp.AddParent(uint32(id), 1)
+	jxpp.AddChild(uint32(id), uint32(path1))
+
+	return nil
 }

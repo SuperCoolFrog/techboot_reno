@@ -166,13 +166,83 @@ func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 		game.gs.SetCellSprite(game.b.GridOutput, pX, pY, assets.SpriteIDCarrotUp)
 	}
 
+	s4StartPathAnimation(game.ans)
+
 	return next
 }
 
-func s4AnimatePath() {
+func s4StartPathAnimation(ans *AnimationSystem) {
+	fmt.Printf("Starting AnimationPath\n")
+	ans.IsPlaying[AnimationPath] = true
+	ans.Timers[AnimationPath] = 0.0
+}
+
+func s4AnimatePath(puzzleId PuzzleId, game *Game) (isPlaying bool) {
+	if !game.ans.IsPlaying[AnimationPath] {
+		// panic("end")
+		return false
+	}
+
+	timer := game.ans.Timers[AnimationPath]
+	duration := game.ans.Durations[AnimationPath]
+	delay := game.ans.Delay[AnimationPath]
+
+	trueTime := float32(math.Max(float64(timer-delay), 0))
+	completedTime := trueTime / duration
+
+	paths, errC := game.jxpp.GetChildren(uint32(puzzleId))
+	if errC != nil {
+		panic(errC)
+	}
+
+	for i := 0; i < len(paths); i++ {
+		pathId := paths[i]
+		x1 := game.ps.StartX[pathId]
+		y1 := game.ps.StartY[pathId]
+		x2 := game.ps.EndX[pathId]
+		y2 := game.ps.EndY[pathId]
+
+		cx := int(float32(x1-x2) * completedTime)
+		cy := int(float32(y1-y2) * completedTime)
+
+		dx := 1
+		dy := 1
+
+		for dx <= cx || dy <= cy {
+			x := x1 - dx
+			y := y1 - dy
+
+			if x < x2 {
+				x = x2
+			}
+			if y < y2 {
+				y = y2
+			}
+
+			game.gs.SetCellSprite(game.b.GridOutput, x, y, assets.SpriteIDSquare)
+
+			dx++
+			dy++
+		}
+
+		game.gs.SetCellSprite(game.b.GridOutput, x1, y1, assets.SpriteIDCarrotUp)
+	}
+
+	return game.ans.IsPlaying[AnimationPath]
 }
 
 func Scene4_Puzzling(current, next GameState, game *Game) GameState {
+	puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
+	if assignmentError != nil {
+		panic(fmt.Errorf("Error getting puzzle assigment: %v\n", assignmentError))
+	}
+
+	if s4AnimatePath(puzzleId, game) {
+		return current
+	} else {
+		// clear cells
+	}
+
 	for i := 0; i < len(game.inputRunes); i++ {
 		err := game.bs.AppendWithDecor(game.b.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
 		if err != nil {
@@ -224,11 +294,6 @@ loop:
 				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
 				game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
 
-				puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
-				if assignmentError != nil {
-					fmt.Printf("Error getting puzzle assigment: %v\n", assignmentError)
-					break loop
-				}
 				gates := game.pz.GetPuzzleGates(puzzleId)
 
 				for i := 0; i < len(gates); i++ {

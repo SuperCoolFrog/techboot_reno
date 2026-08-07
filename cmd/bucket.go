@@ -11,6 +11,7 @@ const (
 	AnimationDialog
 	AnimationScanner
 	AnimationMemoryStack
+	AnimationPath
 
 	AnimationCount
 )
@@ -98,6 +99,7 @@ func InitBucketItems(game *Game) Bucket {
 	bucketInitIntroAnimation(game.gs, game.ans, bucket)
 	bucketInitDialogAnimation(game.gs, game.ans, bucket)
 	bucketInitScannerAnimations(game.gs, game.ans, bucket)
+	bucketInitPathAnimations(game.gs, game.ans, bucket)
 
 	bucketInitMainUI(game.gs, game.bs, bucket)
 
@@ -165,6 +167,14 @@ func bucketInitScannerAnimations(gs *GridSystem, anims *AnimationSystem, bucket 
 	anims.Durations[AnimationScanner] = 10.0
 	anims.Timers[AnimationScanner] = 0.0
 	anims.Delay[AnimationScanner] = 0
+}
+
+func bucketInitPathAnimations(gs *GridSystem, anims *AnimationSystem, bucket *Bucket) {
+	anims.IsPlaying[AnimationPath] = false
+	anims.Loop[AnimationPath] = false
+	anims.Durations[AnimationPath] = 2.0
+	anims.Timers[AnimationPath] = 0.0
+	anims.Delay[AnimationPath] = 0
 }
 
 func bucketInitMainUI(gs *GridSystem, bs *BufferSystem, bucket *Bucket) {
@@ -312,13 +322,13 @@ func bucketInitializeGamePuzzles(pz *PuzzleSystem, ps *PathSystem, jxpp *Junctio
 
 	jxpp.AddParent(uint32(id), 2)
 
-	path1, err := ps.NewPath(cols/2+1, rows-1, 0.0, 0.0)
+	path1, err := ps.NewPath(cols/2+1, rows-1, cols/2+1, g1Y+1)
 	if err != nil {
 		return err
 	}
 	jxpp.AddChild(uint32(id), uint32(path1))
 
-	path2, err2 := ps.NewPath(cols/2-1, rows-1, 0.0, 0.0)
+	path2, err2 := ps.NewPath(cols/2-1, rows-1, cols/2-1, g1Y+1)
 	if err2 != nil {
 		return err2
 	}

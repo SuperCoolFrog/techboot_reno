@@ -303,22 +303,9 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 		gs.SetCellSprite(gridId, x-2, y, assets.SpriteIDVerticalBar)
 		gs.SetCellSprite(gridId, x+2, y, assets.SpriteIDVerticalBar)
 
-		// gs.SetCellSprite(gridId, x-2, y-1, assets.SpriteIDCarrotNW)
-		// gs.SetCellSprite(gridId, x-2, y+1, assets.SpriteIDCarrotSW)
-		// gs.SetCellSprite(gridId, x+2, y-1, assets.SpriteIDCarrotNE)
-		// gs.SetCellSprite(gridId, x+2, y+1, assets.SpriteIDCarrotSE)
-
-		// And Symbol
-		// gs.SetCellSprite(gridId, x-2, y-1, assets.SpriteIDSquare)
-		// gs.SetCellSprite(gridId, x-2, y+1, assets.SpriteIDSquare)
-		// gs.SetCellSprite(gridId, x+2, y-1, assets.SpriteIDSquare)
-		// gs.SetCellSprite(gridId, x+2, y+1, assets.SpriteIDSquare)
-
-		// Or Symbol
-		// gs.SetCellSprite(gridId, x-2, y-1, assets.SpriteIDDiamond)
-		// gs.SetCellSprite(gridId, x-2, y+1, assets.SpriteIDDiamond)
-		// gs.SetCellSprite(gridId, x+2, y-1, assets.SpriteIDDiamond)
-		// gs.SetCellSprite(gridId, x+2, y+1, assets.SpriteIDDiamond)
+		if i < 9 {
+			gs.Set(gridId, x-3, y, CellTypeChar, byte('0'+(i+1)))
+		}
 
 		hasSymbol := false
 		var cornerSprite assets.SpriteID

@@ -126,7 +126,7 @@ func main() {
 	puzzleSystem := NewPuzzleSystem(10, 1, 0, 0, 0)
 
 	game := &Game{
-		State:        Scene1_Init, //Scene1_Init,
+		State:        Scene3_Init, //Scene1_Init,
 		gs:           NewGridSystem(MaxTotalCells, MaxGrids),
 		ans:          NewAnimationSystem(),
 		bs:           NewBufferSystem(500_000, 10),

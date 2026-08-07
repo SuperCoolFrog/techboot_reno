@@ -133,9 +133,6 @@ loop:
 }
 
 func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
-	game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
-	game.gs.EnableGrid(game.b.GridOutputPrecision)
-
 	game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
 
 	var puzzleId PuzzleId
@@ -166,10 +163,13 @@ func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 		pX := game.ps.StartX[pathId]
 		pY := game.ps.StartY[pathId]
 
-		game.gs.SetCellSprite(game.b.GridOutputPrecision, pX, pY, assets.SpriteIDSquare)
+		game.gs.SetCellSprite(game.b.GridOutput, pX, pY, assets.SpriteIDCarrotUp)
 	}
 
 	return next
+}
+
+func s4AnimatePath() {
 }
 
 func Scene4_Puzzling(current, next GameState, game *Game) GameState {

@@ -299,24 +299,30 @@ func bucketInitializeGamePuzzles(pz *PuzzleSystem, ps *PathSystem, jxpp *Junctio
 
 	pz.IntroPuzzles[0] = id
 
-	pz.SetValidGate(id, 0, 13, 16, GateOr)
-	pz.SetPuzzleGate(id, 0, 13, 16, GateUnknown)
-	pz.SetAttemptedGate(id, 0, 13, 16, GateUnknown)
+	cols := gs.Cols[bucket.GridOutput]
+	rows := gs.Rows[bucket.GridOutput]
+	g1X := cols / 2
+	g1Y := rows / 2
+
+	pz.SetValidGate(id, 0, g1X, g1Y, GateOr)
+	pz.SetPuzzleGate(id, 0, g1X, g1Y, GateUnknown)
+	pz.SetAttemptedGate(id, 0, g1X, g1Y, GateUnknown)
 
 	pz.PuzzleGateCounts[id] = 1
 
-	cols := gs.Cols[bucket.GridOutputPrecision]
-	rows := gs.Rows[bucket.GridOutputPrecision]
+	jxpp.AddParent(uint32(id), 2)
 
-	// path1StartX, path1StartY := gs.GridXYToScreenSpace(bucket.GridOutput, cols/2-1, rows+1)
 	path1, err := ps.NewPath(cols/2+1, rows-1, 0.0, 0.0)
-
 	if err != nil {
 		return err
 	}
-
-	jxpp.AddParent(uint32(id), 1)
 	jxpp.AddChild(uint32(id), uint32(path1))
+
+	path2, err2 := ps.NewPath(cols/2-1, rows-1, 0.0, 0.0)
+	if err2 != nil {
+		return err2
+	}
+	jxpp.AddChild(uint32(id), uint32(path2))
 
 	return nil
 }

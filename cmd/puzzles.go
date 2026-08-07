@@ -284,14 +284,10 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 	gatesX := ps.GetGatesX(puzzleId)
 	gatesY := ps.GetGatesY(puzzleId)
 
-	fmt.Printf("%v ; %v ; %v\n", gates, gatesX, gatesY)
-
 	for i := 0; i < len(gates); i++ {
 		gateType := gates[i]
 		x := gatesX[i]
 		y := gatesY[i]
-
-		fmt.Printf("x %d, y %d\n", x, y)
 
 		gs.SetCellSprite(gridId, x, y-1, assets.SpriteIDHorizontalBar)
 		gs.SetCellSprite(gridId, x, y+1, assets.SpriteIDHorizontalBar)

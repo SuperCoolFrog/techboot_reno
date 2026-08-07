@@ -91,7 +91,7 @@ func Scene2_HandleAllDialog(current, next GameState, game *Game) GameState {
 	}
 
 	prefixLen := len(decor.Prefix)
-	appendedByteSize := float32(xCursor - prefixLen - 1)
+	appendedByteSize := float32(xCursor - prefixLen)
 	totalTxtSize := float32(len(txt))
 
 	var appendError error

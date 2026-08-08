@@ -199,30 +199,16 @@ func s4AnimatePath(puzzleId PuzzleId, game *Game) (isPlaying bool) {
 		pathId := paths[i]
 		x1 := game.ps.StartX[pathId]
 		y1 := game.ps.StartY[pathId]
-		x2 := game.ps.EndX[pathId]
-		y2 := game.ps.EndY[pathId]
 
-		cx := int(float32(x1-x2) * completedTime)
-		cy := int(float32(y1-y2) * completedTime)
+		xPts, yPts := game.ps.GetXYPoints(PathId(pathId))
 
-		dx := 1
-		dy := 1
+		end := int(completedTime * float32(len(xPts)))
 
-		for dx <= cx || dy <= cy {
-			x := x1 - dx
-			y := y1 - dy
-
-			if x < x2 {
-				x = x2
-			}
-			if y < y2 {
-				y = y2
-			}
+		for i := 0; i < end; i++ {
+			x := xPts[i]
+			y := yPts[i]
 
 			game.gs.SetCellSprite(game.b.GridOutput, x, y, assets.SpriteIDSquare)
-
-			dx++
-			dy++
 		}
 
 		game.gs.SetCellSprite(game.b.GridOutput, x1, y1, assets.SpriteIDCarrotUp)

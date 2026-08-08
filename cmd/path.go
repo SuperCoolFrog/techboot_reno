@@ -33,8 +33,10 @@ Keep in mind though, if I ever do something with full screen pathing, I may need
 
 // Path System HardCoded 50points per Path
 type PathSystem struct {
-	TotalPaths  int
-	MasterChunk []byte
+	PointsPerPath int
+	TotalPoints   int
+	TotalPaths    int
+	MasterChunk   []byte
 
 	StartX        []int
 	StartY        []int
@@ -54,7 +56,9 @@ func NewPathSystem(totalPaths int) *PathSystem {
 	TotalPoints := (PointsPerPath * totalPaths)
 
 	ps := &PathSystem{
-		TotalPaths: totalPaths,
+		TotalPaths:    totalPaths,
+		PointsPerPath: PointsPerPath,
+		TotalPoints:   TotalPoints,
 		// StartX:     make([]int, totalPaths),
 		// StartY:     make([]int, totalPaths),
 		// EndX:       make([]int, totalPaths),
@@ -113,10 +117,65 @@ func (ps *PathSystem) NewPath(startX, startY, endX, endY int) (PathId, error) {
 	id := ps.NextPathId
 	ps.NextPathId++
 
+	offset := 0
+	if id > 0 {
+		offset = ps.PointsOffsets[id-1] + ps.PointsPerPath
+	}
+	ps.PointsOffsets[id] = offset
+
 	ps.StartX[id] = startX
 	ps.StartY[id] = startY
 	ps.EndX[id] = endX
 	ps.EndY[id] = endY
 
+	fmt.Printf("** start(%d, %d), end(%d, %d)\n", startX, startY, endX, endY)
+
+	itrX := 1
+	if startX > endX {
+		itrX = -1
+	}
+
+	itrY := 1
+	if startY > endY {
+		itrY = -1
+	}
+
+	x := startX
+	y := startY
+	count := 0
+
+	for (x != endX || y != endY) && count < ps.PointsPerPath {
+		ps.PointsX[offset+count] = x
+		ps.PointsY[offset+count] = y
+
+		fmt.Printf("PathPoints(%d, %d)\n", x, y)
+
+		count++
+
+		if x != endX {
+			x += itrX
+		}
+		if y != endY {
+			y += itrY
+		}
+	}
+
+	// Add last endpoint
+	ps.PointsX[offset+count] = endX
+	ps.PointsY[offset+count] = endY
+	fmt.Printf("PathPoints(%d, %d)\n", endX, endY)
+
+	count++
+	fmt.Printf("Final Count %d\n", count)
+
+	ps.PointsCount[id] = count
+
 	return id, nil
+}
+
+func (ps *PathSystem) GetXYPoints(pathId PathId) (XPoints []int, YPoints []int) {
+	offset := ps.PointsOffsets[pathId]
+	count := ps.PointsCount[pathId]
+
+	return ps.PointsX[offset : offset+count], ps.PointsY[offset : offset+count]
 }

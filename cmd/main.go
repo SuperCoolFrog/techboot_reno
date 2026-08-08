@@ -22,7 +22,9 @@ const (
 )
 
 // var fontColor = color.RGBA{R: 0, G: 255, B: 0, A: 255} // this is pure green
-var fontColor = color.RGBA{R: 100, G: 255, B: 150, A: 255}
+// var fontColor = color.RGBA{R: 100, G: 255, B: 150, A: 255} // Minty green
+// var fontColor = color.RGBA{R: 112, G: 238, B: 238, A: 255} // Muted Cyan
+var fontColor = color.RGBA{R: 51, G: 255, B: 51, A: 255} // Softened phospor green
 var fontColorComment = color.RGBA{R: 150, G: 150, B: 150, A: 255 * 0.6}
 
 //go:embed fonts/Courierprime_1OVL.ttf
@@ -84,8 +86,9 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	// Clear the screen with a black background
-	screen.Fill(color.RGBA{R: 20, G: 24, B: 30, A: 255}) // a little off black
-	// screen.Fill(color.RGBA{R: 15, G: 20, B: 25, A: 255}) // a little off black
+	screen.Fill(color.RGBA{R: 18, G: 18, B: 18, A: 255}) // matte black
+	// screen.Fill(color.RGBA{R: 26, G: 27, B: 38, A: 255}) // storm blue grey 26, 27, 38
+	// screen.Fill(color.RGBA{R: 20, G: 24, B: 30, A: 255}) // a little off black
 	// screen.Fill(color.RGBA{R: 0, G: 0, B: 0, A: 255})
 	// screen.Fill(color.RGBA{R: 0, G: 0, B: 50, A: 255})
 

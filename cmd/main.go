@@ -85,6 +85,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	// Clear the screen with a black background
 	screen.Fill(color.RGBA{R: 20, G: 24, B: 30, A: 255}) // a little off black
+	// screen.Fill(color.RGBA{R: 15, G: 20, B: 25, A: 255}) // a little off black
 	// screen.Fill(color.RGBA{R: 0, G: 0, B: 0, A: 255})
 	// screen.Fill(color.RGBA{R: 0, G: 0, B: 50, A: 255})
 

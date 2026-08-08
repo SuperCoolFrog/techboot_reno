@@ -203,8 +203,9 @@ func s4AnimatePath(puzzleId PuzzleId, game *Game) (isPlaying bool) {
 		y1 := game.ps.StartY[pathId]
 
 		xPts, yPts := game.ps.GetXYPoints(PathId(pathId))
+		count := game.ps.PointsCount[pathId]
 
-		end := int(completedTime * float32(len(xPts)))
+		end := int(completedTime * float32(count+1)) // need to add +1 because for uses <, so need to include top idx
 
 		for i := 0; i < end; i++ {
 			x := xPts[i]
@@ -219,6 +220,27 @@ func s4AnimatePath(puzzleId PuzzleId, game *Game) (isPlaying bool) {
 	return game.ans.IsPlaying[AnimationPath]
 }
 
+func s4ClearPathSprites(puzzleId PuzzleId, game *Game) {
+	paths, errC := game.jxpp.GetChildren(uint32(puzzleId))
+
+	if errC != nil {
+		panic(errC)
+	}
+
+	for i := 0; i < len(paths); i++ {
+		pathId := paths[i]
+		xPts, yPts := game.ps.GetXYPoints(PathId(pathId))
+
+		for i := 0; i < len(xPts); i++ {
+			x := xPts[i]
+			y := yPts[i]
+
+			game.gs.Set(game.b.GridOutput, x, y, CellTypeEmpty, ' ')
+		}
+	}
+
+}
+
 func Scene4_Puzzling(current, next GameState, game *Game) GameState {
 	puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
 	if assignmentError != nil {
@@ -227,8 +249,11 @@ func Scene4_Puzzling(current, next GameState, game *Game) GameState {
 
 	if s4AnimatePath(puzzleId, game) {
 		return current
+	} else if game.pz.IsPuzzleSolved(puzzleId) {
+		fmt.Println("Puzzle Solved!\n")
+		return next
 	} else {
-		// clear cells
+		// s4ClearPathSprites(puzzleId, game)
 	}
 
 	for i := 0; i < len(game.inputRunes); i++ {

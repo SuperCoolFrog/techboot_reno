@@ -331,13 +331,13 @@ func bucketInitializeGamePuzzles(pz *PuzzleSystem, ps *PathSystem, jxpp *Junctio
 
 	jxpp.AddParent(uint32(id), 2)
 
-	path1, err := ps.NewPath(cols/2+1, rows-1, cols/2+1, g1Y+1)
+	path1, err := ps.NewPath(cols/2+1, rows-1, cols/2+1, g1Y+2)
 	if err != nil {
 		return err
 	}
 	jxpp.AddChild(uint32(id), uint32(path1))
 
-	path2, err2 := ps.NewPath(cols/2-1, rows-1, cols/2-1, g1Y+1)
+	path2, err2 := ps.NewPath(cols/2-1, rows-1, cols/2-1, g1Y+2)
 	if err2 != nil {
 		return err2
 	}

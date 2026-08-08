@@ -244,6 +244,19 @@ func (ps *PuzzleSystem) GetGatesY(puzzleId PuzzleId) []int {
 	return ps.GateY[start:end]
 }
 
+func (ps *PuzzleSystem) IsPuzzleSolved(puzzleId PuzzleId) bool {
+	attempt := ps.GetAttemptGates(puzzleId)
+	valid := ps.GetValidGates(puzzleId)
+
+	for i := 0; i < len(attempt); i++ {
+		if attempt[i] != valid[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (ps *PuzzleSystem) GetUnassignedIntroPuzzle() (PuzzleId, error) {
 	for i := 0; i < len(ps.IntroPuzzles); i++ {
 		id := ps.IntroPuzzles[i]
@@ -255,6 +268,7 @@ func (ps *PuzzleSystem) GetUnassignedIntroPuzzle() (PuzzleId, error) {
 	return 0, fmt.Errorf("No available intro puzzle")
 }
 
+// @TODO move this into junction system
 func (ps *PuzzleSystem) AssignPuzzle(puzzleId PuzzleId, state GameState) {
 	ps.PuzzleIsAssigned[puzzleId] = true
 	ps.PuzzleAssignment[puzzleId] = state
@@ -324,7 +338,7 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 			hasSymbol = true
 			cornerSprite = assets.SpriteIDCarrotUp
 		case GatePass:
-			gs.Set(gridId, x, y, CellTypeChar, 'S')
+			gs.Set(gridId, x, y, CellTypeChar, 'O')
 			hasSymbol = true
 			cornerSprite = assets.SpriteIDCircle
 		}

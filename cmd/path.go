@@ -128,8 +128,6 @@ func (ps *PathSystem) NewPath(startX, startY, endX, endY int) (PathId, error) {
 	ps.EndX[id] = endX
 	ps.EndY[id] = endY
 
-	fmt.Printf("** start(%d, %d), end(%d, %d)\n", startX, startY, endX, endY)
-
 	itrX := 1
 	if startX > endX {
 		itrX = -1
@@ -148,8 +146,6 @@ func (ps *PathSystem) NewPath(startX, startY, endX, endY int) (PathId, error) {
 		ps.PointsX[offset+count] = x
 		ps.PointsY[offset+count] = y
 
-		fmt.Printf("PathPoints(%d, %d)\n", x, y)
-
 		count++
 
 		if x != endX {
@@ -163,10 +159,8 @@ func (ps *PathSystem) NewPath(startX, startY, endX, endY int) (PathId, error) {
 	// Add last endpoint
 	ps.PointsX[offset+count] = endX
 	ps.PointsY[offset+count] = endY
-	fmt.Printf("PathPoints(%d, %d)\n", endX, endY)
 
 	count++
-	fmt.Printf("Final Count %d\n", count)
 
 	ps.PointsCount[id] = count
 

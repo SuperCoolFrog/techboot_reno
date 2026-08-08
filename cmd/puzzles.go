@@ -13,8 +13,10 @@ type GateType uint32
 const (
 	GateEmpty GateType = iota
 	GateUnknown
-	GateAnd
-	GateOr
+	GateJoin
+	GatePair
+	GateSplit
+	GatePass
 )
 
 type PuzzleSystem struct {
@@ -309,18 +311,22 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 		switch gateType {
 		case GateUnknown:
 			gs.Set(gridId, x, y, CellTypeChar, '?')
-		case GateAnd:
-			gs.Set(gridId, x-1, y, CellTypeChar, 'A')
-			gs.Set(gridId, x, y, CellTypeChar, 'N')
-			gs.Set(gridId, x+1, y, CellTypeChar, 'D')
+		case GateJoin:
+			gs.Set(gridId, x, y, CellTypeChar, 'J')
 			hasSymbol = true
 			cornerSprite = assets.SpriteIDSquare
-		case GateOr:
-			gs.Set(gridId, x-1, y, CellTypeChar, 'O')
-			gs.Set(gridId, x, y, CellTypeChar, 'R')
-			gs.Set(gridId, x+1, y, CellTypeEmpty, 0)
+		case GatePair:
+			gs.Set(gridId, x, y, CellTypeChar, 'P')
 			hasSymbol = true
 			cornerSprite = assets.SpriteIDDiamond
+		case GateSplit:
+			gs.Set(gridId, x, y, CellTypeChar, 'S')
+			hasSymbol = true
+			cornerSprite = assets.SpriteIDCarrotUp
+		case GatePass:
+			gs.Set(gridId, x, y, CellTypeChar, 'S')
+			hasSymbol = true
+			cornerSprite = assets.SpriteIDCircle
 		}
 
 		if hasSymbol {

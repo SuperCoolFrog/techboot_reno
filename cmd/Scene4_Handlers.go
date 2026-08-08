@@ -312,10 +312,14 @@ loop:
 
 					switch CommandId(cmd.Items[i]) {
 
-					case CommandGateTypeAnd:
-						gateType = GateAnd
-					case CommandGateTypeOr:
-						gateType = GateOr
+					case CommandGateTypeJoin:
+						gateType = GateJoin
+					case CommandGateTypePair:
+						gateType = GatePair
+					case CommandGateTypeSplit:
+						gateType = GateSplit
+					case CommandGateTypePass:
+						gateType = GatePass
 					default:
 						gateType = GateUnknown
 					}

@@ -38,8 +38,14 @@ const (
 	CommandPuzzleMed
 	CommandPuzzleHard
 	CommandSet
-	CommandGateTypeAnd
-	CommandGateTypeOr
+	CommandSetJoin
+	CommandSetPair
+	CommandSetSplit
+	CommandSetPass
+	CommandGateTypeJoin
+	CommandGateTypePair
+	CommandGateTypeSplit
+	CommandGateTypePass
 
 	CommandsCount
 )
@@ -288,7 +294,10 @@ func bucketInitCommandStrings(bs *BufferSystem, bucket *Bucket) {
 	bucketAddCommandStrings(CommandRoy2Fn, []byte("Email: RE: Sorry"), bs, bucket)
 	bucketAddCommandStrings(CommandRoy3Fn, []byte("Email: Miami"), bs, bucket)
 	bucketAddCommandStrings(CommandLobby, []byte("Lobby"), bs, bucket)
-	bucketAddCommandStrings(CommandSet, []byte(":set {gateId} {and;or}="), bs, bucket)
+	bucketAddCommandStrings(CommandSetJoin, []byte(":set {num} join="), bs, bucket)
+	bucketAddCommandStrings(CommandSetPair, []byte(":set {num} pair="), bs, bucket)
+	bucketAddCommandStrings(CommandSetSplit, []byte(":set {num} split="), bs, bucket)
+	bucketAddCommandStrings(CommandSetPass, []byte(":set {num} pass="), bs, bucket)
 }
 
 func bucketAddCommandStrings(commandId CommandId, val []byte, bs *BufferSystem, bucket *Bucket) {
@@ -314,7 +323,7 @@ func bucketInitializeGamePuzzles(pz *PuzzleSystem, ps *PathSystem, jxpp *Junctio
 	g1X := cols / 2
 	g1Y := rows / 2
 
-	pz.SetValidGate(id, 0, g1X, g1Y, GateOr)
+	pz.SetValidGate(id, 0, g1X, g1Y, GateJoin)
 	pz.SetPuzzleGate(id, 0, g1X, g1Y, GateUnknown)
 	pz.SetAttemptedGate(id, 0, g1X, g1Y, GateUnknown)
 

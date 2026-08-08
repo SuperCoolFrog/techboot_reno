@@ -32,19 +32,27 @@ command_id(puzzle_med,     16).
 command_id(puzzle_hard,    17).
 command_id(puzzle_hard,    17).
 command_id(set,            18).
-command_id(gate_and,       19).
-command_id(gate_or,        20).
+command_id(set_join,       19).
+command_id(set_pair,       20).
+command_id(set_split,      21).
+command_id(set_pass,       22).
+command_id(gate_join,      23).
+command_id(gate_pair,      24).
+command_id(gate_split,     25).
+command_id(gate_pass,      26).
 
 
 % Matchs puzzles.go GateType
-gate_type(and, gate_and).
-gate_type(or, gate_or).
+gate_type(join, gate_join).
+gate_type(pair, gate_pair).
+gate_type(split, gate_split).
+gate_type(pass, gate_pass).
 
 
 % Common
 commands(_, result(ListType, List, [])) :-
     command_id(list, ListType),
-    maplist(command_id, [connect, list, list_specific, set], List),!.
+    maplist(command_id, [connect, list, list_specific, set_join, set_pair, set_split, set_pass], List),!.
 
 
 % Scene3_InputHandlingLoop :: 21

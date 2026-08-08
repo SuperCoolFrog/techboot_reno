@@ -47,6 +47,13 @@ set 1 or, 2 and, 3 not=
 - Boss battle will hide in locations and can be "zapped" by current
 - Boss Battle sometimes you have to avoid sending current
 
+### I think the following phrases would be used to build the puzzles
+
+- __join__  : would join 2 paths into 1 path
+- __pair__  : would perform an 'or' and sort of addition
+- __split__ : would split 1 into 2 
+- __open__  : just pass through
+
 ## Trealla prolog
 
 ```

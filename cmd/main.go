@@ -21,7 +21,8 @@ const (
 	screenPadding = fontSize / 4
 )
 
-var fontColor = color.RGBA{R: 0, G: 255, B: 0, A: 255}
+// var fontColor = color.RGBA{R: 0, G: 255, B: 0, A: 255} // this is pure green
+var fontColor = color.RGBA{R: 100, G: 255, B: 150, A: 255}
 var fontColorComment = color.RGBA{R: 150, G: 150, B: 150, A: 255 * 0.6}
 
 //go:embed fonts/Courierprime_1OVL.ttf
@@ -83,7 +84,8 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	// Clear the screen with a black background
-	screen.Fill(color.RGBA{R: 0, G: 0, B: 0, A: 255})
+	screen.Fill(color.RGBA{R: 20, G: 24, B: 30, A: 255}) // a little off black
+	// screen.Fill(color.RGBA{R: 0, G: 0, B: 0, A: 255})
 	// screen.Fill(color.RGBA{R: 0, G: 0, B: 50, A: 255})
 
 	// err := g.Grid.RenderDebug(screen)

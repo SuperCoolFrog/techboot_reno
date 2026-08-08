@@ -294,7 +294,7 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 	spriteIds := gs.SpriteIDs[offset : offset+count]
 
 	strokeW := float32(0.5)
-	clr := color.RGBA{R: 0, G: 255, B: 0, A: 255}
+	clr := fontColor //color.RGBA{R: 0, G: 255, B: 0, A: 255}
 
 	face := &text.GoTextFace{
 		Source: fontSrc,
@@ -313,7 +313,8 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 		case CellTypeReserved:
 			opt := &text.DrawOptions{}
 			charStr := string(chars[i])
-			opt.ColorScale.ScaleWithColor(color.RGBA{R: 0, G: 255, B: 0, A: 255})
+			// opt.ColorScale.ScaleWithColor(color.RGBA{R: 0, G: 255, B: 0, A: 255})
+			opt.ColorScale.ScaleWithColor(fontColor)
 			w, h := text.Measure(charStr, face, 0.0)
 			charX := x + (size-float32(w))/2
 			charY := y + (size-float32(h))/2
@@ -322,7 +323,8 @@ func (gs *GridSystem) RenderGrid(screen *ebiten.Image, gridID GridID) error {
 		case CellTypeChar:
 			opt := &text.DrawOptions{}
 			charStr := string(chars[i])
-			opt.ColorScale.ScaleWithColor(color.RGBA{R: 0, G: 255, B: 0, A: 255})
+			// opt.ColorScale.ScaleWithColor(color.RGBA{R: 0, G: 255, B: 0, A: 255})
+			opt.ColorScale.ScaleWithColor(fontColor)
 			w, h := text.Measure(charStr, face, 0.0)
 			charX := x + (size-float32(w))/2
 			charY := y + (size-float32(h))/2

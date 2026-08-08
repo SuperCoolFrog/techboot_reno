@@ -355,7 +355,7 @@ loop:
 
 					gateIdx := cmd.ValuesInt[i]
 
-					err := game.pz.SetGateType(puzzleId, gateIdx, gateType)
+					err := game.pz.SetAttemptGate(puzzleId, gateIdx, gateType)
 					if err != nil {
 						fmt.Printf("Error setting gatetype: %d ; %d ; %d ;\n%v\n", puzzleId, gateIdx, gateType, err)
 					}

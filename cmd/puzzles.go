@@ -166,7 +166,7 @@ func (ps *PuzzleSystem) SetPuzzleGate(puzzleId PuzzleId, gateIdx, gateX, gateY i
 	return nil
 }
 
-func (ps *PuzzleSystem) SetGateType(puzzleId PuzzleId, gateIdx int, gate GateType) error {
+func (ps *PuzzleSystem) SetAttemptGate(puzzleId PuzzleId, gateIdx int, gate GateType) error {
 	offset := ps.GatesOffsets[puzzleId]
 
 	if gateIdx >= ps.PuzzleGateCounts[puzzleId] {
@@ -174,7 +174,7 @@ func (ps *PuzzleSystem) SetGateType(puzzleId PuzzleId, gateIdx int, gate GateTyp
 	}
 
 	idx := offset + gateIdx
-	ps.PuzzleGates[idx] = gate
+	ps.AttemptedGates[idx] = gate
 
 	return nil
 }
@@ -250,6 +250,7 @@ func (ps *PuzzleSystem) IsPuzzleSolved(puzzleId PuzzleId) bool {
 
 	for i := 0; i < len(attempt); i++ {
 		if attempt[i] != valid[i] {
+			fmt.Printf("%v ;; %v \n", attempt[i], valid[i])
 			return false
 		}
 	}
@@ -296,7 +297,7 @@ func (ps *PuzzleSystem) HasPuzzleAssignment(state GameState) bool {
 
 func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, gs *GridSystem) error {
 
-	gates := ps.GetPuzzleGates(puzzleId)
+	gates := ps.GetAttemptGates(puzzleId)
 	gatesX := ps.GetGatesX(puzzleId)
 	gatesY := ps.GetGatesY(puzzleId)
 

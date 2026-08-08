@@ -250,7 +250,6 @@ func (ps *PuzzleSystem) IsPuzzleSolved(puzzleId PuzzleId) bool {
 
 	for i := 0; i < len(attempt); i++ {
 		if attempt[i] != valid[i] {
-			fmt.Printf("%v ;; %v \n", attempt[i], valid[i])
 			return false
 		}
 	}

@@ -102,7 +102,6 @@ loop:
 			switch cmd.ResultType {
 			case CommandList:
 				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
-				game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
 
 				game.gs.SetRowCells(game.b.GridOutput, 0, CellTypeChar, cmd.Command)
 				game.gs.SetRowSprites(game.b.GridOutput, 1, assets.SpriteIDHorizontalBar)
@@ -147,8 +146,17 @@ func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 		}
 
 		game.pz.AssignPuzzle(puzzleId, next)
+		game.b.SceneStateItr[next] = 2 // Controls number of paths animating
 	}
 
+	s4DrawPuzzle(puzzleId, game)
+
+	s4StartPathAnimation(game.ans)
+
+	return next
+}
+
+func s4DrawPuzzle(puzzleId PuzzleId, game *Game) {
 	gates := game.pz.GetPuzzleGates(puzzleId)
 
 	for i := 0; i < len(gates); i++ {
@@ -168,9 +176,7 @@ func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 		game.gs.SetCellSprite(game.b.GridOutput, pX, pY, assets.SpriteIDCarrotUp)
 	}
 
-	s4StartPathAnimation(game.ans)
-
-	return next
+	game.gs.SetCellSprite(game.b.GridOutput, game.gs.Cols[game.b.GridOutput]/2, 0, assets.SpriteIDCarrotUp)
 }
 
 func s4StartPathAnimation(ans *AnimationSystem) {
@@ -179,9 +185,9 @@ func s4StartPathAnimation(ans *AnimationSystem) {
 	ans.Timers[AnimationPath] = 0.0
 }
 
-func s4AnimatePath(puzzleId PuzzleId, game *Game) (isPlaying bool) {
+func s4AnimatePath(puzzleId PuzzleId, state GameState, game *Game) (isPlaying bool) {
 	if !game.ans.IsPlaying[AnimationPath] {
-		// panic("end")
+		s4DrawPuzzle(puzzleId, game)
 		return false
 	}
 
@@ -197,7 +203,9 @@ func s4AnimatePath(puzzleId PuzzleId, game *Game) (isPlaying bool) {
 		panic(errC)
 	}
 
-	for i := 0; i < len(paths); i++ {
+	pathCount := game.b.SceneStateItr[state]
+
+	for i := 0; i < pathCount; i++ {
 		pathId := paths[i]
 		x1 := game.ps.StartX[pathId]
 		y1 := game.ps.StartY[pathId]
@@ -239,6 +247,7 @@ func s4ClearPathSprites(puzzleId PuzzleId, game *Game) {
 		}
 	}
 
+	s4DrawPuzzle(puzzleId, game)
 }
 
 func Scene4_Puzzling(current, next GameState, game *Game) GameState {
@@ -247,13 +256,20 @@ func Scene4_Puzzling(current, next GameState, game *Game) GameState {
 		panic(fmt.Errorf("Error getting puzzle assigment: %v\n", assignmentError))
 	}
 
-	if s4AnimatePath(puzzleId, game) {
+	if s4AnimatePath(puzzleId, current, game) {
 		return current
-	} else if game.pz.IsPuzzleSolved(puzzleId) {
-		fmt.Println("Puzzle Solved!\n")
-		return next
+	} else if game.b.SceneStateItr[current] > 0 && game.pz.IsPuzzleSolved(puzzleId) { // lock next until connect is called
+		if game.b.SceneStateItr[current] < 3 {
+			fmt.Printf("INIT Next Path animation \n")
+			game.b.SceneStateItr[current]++
+			s4StartPathAnimation(game.ans)
+			return current
+		} else {
+			fmt.Printf("NEXT\n")
+			return next
+		}
 	} else {
-		// s4ClearPathSprites(puzzleId, game)
+		s4ClearPathSprites(puzzleId, game)
 	}
 
 	for i := 0; i < len(game.inputRunes); i++ {
@@ -295,7 +311,6 @@ loop:
 			switch cmd.ResultType {
 			case CommandList:
 				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
-				game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
 
 				game.gs.SetRowCells(game.b.GridOutput, 0, CellTypeChar, cmd.Command)
 				game.gs.SetRowSprites(game.b.GridOutput, 1, assets.SpriteIDHorizontalBar)
@@ -306,28 +321,13 @@ loop:
 					game.gs.SetRowCellsAtCol(game.b.GridOutput, 1, i+2, CellTypeChar, b)
 				}
 			case CommandPuzzle:
-				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
-				game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
-
-				gates := game.pz.GetPuzzleGates(puzzleId)
-
-				for i := 0; i < len(gates); i++ {
-					game.pz.DrawGate(puzzleId, i, game.b.GridOutput, game.gs)
+				if game.pz.IsPuzzleSolved(puzzleId) {
+					game.b.SceneStateItr[current] = 1
+				} else {
+					game.b.SceneStateItr[current] = 2
 				}
-
-				paths, errC := game.jxpp.GetChildren(uint32(puzzleId))
-				if errC != nil {
-					panic(errC)
-				}
-
-				for i := 0; i < len(paths); i++ {
-					pathId := paths[i]
-					pX := game.ps.StartX[pathId]
-					pY := game.ps.StartY[pathId]
-
-					game.gs.SetCellSprite(game.b.GridOutputPrecision, pX, pY, assets.SpriteIDSquare)
-				}
-
+				s4DrawPuzzle(puzzleId, game)
+				s4AnimatePath(puzzleId, current, game)
 			case CommandSet:
 				puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
 
@@ -361,6 +361,12 @@ loop:
 					}
 
 					game.pz.DrawGate(puzzleId, i, game.b.GridOutput, game.gs)
+
+					if game.pz.IsPuzzleSolved(puzzleId) {
+						//	s4StartPathAnimation(game.ans)
+						// game.b.SceneStateItr[current] = 1
+						game.b.SceneStateItr[current] = -1
+					}
 				}
 			case CommandInvalid:
 				// fmt.Printf("Invalid!\n")

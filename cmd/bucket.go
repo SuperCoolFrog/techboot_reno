@@ -329,7 +329,7 @@ func bucketInitializeGamePuzzles(pz *PuzzleSystem, ps *PathSystem, jxpp *Junctio
 
 	pz.PuzzleGateCounts[id] = 1
 
-	jxpp.AddParent(uint32(id), 2)
+	jxpp.AddParent(uint32(id), 3)
 
 	path1, err := ps.NewPath(cols/2+1, rows-1, cols/2+1, g1Y+2)
 	if err != nil {
@@ -342,6 +342,12 @@ func bucketInitializeGamePuzzles(pz *PuzzleSystem, ps *PathSystem, jxpp *Junctio
 		return err2
 	}
 	jxpp.AddChild(uint32(id), uint32(path2))
+
+	path3, err3 := ps.NewPath(cols/2, g1Y-2, cols/2, 0)
+	if err3 != nil {
+		return err3
+	}
+	jxpp.AddChild(uint32(id), uint32(path3))
 
 	return nil
 }

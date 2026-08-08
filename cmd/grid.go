@@ -182,9 +182,27 @@ func (gs *GridSystem) SetAllCells(gridId GridID, cellType GridCellType, char byt
 	}
 }
 
+func (gs *GridSystem) SetRow(gridId GridID, row int, cellType GridCellType, char byte) {
+	for i := 0; i < gs.Cols[gridId]; i++ {
+		gs.Set(gridId, i, row, CellTypeChar, char)
+	}
+}
+
+func (gs *GridSystem) SetRowSprites(gridId GridID, row int, spriteId assets.SpriteID) {
+	for i := 0; i < gs.Cols[gridId]; i++ {
+		gs.SetCellSprite(gridId, i, row, spriteId)
+	}
+}
+
 func (gs *GridSystem) SetRowCells(gridId GridID, row int, cellType GridCellType, chars []byte) {
 	for i := 0; i < len(chars); i++ {
-		gs.Set(gridId, i, row, CellTypeChar, chars[i])
+		gs.Set(gridId, i, row, cellType, chars[i])
+	}
+}
+
+func (gs *GridSystem) SetRowCellsAtCol(gridId GridID, col, row int, cellType GridCellType, chars []byte) {
+	for i := 0; i < len(chars); i++ {
+		gs.Set(gridId, i+col, row, CellTypeChar, chars[i])
 	}
 }
 

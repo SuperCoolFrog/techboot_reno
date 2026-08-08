@@ -60,7 +60,6 @@ func Scene4_UpdateStackAnimation(current, next GameState, game *Game) GameState 
 	return next
 }
 
-// func Scene4_Update(current, next GameState, runes []rune, input chan []byte, commands chan trealla.Atom, gs *GridSystem, anims *AnimationSystem) GameState {
 func Scene4_Update(current, next GameState, game *Game) GameState {
 	for i := 0; i < len(game.inputRunes); i++ {
 		err := game.bs.AppendWithDecor(game.b.BufferCommands, byte(game.inputRunes[i]), CmdBufferDecor)
@@ -103,12 +102,15 @@ loop:
 			switch cmd.ResultType {
 			case CommandList:
 				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
+				game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
 
 				game.gs.SetRowCells(game.b.GridOutput, 0, CellTypeChar, cmd.Command)
+				game.gs.SetRowSprites(game.b.GridOutput, 1, assets.SpriteIDHorizontalBar)
+
 				for i := 0; i < len(cmd.Items); i++ {
 					b := game.b.CommandBytes(cmd.Items[i], game.bs)
-					// fmt.Printf("%d: %d: %s\n", i, len(b), b)
-					game.gs.SetRowCells(game.b.GridOutput, i+1, CellTypeChar, b)
+					game.gs.SetCellSprite(game.b.GridOutput, 0, i+2, assets.SpriteIDRightConnectBar)
+					game.gs.SetRowCellsAtCol(game.b.GridOutput, 1, i+2, CellTypeChar, b)
 				}
 			case CommandPuzzle:
 				state = next
@@ -271,10 +273,12 @@ loop:
 				game.gs.SetAllCells(game.b.GridOutputPrecision, CellTypeEmpty, 0)
 
 				game.gs.SetRowCells(game.b.GridOutput, 0, CellTypeChar, cmd.Command)
+				game.gs.SetRowSprites(game.b.GridOutput, 1, assets.SpriteIDHorizontalBar)
+
 				for i := 0; i < len(cmd.Items); i++ {
 					b := game.b.CommandBytes(cmd.Items[i], game.bs)
-					// fmt.Printf("%d: %d: %s\n", i, len(b), b)
-					game.gs.SetRowCells(game.b.GridOutput, i+1, CellTypeChar, b)
+					game.gs.SetCellSprite(game.b.GridOutput, 0, i+2, assets.SpriteIDRightConnectBar)
+					game.gs.SetRowCellsAtCol(game.b.GridOutput, 1, i+2, CellTypeChar, b)
 				}
 			case CommandPuzzle:
 				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)

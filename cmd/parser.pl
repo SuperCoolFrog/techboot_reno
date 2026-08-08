@@ -62,6 +62,7 @@ secured_connection(state(17), lobby, puzzle_intro).
 
 % Scene4_Run :: 25
 list(state(15), [files, networks]).
+list(state(17), [files, networks]).
 list(StateId, result(ListType, List, [])) :-
     state(StateId),
     command_id(list, ListType),
@@ -73,6 +74,7 @@ list(networks, StateId, Out) :-
     networks(StateId, Out), !.
 
 files(state(15), [roy_1_fn, roy_2_fn, roy_3_fn]).
+files(state(17), [roy_1_fn, roy_2_fn, roy_3_fn]).
 files(StateId, result(ListType, List, [])) :-
     state(StateId),
     command_id(list, ListType),
@@ -80,6 +82,7 @@ files(StateId, result(ListType, List, [])) :-
     maplist(command_id, CommandNames, List),!.
 
 networks(state(15), [lobby]).
+networks(state(17), [lobby]).
 networks(StateId, result(ListType, List, [])) :-
     state(StateId),
     command_id(list, ListType),

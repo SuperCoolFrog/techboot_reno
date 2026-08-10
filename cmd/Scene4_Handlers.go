@@ -321,13 +321,14 @@ loop:
 					game.gs.SetRowCellsAtCol(game.b.GridOutput, 1, i+2, CellTypeChar, b)
 				}
 			case CommandPuzzle:
+				game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
 				if game.pz.IsPuzzleSolved(puzzleId) {
 					game.b.SceneStateItr[current] = 1
 				} else {
 					game.b.SceneStateItr[current] = 2
 				}
 				s4DrawPuzzle(puzzleId, game)
-				s4AnimatePath(puzzleId, current, game)
+				s4StartPathAnimation(game.ans)
 			case CommandSet:
 				puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
 

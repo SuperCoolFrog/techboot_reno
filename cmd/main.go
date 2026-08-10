@@ -51,6 +51,7 @@ type Game struct {
 	pz                     *PuzzleSystem
 	ps                     *PathSystem
 	jxpp                   *JunctionSystem //PuzzleId -> PathIds
+	jxgp                   *CompoundSystem //GateId+GateType -> []Paths
 	b                      Bucket
 	MouseMoved             bool
 	LastMouseX, LastMouseY int
@@ -131,6 +132,11 @@ func main() {
 
 	puzzleSystem := NewPuzzleSystem(10, 1, 0, 0, 0)
 
+	maxIdJxgp := puzzleSystem.TotalGates
+	if int(GateTypeCount) > maxIdJxgp {
+		maxIdJxgp = int(GateTypeCount)
+	}
+
 	game := &Game{
 		State:        Scene3_Init, //Scene1_Init,
 		gs:           NewGridSystem(MaxTotalCells, MaxGrids),
@@ -139,6 +145,7 @@ func main() {
 		ps:           NewPathSystem(200),
 		pz:           puzzleSystem,
 		jxpp:         NewJunctionSystem(puzzleSystem.TotalPuzzles, 20),
+		jxgp:         NewCompoundSystem(maxIdJxgp, 5),
 		parserpl:     string(parserpl),
 		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
 		prologOutput: make(chan CommandResponse, 128),

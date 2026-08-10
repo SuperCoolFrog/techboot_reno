@@ -307,47 +307,48 @@ func bucketAddCommandStrings(commandId CommandId, val []byte, bs *BufferSystem, 
 	bs.NewLine(bucket.BufferCommandOutputs)
 }
 
-func bucketInitializeGamePuzzles(pz *PuzzleSystem, ps *PathSystem, jxpp *JunctionSystem, gs *GridSystem, bucket *Bucket) error {
+func bucketInitializeGamePuzzles(game *Game, bucket *Bucket) error {
 	/* Placeholder for now until puzzle generator is created */
 
-	id, errorIntro := pz.AllocatePuzzle(1)
+	id, errorIntro := game.pz.AllocatePuzzle(1)
 
 	if errorIntro != nil {
 		return errorIntro
 	}
 
-	pz.IntroPuzzles[0] = id
+	game.pz.IntroPuzzles[0] = id
 
-	cols := gs.Cols[bucket.GridOutput]
-	rows := gs.Rows[bucket.GridOutput]
+	cols := game.gs.Cols[bucket.GridOutput]
+	rows := game.gs.Rows[bucket.GridOutput]
 	g1X := cols / 2
 	g1Y := rows / 2
 
-	pz.SetValidGate(id, 0, g1X, g1Y, GateJoin)
-	pz.SetPuzzleGate(id, 0, g1X, g1Y, GateUnknown)
-	pz.SetAttemptedGate(id, 0, g1X, g1Y, GateUnknown)
+	game.pz.SetValidGate(id, 0, g1X, g1Y, GateJoin)
+	game.pz.SetPuzzleGate(id, 0, g1X, g1Y, GateUnknown)
+	game.pz.SetAttemptedGate(id, 0, g1X, g1Y, GateUnknown)
 
-	pz.PuzzleGateCounts[id] = 1
+	game.pz.PuzzleGateCounts[id] = 1
 
-	jxpp.AddParent(uint32(id), 3)
+	game.jxpp.AddParent(uint32(id), 3)
 
-	path1, err := ps.NewPath(cols/2+1, rows-1, cols/2+1, g1Y+2)
+	path1, err := game.ps.NewPath(cols/2+1, rows-1, cols/2+1, g1Y+2)
 	if err != nil {
 		return err
 	}
-	jxpp.AddChild(uint32(id), uint32(path1))
+	game.jxpp.AddChild(uint32(id), uint32(path1))
 
-	path2, err2 := ps.NewPath(cols/2-1, rows-1, cols/2-1, g1Y+2)
+	path2, err2 := game.ps.NewPath(cols/2-1, rows-1, cols/2-1, g1Y+2)
 	if err2 != nil {
 		return err2
 	}
-	jxpp.AddChild(uint32(id), uint32(path2))
+	game.jxpp.AddChild(uint32(id), uint32(path2))
 
-	path3, err3 := ps.NewPath(cols/2, g1Y-2, cols/2, 0)
+	// @TODO this path gets added to gate1+GateTypeJoin for jxgp
+	path3, err3 := game.ps.NewPath(cols/2, g1Y-2, cols/2, 0)
 	if err3 != nil {
 		return err3
 	}
-	jxpp.AddChild(uint32(id), uint32(path3))
+	game.jxpp.AddChild(uint32(id), uint32(path3))
 
 	return nil
 }

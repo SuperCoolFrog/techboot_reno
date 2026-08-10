@@ -8,6 +8,7 @@ import (
 
 type PuzzleId uint32
 
+type GateId int // offset+idx
 type GateType uint32
 
 const (
@@ -17,6 +18,8 @@ const (
 	GatePair
 	GateSplit
 	GatePass
+
+	GateTypeCount
 )
 
 type PuzzleSystem struct {

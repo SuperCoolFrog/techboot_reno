@@ -52,6 +52,10 @@ type Game struct {
 	ps                     *PathSystem
 	jxpp                   *JunctionSystem //PuzzleId -> PathIds
 	jxgp                   *CompoundSystem //GateId+GateType -> []Paths
+	pcn                    *FlagSystem     // PuzzleConnected
+	pac                    *FlagSystem     // PuzzleAnimationComplete
+	gap                    *FlagSystem     // GateAnimationPlaying
+	gac                    *FlagSystem     // GateAnimationCompleted
 	b                      Bucket
 	MouseMoved             bool
 	LastMouseX, LastMouseY int
@@ -146,6 +150,10 @@ func main() {
 		pz:           puzzleSystem,
 		jxpp:         NewJunctionSystem(puzzleSystem.TotalPuzzles, 20),
 		jxgp:         NewCompoundSystem(maxIdJxgp, 5),
+		pcn:          NewFlagSystem(puzzleSystem.TotalPuzzles),
+		pac:          NewFlagSystem(puzzleSystem.TotalPuzzles),
+		gap:          NewFlagSystem(puzzleSystem.TotalGates),
+		gac:          NewFlagSystem(puzzleSystem.TotalGates),
 		parserpl:     string(parserpl),
 		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
 		prologOutput: make(chan CommandResponse, 128),

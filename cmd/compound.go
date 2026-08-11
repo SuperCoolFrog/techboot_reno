@@ -19,7 +19,7 @@ type CompoundSystem struct {
 	MaxChildren int
 	MasterChunk []byte
 
-	Children      []uint32
+	Children      []uint16
 	ChildrenCount []int
 }
 
@@ -33,7 +33,7 @@ func NewCompoundSystem(maxId, maxChildren int) *CompoundSystem {
 	totalChildren := totalIdCombos * maxChildren
 
 	sizeChildrenCount := totalIdCombos * int(unsafe.Sizeof(int(0))) // 8 bytes
-	sizeChildren := totalChildren * int(unsafe.Sizeof(uint32(0)))   // 4 bytes
+	sizeChildren := totalChildren * int(unsafe.Sizeof(uint16(0)))   // 4 bytes
 
 	totalSize := sizeChildrenCount + sizeChildren
 
@@ -43,13 +43,13 @@ func NewCompoundSystem(maxId, maxChildren int) *CompoundSystem {
 	cs.ChildrenCount = unsafe.Slice((*int)(ptr), totalIdCombos)
 	ptr = unsafe.Add(ptr, sizeChildrenCount)
 
-	cs.Children = unsafe.Slice((*uint32)(ptr), totalChildren)
+	cs.Children = unsafe.Slice((*uint16)(ptr), totalChildren)
 	// ptr = unsafe.Add(ptr, sizeChildren)
 
 	return cs
 }
 
-func (cs *CompoundSystem) AddChild(idA, idB uint32, child uint32) error {
+func (cs *CompoundSystem) AddChild(idA, idB uint16, child uint16) error {
 	idx := (int(idA) * cs.MaxId) + int(idB)
 	count := cs.ChildrenCount[idx]
 
@@ -64,7 +64,7 @@ func (cs *CompoundSystem) AddChild(idA, idB uint32, child uint32) error {
 	return nil
 }
 
-func (cs *CompoundSystem) GetChild(idA, idB uint32) []uint32 {
+func (cs *CompoundSystem) GetChildren(idA, idB uint16) []uint16 {
 	idx := (int(idA) * cs.MaxId) + int(idB)
 	count := cs.ChildrenCount[idx]
 

@@ -16,7 +16,7 @@ const (
 	AnimationCount
 )
 
-type CommandId uint32
+type CommandId uint8 // uint8 < 256 ;; uint16 <  65535
 
 const (
 	CommandInvalid CommandId = iota
@@ -111,7 +111,7 @@ func InitBucketItems(game *Game) Bucket {
 
 	bucketInitCommandStrings(game.bs, bucket)
 
-	bucketInitializeGamePuzzles(game.pz, game.ps, game.jxpp, game.gs, bucket)
+	bucketInitializeGamePuzzles(game, bucket)
 
 	return *bucket
 }
@@ -317,15 +317,20 @@ func bucketInitializeGamePuzzles(game *Game, bucket *Bucket) error {
 	}
 
 	game.pz.IntroPuzzles[0] = id
+	game.pac.Set(uint16(id), false)
+	game.pcn.Set(uint16(id), false)
 
 	cols := game.gs.Cols[bucket.GridOutput]
 	rows := game.gs.Rows[bucket.GridOutput]
 	g1X := cols / 2
 	g1Y := rows / 2
 
-	game.pz.SetValidGate(id, 0, g1X, g1Y, GateJoin)
-	game.pz.SetPuzzleGate(id, 0, g1X, g1Y, GateUnknown)
-	game.pz.SetAttemptedGate(id, 0, g1X, g1Y, GateUnknown)
+	gateIdx0 := 0
+	gateId0 := game.pz.GetGateId(id, gateIdx0)
+
+	game.pz.SetValidGate(id, gateIdx0, g1X, g1Y, GateJoin)
+	game.pz.SetPuzzleGate(id, gateIdx0, g1X, g1Y, GateUnknown)
+	game.pz.SetAttemptedGate(id, gateIdx0, g1X, g1Y, GateUnknown)
 
 	game.pz.PuzzleGateCounts[id] = 1
 
@@ -343,12 +348,16 @@ func bucketInitializeGamePuzzles(game *Game, bucket *Bucket) error {
 	}
 	game.jxpp.AddChild(uint32(id), uint32(path2))
 
+	// Gate Paths
+
 	// @TODO this path gets added to gate1+GateTypeJoin for jxgp
 	path3, err3 := game.ps.NewPath(cols/2, g1Y-2, cols/2, 0)
 	if err3 != nil {
 		return err3
 	}
-	game.jxpp.AddChild(uint32(id), uint32(path3))
+	game.jxgp.AddChild(uint16(gateId0), uint16(GateJoin), uint16(path3))
+	game.gap.Set(uint16(gateId0), false)
+	game.gac.Set(uint16(gateId0), false)
 
 	return nil
 }

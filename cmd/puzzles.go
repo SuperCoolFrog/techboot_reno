@@ -6,10 +6,10 @@ import (
 	"unsafe"
 )
 
-type PuzzleId uint32
+type PuzzleId uint16
 
-type GateId int // offset+idx
-type GateType uint32
+type GateId uint16 // offset+idx
+type GateType uint16
 
 const (
 	GateEmpty GateType = iota
@@ -137,6 +137,11 @@ func (ps *PuzzleSystem) AllocatePuzzle(numberOfGates int) (PuzzleId, error) {
 	ps.GatesOffsets[id] = startOffset
 
 	return id, nil
+}
+
+func (ps *PuzzleSystem) GetGateId(puzzleId PuzzleId, gateIdx int) GateId {
+	offset := ps.GatesOffsets[puzzleId]
+	return GateId(offset + gateIdx)
 }
 
 func (ps *PuzzleSystem) SetValidGate(puzzleId PuzzleId, gateIdx, gateX, gateY int, gate GateType) error {

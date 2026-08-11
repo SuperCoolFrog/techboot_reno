@@ -112,6 +112,8 @@ loop:
 				}
 			case CommandPuzzle:
 				state = next
+				game.bs.AppendAll(game.b.BufferLogs, []byte("Connection Failed"))
+				game.bs.NewLine(game.b.BufferLogs)
 			case CommandConnectFalse:
 				game.bs.AppendAll(game.b.BufferLogs, []byte("Connection Failed"))
 				game.bs.NewLine(game.b.BufferLogs)
@@ -330,7 +332,9 @@ func Scene4_Puzzling(current, next GameState, game *Game) GameState {
 	if s4AnimatePath(puzzleId, current, game) {
 		return current
 	} else if game.pcn.Has(uint16(puzzleId)) { // lock next until connect is called
-		fmt.Printf("Puzzle COMPLETE ;; NEXT\n")
+		game.bs.AppendAll(game.b.BufferLogs, []byte("Connection Successful"))
+		game.bs.NewLine(game.b.BufferLogs)
+		game.bs.DrawToGrid(game.b.BufferLogs, game.b.GridMainUI, 37, 38, game.gs)
 		return next
 	} else {
 		s4ClearPathSprites(puzzleId, game)
@@ -392,6 +396,9 @@ loop:
 
 				if game.pz.IsPuzzleSolved(puzzleId) {
 					game.pcn.Set(uint16(puzzleId), true)
+				} else {
+					game.bs.AppendAll(game.b.BufferLogs, []byte("Connection Failed"))
+					game.bs.NewLine(game.b.BufferLogs)
 				}
 
 			case CommandSet:

@@ -334,7 +334,7 @@ func bucketInitializeGamePuzzles(game *Game, bucket *Bucket) error {
 
 	game.pz.PuzzleGateCounts[id] = 1
 
-	game.jxpp.AddParent(uint32(id), 3)
+	game.jxpp.AddParent(uint32(id), 2)
 
 	path1, err := game.ps.NewPath(cols/2+1, rows-1, cols/2+1, g1Y+2)
 	if err != nil {
@@ -351,11 +351,11 @@ func bucketInitializeGamePuzzles(game *Game, bucket *Bucket) error {
 	// Gate Paths
 
 	// @TODO this path gets added to gate1+GateTypeJoin for jxgp
-	path3, err3 := game.ps.NewPath(cols/2, g1Y-2, cols/2, 0)
-	if err3 != nil {
-		return err3
+	pathJoin, errpj := game.ps.NewPath(cols/2, g1Y-2, cols/2, 0)
+	if errpj != nil {
+		return errpj
 	}
-	game.jxgp.AddChild(uint16(gateId0), uint16(GateJoin), uint16(path3))
+	game.jxgp.AddChild(uint16(gateId0), uint16(GateJoin), uint16(pathJoin))
 	game.gap.Set(uint16(gateId0), false)
 	game.gac.Set(uint16(gateId0), false)
 

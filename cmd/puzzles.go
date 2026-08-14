@@ -383,16 +383,17 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 
 		gs.SetCellSprite(gridId, x, y-1, assets.SpriteIDHorizontalBar)
 		gs.SetCellSprite(gridId, x, y+1, assets.SpriteIDHorizontalBar)
-		gs.SetCellSprite(gridId, x-1, y-1, assets.SpriteIDHorizontalBar)
-		gs.SetCellSprite(gridId, x+1, y+1, assets.SpriteIDHorizontalBar)
-		gs.SetCellSprite(gridId, x+1, y-1, assets.SpriteIDHorizontalBar)
-		gs.SetCellSprite(gridId, x-1, y+1, assets.SpriteIDHorizontalBar)
 
-		gs.SetCellSprite(gridId, x-2, y, assets.SpriteIDVerticalBar)
-		gs.SetCellSprite(gridId, x+2, y, assets.SpriteIDVerticalBar)
+		// gs.SetCellSprite(gridId, x-1, y-1, assets.SpriteIDHorizontalBar)
+		// gs.SetCellSprite(gridId, x+1, y+1, assets.SpriteIDHorizontalBar)
+		// gs.SetCellSprite(gridId, x+1, y-1, assets.SpriteIDHorizontalBar)
+		// gs.SetCellSprite(gridId, x-1, y+1, assets.SpriteIDHorizontalBar)
+
+		gs.SetCellSprite(gridId, x-1, y, assets.SpriteIDVerticalBar)
+		gs.SetCellSprite(gridId, x+1, y, assets.SpriteIDVerticalBar)
 
 		if i < 9 {
-			gs.Set(gridId, x-3, y, CellTypeChar, byte('0'+(i+1)))
+			gs.Set(gridId, x-2, y, CellTypeChar, byte('0'+(i+1)))
 		}
 
 		hasSymbol := false
@@ -417,10 +418,10 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 
 		if hasSymbol {
 			gs.SetCellSprite(gridId, x, y, gateSprite)
-			gs.SetCellSprite(gridId, x-2, y-1, cornerSprite)
-			gs.SetCellSprite(gridId, x-2, y+1, cornerSprite)
-			gs.SetCellSprite(gridId, x+2, y-1, cornerSprite)
-			gs.SetCellSprite(gridId, x+2, y+1, cornerSprite)
+			gs.SetCellSprite(gridId, x-1, y-1, cornerSprite)
+			gs.SetCellSprite(gridId, x-1, y+1, cornerSprite)
+			gs.SetCellSprite(gridId, x+1, y-1, cornerSprite)
+			gs.SetCellSprite(gridId, x+1, y+1, cornerSprite)
 		}
 	}
 

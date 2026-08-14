@@ -174,7 +174,9 @@ func s4DrawPuzzle(puzzleId PuzzleId, game *Game) {
 		game.gs.SetCellSprite(game.b.GridOutput, pX, pY, assets.SpriteIDCarrotUp)
 	}
 
-	game.gs.SetCellSprite(game.b.GridOutput, game.gs.Cols[game.b.GridOutput]/2, 0, assets.SpriteIDCarrotUp)
+	game.pz.DrawMarkers(puzzleId, game.b.GridOutput, game.gs)
+
+	// game.gs.SetCellSprite(game.b.GridOutput, game.gs.Cols[game.b.GridOutput]/2, 0, assets.SpriteIDCarrotUp)
 }
 
 func s4StartPathAnimation(puzzleId PuzzleId, game *Game) {

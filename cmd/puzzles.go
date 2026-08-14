@@ -320,6 +320,26 @@ func (ps *PuzzleSystem) GetGatesY(puzzleId PuzzleId) []int {
 	return ps.GateY[start:end]
 }
 
+func (ps *PuzzleSystem) GetMarkersX(puzzleId PuzzleId) []int {
+	offset := ps.MarkersOffsets[puzzleId]
+	count := ps.MarkersCounts[puzzleId]
+
+	start := offset
+	end := start + count
+
+	return ps.MarkerX[start:end]
+}
+
+func (ps *PuzzleSystem) GetMarkersY(puzzleId PuzzleId) []int {
+	offset := ps.MarkersOffsets[puzzleId]
+	count := ps.MarkersCounts[puzzleId]
+
+	start := offset
+	end := start + count
+
+	return ps.MarkerY[start:end]
+}
+
 func (ps *PuzzleSystem) IsPuzzleSolved(puzzleId PuzzleId) bool {
 	attempt := ps.GetAttemptGates(puzzleId)
 	valid := ps.GetValidGates(puzzleId)
@@ -423,6 +443,28 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 			gs.SetCellSprite(gridId, x+1, y-1, cornerSprite)
 			gs.SetCellSprite(gridId, x+1, y+1, cornerSprite)
 		}
+	}
+
+	return nil
+}
+
+func (ps *PuzzleSystem) DrawMarkers(puzzleId PuzzleId, gridId GridID, gs *GridSystem) error {
+	markers := ps.GetMarkers(puzzleId)
+	markersX := ps.GetMarkersX(puzzleId)
+	markersY := ps.GetMarkersY(puzzleId)
+
+	for i := 0; i < len(markers); i++ {
+		marker := markers[i]
+		x := markersX[i]
+		y := markersY[i]
+
+		switch marker {
+		case PuzzleMarkerYes:
+			gs.SetCellSprite(gridId, x, y, assets.SpriteIDCircle)
+		case PuzzleMarkerNo:
+			gs.SetCellSprite(gridId, x, y, assets.SpriteIDNotCircle)
+		}
+
 	}
 
 	return nil

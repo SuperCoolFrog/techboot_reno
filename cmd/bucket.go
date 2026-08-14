@@ -328,6 +328,7 @@ func bucketInitializeGamePuzzles(game *Game, bucket *Bucket) error {
 	game.pz.SetValidGate(id, gateIdx0, g1X, g1Y, GatePass)
 	game.pz.SetPuzzleGate(id, gateIdx0, g1X, g1Y, GateUnknown)
 	game.pz.SetAttemptedGate(id, gateIdx0, g1X, g1Y, GateUnknown)
+	game.pz.SetMarker(id, 0, cols/2, 0, PuzzleMarkerYes)
 
 	game.pz.PuzzleGateCounts[id] = 1
 

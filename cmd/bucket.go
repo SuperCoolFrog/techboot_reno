@@ -39,11 +39,9 @@ const (
 	CommandPuzzleHard
 	CommandSet
 	CommandSetJoin
-	CommandSetPair
 	CommandSetSplit
 	CommandSetPass
 	CommandGateTypeJoin
-	CommandGateTypePair
 	CommandGateTypeSplit
 	CommandGateTypePass
 
@@ -295,7 +293,6 @@ func bucketInitCommandStrings(bs *BufferSystem, bucket *Bucket) {
 	bucketAddCommandStrings(CommandRoy3Fn, []byte("Email: Miami"), bs, bucket)
 	bucketAddCommandStrings(CommandLobby, []byte("Lobby"), bs, bucket)
 	bucketAddCommandStrings(CommandSetJoin, []byte(":set {num} join="), bs, bucket)
-	bucketAddCommandStrings(CommandSetPair, []byte(":set {num} pair="), bs, bucket)
 	bucketAddCommandStrings(CommandSetSplit, []byte(":set {num} split="), bs, bucket)
 	bucketAddCommandStrings(CommandSetPass, []byte(":set {num} pass="), bs, bucket)
 }

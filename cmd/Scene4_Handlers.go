@@ -416,8 +416,6 @@ loop:
 
 					case CommandGateTypeJoin:
 						gateType = GateJoin
-					case CommandGateTypePair:
-						gateType = GatePair
 					case CommandGateTypeSplit:
 						gateType = GateSplit
 					case CommandGateTypePass:

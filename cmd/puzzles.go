@@ -15,7 +15,6 @@ const (
 	GateEmpty GateType = iota
 	GateUnknown
 	GateJoin
-	GatePair
 	GateSplit
 	GatePass
 
@@ -337,14 +336,10 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 			gs.Set(gridId, x, y, CellTypeChar, 'J')
 			hasSymbol = true
 			cornerSprite = assets.SpriteIDSquare
-		case GatePair:
-			gs.Set(gridId, x, y, CellTypeChar, 'P')
-			hasSymbol = true
-			cornerSprite = assets.SpriteIDDiamond
 		case GateSplit:
 			gs.Set(gridId, x, y, CellTypeChar, 'S')
 			hasSymbol = true
-			cornerSprite = assets.SpriteIDCarrotUp
+			cornerSprite = assets.SpriteIDDiamond
 		case GatePass:
 			gs.Set(gridId, x, y, CellTypeChar, 'O')
 			hasSymbol = true

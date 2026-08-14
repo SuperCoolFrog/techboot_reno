@@ -134,7 +134,9 @@ func main() {
 	const MaxTotalCells = 150_000
 	const MaxGrids = 15
 
-	puzzleSystem := NewPuzzleSystem(10, 1, 0, 0, 0)
+	// MaxMarkers calculated by 2(cols)+2(rows) of output grid
+
+	puzzleSystem := NewPuzzleSystem(10, 26*2+36*2, 1, 0, 0, 0)
 
 	maxIdJxgp := puzzleSystem.TotalGates
 	if int(GateTypeCount) > maxIdJxgp {

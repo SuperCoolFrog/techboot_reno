@@ -307,7 +307,7 @@ func bucketAddCommandStrings(commandId CommandId, val []byte, bs *BufferSystem, 
 func bucketInitializeGamePuzzles(game *Game, bucket *Bucket) error {
 	/* Placeholder for now until puzzle generator is created */
 
-	id, errorIntro := game.pz.AllocatePuzzle(1)
+	id, errorIntro := game.pz.AllocatePuzzle(1, 1)
 
 	if errorIntro != nil {
 		return errorIntro

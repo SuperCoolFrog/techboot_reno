@@ -24,6 +24,10 @@ const (
 	SpriteIDCarrotUp
 	SpriteIDDownConnectBar
 	SpriteIDUpConnectBar
+	SpriteIDNotCircle
+	SpriteIDGateJoin
+	SpriteIDGateSplit
+	SpriteIDGatePass
 
 	SpirteIDCount // Always Last
 )

@@ -21,9 +21,18 @@ const (
 	GateTypeCount
 )
 
+type PuzzleMarker byte
+
+const (
+	PuzzleMarkerNone PuzzleMarker = 0
+	PuzzleMarkerYes  PuzzleMarker = 1 << 0
+	PuzzleMarkerNo   PuzzleMarker = 2 << 0
+)
+
 type PuzzleSystem struct {
 	TotalPuzzles int
 	TotalGates   int
+	TotalMarkers int
 	MasterChunk  []byte
 
 	IntroPuzzlesCount int
@@ -41,6 +50,8 @@ type PuzzleSystem struct {
 	PuzzleIsAssigned []bool
 	PuzzleAssignment []GameState
 
+	MarkersCounts []int
+
 	// Stored in Chunk
 	ValidGates     []GateType // Valid Gates that solve the puzzle
 	PuzzleGates    []GateType // This is the gates presented to player
@@ -49,15 +60,22 @@ type PuzzleSystem struct {
 	GateX          []int
 	GateY          []int
 
+	Markers        []PuzzleMarker
+	MarkerX        []int
+	MarkerY        []int
+	MarkersOffsets []int
+
 	NextPuzzleId PuzzleId
 }
 
-func NewPuzzleSystem(totalGates, introPuzzles, easyPuzzles, medPuzzles, hardPuzzles int) *PuzzleSystem {
+func NewPuzzleSystem(totalGates, maxMarkersPerPuzzle, introPuzzles, easyPuzzles, medPuzzles, hardPuzzles int) *PuzzleSystem {
 	totalPuzzles := introPuzzles + easyPuzzles + medPuzzles + hardPuzzles
+	totalMarkers := totalPuzzles + maxMarkersPerPuzzle
 
 	ps := &PuzzleSystem{
 		TotalPuzzles:      totalPuzzles,
 		TotalGates:        totalGates,
+		TotalMarkers:      totalMarkers,
 		IntroPuzzlesCount: introPuzzles,
 		EasyPuzzlesCount:  easyPuzzles,
 		MedPuzzlesCount:   medPuzzles,
@@ -72,9 +90,11 @@ func NewPuzzleSystem(totalGates, introPuzzles, easyPuzzles, medPuzzles, hardPuzz
 		PuzzleGateCounts: make([]int, totalPuzzles),
 		PuzzleIsAssigned: make([]bool, totalPuzzles),
 		PuzzleAssignment: make([]GameState, totalPuzzles),
+		MarkersCounts:    make([]int, totalPuzzles),
 
 		// Standard Go slice allocations for non-contiguous offsets
-		GatesOffsets: make([]int, totalGates),
+		GatesOffsets:   make([]int, totalPuzzles),
+		MarkersOffsets: make([]int, totalPuzzles),
 	}
 
 	// 1. Compute Byte Sizes Grouped by Memory Alignment Requirements
@@ -83,11 +103,17 @@ func NewPuzzleSystem(totalGates, introPuzzles, easyPuzzles, medPuzzles, hardPuzz
 	sizeGateX := totalGates * int(unsafe.Sizeof(int(0)))
 	sizeGateY := totalGates * int(unsafe.Sizeof(int(0)))
 
+	sizeMarkerX := totalMarkers * int(unsafe.Sizeof(int(0)))
+	sizeMarkerY := totalMarkers * int(unsafe.Sizeof(int(0)))
+
 	// 4-Byte Types (uint32)
 	sizeGates := totalGates * int(unsafe.Sizeof(GateType(0)))
 
+	sizeMarkers := totalMarkers * int(unsafe.Sizeof(PuzzleMarker(0)))
+
 	// 2. Allocate the Master Chunk
-	totalSize := sizeGateX + sizeGateY + (sizeGates * 3) // Valid,Puzzle,Attempted,
+	totalSize := sizeMarkers + sizeMarkerX + sizeMarkerY +
+		sizeGateX + sizeGateY + (sizeGates * 3) // Valid,Puzzle,Attempted,
 
 	ps.MasterChunk = make([]byte, totalSize)
 	ptr := unsafe.Pointer(&ps.MasterChunk[0])
@@ -99,6 +125,12 @@ func NewPuzzleSystem(totalGates, introPuzzles, easyPuzzles, medPuzzles, hardPuzz
 	ps.GateY = unsafe.Slice((*int)(ptr), totalGates)
 	ptr = unsafe.Add(ptr, sizeGateY)
 
+	ps.MarkerX = unsafe.Slice((*int)(ptr), totalMarkers)
+	ptr = unsafe.Add(ptr, sizeMarkerX)
+
+	ps.MarkerY = unsafe.Slice((*int)(ptr), totalMarkers)
+	ptr = unsafe.Add(ptr, sizeMarkerY)
+
 	// 4. Slice 4-Byte Fields (Guaranteed 4-byte aligned because previous sizes are multiples of 8)
 	ps.ValidGates = unsafe.Slice((*GateType)(ptr), totalGates)
 	ptr = unsafe.Add(ptr, sizeGates)
@@ -107,12 +139,16 @@ func NewPuzzleSystem(totalGates, introPuzzles, easyPuzzles, medPuzzles, hardPuzz
 	ptr = unsafe.Add(ptr, sizeGates)
 
 	ps.AttemptedGates = unsafe.Slice((*GateType)(ptr), totalGates)
-	// ptr = unsafe.Add(ptr, sizeGates)
+	ptr = unsafe.Add(ptr, sizeGates)
+
+	// 5. 1 Byte Fields
+	ps.Markers = unsafe.Slice((*PuzzleMarker)(ptr), totalMarkers)
+	// ptr = unsafe.Add(ptr, sizeMarkers)
 
 	return ps
 }
 
-func (ps *PuzzleSystem) AllocatePuzzle(numberOfGates int) (PuzzleId, error) {
+func (ps *PuzzleSystem) AllocatePuzzle(numberOfGates, numberOfMarkers int) (PuzzleId, error) {
 	if int(ps.NextPuzzleId) >= ps.TotalPuzzles {
 		return 0, fmt.Errorf("Max Puzzles Reach, Unable to create new puzzle")
 	}
@@ -121,19 +157,27 @@ func (ps *PuzzleSystem) AllocatePuzzle(numberOfGates int) (PuzzleId, error) {
 
 	ps.NextPuzzleId++
 
-	var startOffset int = 0
+	var gateOffset int = 0
+	var markerOffset int = 0
 
 	if id > 0 {
 		prevID := id - 1
-		startOffset = ps.GatesOffsets[prevID] + ps.PuzzleGateCounts[prevID]
+		gateOffset = ps.GatesOffsets[prevID] + ps.PuzzleGateCounts[prevID]
+		markerOffset = ps.MarkersOffsets[prevID] + ps.MarkersCounts[prevID]
 	}
 
-	if startOffset+numberOfGates > ps.TotalGates {
+	if gateOffset+numberOfGates > ps.TotalGates {
 		return 0, fmt.Errorf("Number of gates(%d) would exceed allotted TotalGates (%d)", numberOfGates, ps.TotalGates)
 	}
 
+	if markerOffset+numberOfMarkers > ps.TotalMarkers {
+		return 0, fmt.Errorf("Number of Markers(%d) would exceed allotted TotalMarkers (%d)", numberOfMarkers, ps.TotalMarkers)
+	}
+
 	ps.PuzzleGateCounts[id] = numberOfGates
-	ps.GatesOffsets[id] = startOffset
+	ps.GatesOffsets[id] = gateOffset
+	ps.MarkersCounts[id] = numberOfGates
+	ps.MarkersOffsets[id] = markerOffset
 
 	return id, nil
 }
@@ -199,6 +243,31 @@ func (ps *PuzzleSystem) SetAttemptedGate(puzzleId PuzzleId, gateIdx, gateX, gate
 	ps.GateY[idx] = gateY
 
 	return nil
+}
+
+func (ps *PuzzleSystem) SetMarker(puzzleId PuzzleId, markerIdx, x, y int, marker PuzzleMarker) error {
+	offset := ps.MarkersOffsets[puzzleId]
+
+	if markerIdx >= ps.MarkersCounts[puzzleId] {
+		return fmt.Errorf("MarkerIdx out of bounds: Given %d ; Count %d", markerIdx, ps.MarkersCounts[puzzleId])
+	}
+
+	idx := offset + markerIdx
+	ps.Markers[idx] = marker
+	ps.MarkerX[idx] = x
+	ps.MarkerY[idx] = y
+
+	return nil
+}
+
+func (ps *PuzzleSystem) GetMarkers(puzzleId PuzzleId) []PuzzleMarker {
+	offset := ps.MarkersOffsets[puzzleId]
+	count := ps.MarkersCounts[puzzleId]
+
+	start := offset
+	end := start + count
+
+	return ps.Markers[start:end]
 }
 
 func (ps *PuzzleSystem) GetValidGates(puzzleId PuzzleId) []GateType {
@@ -327,26 +396,27 @@ func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, 
 		}
 
 		hasSymbol := false
-		var cornerSprite assets.SpriteID
+		var cornerSprite, gateSprite assets.SpriteID
 
 		switch gateType {
-		case GateUnknown:
-			gs.Set(gridId, x, y, CellTypeChar, '?')
 		case GateJoin:
-			gs.Set(gridId, x, y, CellTypeChar, 'J')
 			hasSymbol = true
 			cornerSprite = assets.SpriteIDSquare
+			gateSprite = assets.SpriteIDGateJoin
 		case GateSplit:
-			gs.Set(gridId, x, y, CellTypeChar, 'S')
 			hasSymbol = true
 			cornerSprite = assets.SpriteIDDiamond
+			gateSprite = assets.SpriteIDGateSplit
 		case GatePass:
-			gs.Set(gridId, x, y, CellTypeChar, 'O')
 			hasSymbol = true
 			cornerSprite = assets.SpriteIDCircle
+			gateSprite = assets.SpriteIDGatePass
+		default:
+			gs.Set(gridId, x, y, CellTypeChar, '?')
 		}
 
 		if hasSymbol {
+			gs.SetCellSprite(gridId, x, y, gateSprite)
 			gs.SetCellSprite(gridId, x-2, y-1, cornerSprite)
 			gs.SetCellSprite(gridId, x-2, y+1, cornerSprite)
 			gs.SetCellSprite(gridId, x+2, y-1, cornerSprite)

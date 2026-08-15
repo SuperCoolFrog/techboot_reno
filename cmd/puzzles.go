@@ -48,7 +48,6 @@ type PuzzleSystem struct {
 	// Per-Puzzle
 	PuzzleGateCounts []int // Tracks exactly how many gates a specific PuzzleId has
 	PuzzleIsAssigned []bool
-	PuzzleAssignment []GameState
 
 	MarkersCounts []int
 
@@ -88,8 +87,6 @@ func NewPuzzleSystem(totalGates, maxMarkersPerPuzzle, introPuzzles, easyPuzzles,
 		NextPuzzleId: 0,
 
 		PuzzleGateCounts: make([]int, totalPuzzles),
-		PuzzleIsAssigned: make([]bool, totalPuzzles),
-		PuzzleAssignment: make([]GameState, totalPuzzles),
 		MarkersCounts:    make([]int, totalPuzzles),
 
 		// Standard Go slice allocations for non-contiguous offsets
@@ -362,32 +359,6 @@ func (ps *PuzzleSystem) GetUnassignedIntroPuzzle() (PuzzleId, error) {
 	}
 
 	return 0, fmt.Errorf("No available intro puzzle")
-}
-
-// @TODO move this into junction system
-func (ps *PuzzleSystem) AssignPuzzle(puzzleId PuzzleId, state GameState) {
-	ps.PuzzleIsAssigned[puzzleId] = true
-	ps.PuzzleAssignment[puzzleId] = state
-}
-
-func (ps *PuzzleSystem) GetPuzzleAssignment(state GameState) (PuzzleId, error) {
-	for i := PuzzleId(0); i < PuzzleId(ps.NextPuzzleId); i++ {
-		if ps.PuzzleIsAssigned[i] && ps.PuzzleAssignment[i] == state {
-			return i, nil
-		}
-	}
-
-	return 0, fmt.Errorf("No assignment for state")
-}
-
-func (ps *PuzzleSystem) HasPuzzleAssignment(state GameState) bool {
-	for i := PuzzleId(0); i < PuzzleId(ps.NextPuzzleId); i++ {
-		if ps.PuzzleIsAssigned[i] && ps.PuzzleAssignment[i] == state {
-			return true
-		}
-	}
-
-	return false
 }
 
 func (ps *PuzzleSystem) DrawGate(puzzleId PuzzleId, gateIdx int, gridId GridID, gs *GridSystem) error {

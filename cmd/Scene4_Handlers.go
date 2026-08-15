@@ -132,23 +132,28 @@ loop:
 	return state
 }
 
+func s4GetActivePuzzle(state GameState, game *Game) (puzzleId PuzzleId, exists bool) {
+	puzzles, _ := game.jxsp.GetChildren(uint32(state))
+
+	for i := 0; i < len(puzzles); i++ {
+		id := puzzles[i]
+
+		if game.pcn.Has(uint16(id)) {
+			continue
+		}
+
+		return PuzzleId(id), true
+	}
+
+	return 0, false
+}
+
 func Scene4_SetupPuzzle(current, next GameState, game *Game) GameState {
 	game.gs.SetAllCells(game.b.GridOutput, CellTypeEmpty, 0)
 
-	var puzzleId PuzzleId
-
-	if !game.pz.HasPuzzleAssignment(next) {
-		puzzleId, pzError := game.pz.GetUnassignedIntroPuzzle()
-
-		if pzError != nil {
-			panic(pzError)
-		}
-
-		game.pz.AssignPuzzle(puzzleId, next)
-	}
+	puzzleId, _ := s4GetActivePuzzle(next, game)
 
 	s4DrawPuzzle(puzzleId, game)
-
 	s4StartPathAnimation(puzzleId, game)
 
 	return next
@@ -326,10 +331,7 @@ func s4ClearPathSprites(puzzleId PuzzleId, game *Game) {
 }
 
 func Scene4_Puzzling(current, next GameState, game *Game) GameState {
-	puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
-	if assignmentError != nil {
-		panic(fmt.Errorf("Error getting puzzle assigment: %v\n", assignmentError))
-	}
+	puzzleId, _ := s4GetActivePuzzle(current, game)
 
 	if s4AnimatePath(puzzleId, current, game) {
 		return current
@@ -404,12 +406,7 @@ loop:
 				}
 
 			case CommandSet:
-				puzzleId, assignmentError := game.pz.GetPuzzleAssignment(current)
-
-				if assignmentError != nil {
-					fmt.Printf("Error getting puzzle assigment: %v\n", assignmentError)
-					break loop
-				}
+				puzzleId, _ := s4GetActivePuzzle(current, game)
 
 				for i := 0; i < len(cmd.Items); i++ {
 					var gateType GateType

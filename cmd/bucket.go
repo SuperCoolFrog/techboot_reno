@@ -317,6 +317,9 @@ func bucketInitializeGamePuzzles(game *Game, bucket *Bucket) error {
 	game.pac.Set(uint16(id), false)
 	game.pcn.Set(uint16(id), false)
 
+	game.jxsp.AddParent(uint32(Scene4_Puzzle), 1)
+	game.jxsp.AddChild(uint32(Scene4_Puzzle), uint32(id))
+
 	cols := game.gs.Cols[bucket.GridOutput]
 	rows := game.gs.Rows[bucket.GridOutput]
 	g1X := cols / 2

@@ -50,6 +50,7 @@ type Game struct {
 	gs                     *GridSystem
 	pz                     *PuzzleSystem
 	ps                     *PathSystem
+	jxsp                   *JunctionSystem //Scene -> PuzzleIds
 	jxpp                   *JunctionSystem //PuzzleId -> PathIds
 	jxgp                   *CompoundSystem //GateId+GateType -> []Paths
 	pcn                    *FlagSystem     // PuzzleConnected
@@ -150,6 +151,7 @@ func main() {
 		bs:           NewBufferSystem(500_000, 10),
 		ps:           NewPathSystem(200),
 		pz:           puzzleSystem,
+		jxsp:         NewJunctionSystem(int(GameStateCount), 5),
 		jxpp:         NewJunctionSystem(puzzleSystem.TotalPuzzles, 20),
 		jxgp:         NewCompoundSystem(maxIdJxgp, 5),
 		pcn:          NewFlagSystem(puzzleSystem.TotalPuzzles),

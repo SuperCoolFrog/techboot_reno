@@ -1,6 +1,6 @@
 package main
 
-type GameState uint64
+type GameState uint16
 
 const (
 	Scene1_Init GameState = iota

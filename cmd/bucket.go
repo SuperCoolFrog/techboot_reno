@@ -109,8 +109,6 @@ func InitBucketItems(game *Game) Bucket {
 
 	bucketInitCommandStrings(game.bs, bucket)
 
-	bucketInitializeGamePuzzles(game, bucket)
-
 	return *bucket
 }
 
@@ -302,57 +300,4 @@ func bucketAddCommandStrings(commandId CommandId, val []byte, bs *BufferSystem, 
 
 	bs.AppendAll(bucket.BufferCommandOutputs, val)
 	bs.NewLine(bucket.BufferCommandOutputs)
-}
-
-func bucketInitializeGamePuzzles(game *Game, bucket *Bucket) error {
-	/* Placeholder for now until puzzle generator is created */
-
-	id, errorIntro := game.pz.AllocatePuzzle(1, 1)
-
-	if errorIntro != nil {
-		return errorIntro
-	}
-
-	game.pz.IntroPuzzles[0] = id
-	game.pac.Set(uint16(id), false)
-	game.pcn.Set(uint16(id), false)
-
-	game.jxsp.AddParent(uint32(Scene4_Puzzle), 1)
-	game.jxsp.AddChild(uint32(Scene4_Puzzle), uint32(id))
-
-	cols := game.gs.Cols[bucket.GridOutput]
-	rows := game.gs.Rows[bucket.GridOutput]
-	g1X := cols / 2
-	g1Y := rows / 2
-
-	gateIdx0 := 0
-	gateId0 := game.pz.GetGateId(id, gateIdx0)
-
-	game.pz.SetValidGate(id, gateIdx0, g1X, g1Y, GatePass)
-	game.pz.SetPuzzleGate(id, gateIdx0, g1X, g1Y, GateUnknown)
-	game.pz.SetAttemptedGate(id, gateIdx0, g1X, g1Y, GateUnknown)
-	game.pz.SetMarker(id, 0, cols/2, 0, PuzzleMarkerYes)
-
-	game.pz.PuzzleGateCounts[id] = 1
-
-	game.jxpp.AddParent(uint32(id), 1)
-
-	pathIn, err := game.ps.NewPath(cols/2, rows-1, cols/2, g1Y+2)
-	if err != nil {
-		return err
-	}
-	game.jxpp.AddChild(uint32(id), uint32(pathIn))
-
-	// Gate Paths
-
-	// @TODO this path gets added to gate1+GateTypePass for jxgp
-	pathPass, errpj := game.ps.NewPath(cols/2, g1Y-2, cols/2, 0)
-	if errpj != nil {
-		return errpj
-	}
-	game.jxgp.AddChild(uint16(gateId0), uint16(GatePass), uint16(pathPass))
-	game.gap.Set(uint16(gateId0), false)
-	game.gac.Set(uint16(gateId0), false)
-
-	return nil
 }

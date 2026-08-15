@@ -1,103 +1,98 @@
-seed(4,4, cell_state(gate_or)). 
+puzzle_type(0, puzzle_intro).
+puzzle_type(1, puzzle_easy).
+puzzle_type(2, puzzle_med).
+puzzle_type(3, puzzle_hard).
 
-rows(5).
-cols(5).
+% Matches puzzle.go
+gate_type(0, gate_empty).
+gate_type(1, gate_unknown).
+gate_type(2, gate_join).
+gate_type(3, gate_split).
+gate_type(4, gate_pass).
 
-cell_state(out_of_bounds).
-cell_state(super_position).
-cell_state(empty).
-cell_state(gate_and).
-cell_state(gate_or).
-cell_state(current_vertical).
-cell_state(current_horizontal).
-
-
-p(out_of_bounds, x).
-p(super_position, s).
-p(empty, e).
-p(gate_and, a).
-p(gate_or, o).
-p(current_vertical, v).
-p(current_horizontal, h).
-
-% mod X, // Y
-setup(TotalCells, RowCount, Grid) :-
-    grid_rows(TotalCells, RowCount, TotalCells, FreshGrid),
-    seed(Col, Row, CellState),
-    update_grid(Row, Col, FreshGrid, CellState, Grid).
+marker_type(0, marker_none).
+marker_type(1, marker_yes).
+marker_type(2, marker_no).
 
 
-new_head(NewVal, [_| Rest], [NewVal | Rest]).
+puzzle(config_id(1), state(17), puzzle_intro, gate_count(1), marker_count(1)).
 
-grid_rows(_, _, 0, []).
-grid_rows(TotalCells, RowCount, Remaining, [Row | Rest]) :-
-    Remaining > 0,
-    Cols is TotalCells // RowCount,
-    NuRemaining is Remaining - Cols,  
-    row(Cols, Row),
-    grid_rows(TotalCells, RowCount, NuRemaining, Rest), !.
+% Helper
+puzzle(Id) :- puzzle(Id, _,_,_,_).
 
-
-
-row(0, []).
-row(CellCounter, [cell_state(super_position) | Rest]) :-
-    CellCounter > 0,
-    NextCellCounter is CellCounter - 1,
-    row(NextCellCounter, Rest).
-
-
-
-% HELPERS
-
-% Base Case: Index is 0. Swap the old Head out for the NewElement.
-replace_nth(0, [_|Tail], NewElement, [NewElement|Tail]).
-
-% Recursive Case: Keep the current Head, decrement Index, and move into the Tail.
-replace_nth(Index, [Head|Tail], NewElement, [Head|NewTail]) :-
-    Index > 0,
-    NextIndex is Index - 1,
-    replace_nth(NextIndex, Tail, NewElement, NewTail).
-
-% Arguments: update_grid(RowIndex, ColIndex, Grid, NewValue, NewGrid)
-update_grid(RowIdx, ColIdx, Grid, NewValue, NewGrid) :-
-    % 1. Extract the target row
-    nth0(RowIdx, Grid, OldRow),
-    % 2. Create the updated row
-    replace_nth(ColIdx, OldRow, NewValue, NewRow),
-    % 3. Replace the old row with the new row in the main grid
-    replace_nth(RowIdx, Grid, NewRow, NewGrid).
-
-% 1. Main Predicate: Loops through each row
-print_matrix([]). % Base case: nothing left to print
-print_matrix([Row|Rest]) :-
-    print_row(Row),
-    nl,               % Move to the next line after finishing a row
-    print_matrix(Rest).
-
-% 2. Helper Predicate: Loops through elements in a single row
-print_row([]).    % Base case: row is empty
-print_row([cell_state(X)|Xs]) :-
-    p(X, V),
-    format(' ~w', [V]), % Prints element followed by a tab (~w = write, \t = tab)
-    print_row(Xs).
-
-% noop(Any) :- Any = [].
-noop(_) :- nl, write('NOOP False: '), false.
-
-
-% Example
-% grid_rows(100, 10, 100, Grid), print_matrix(Grid), noop(Grid).
-% setup(100, 10, Grid), print_matrix(Grid), noop(Grid).
-
-% grid_rows(TotalCells, Rows, Remaining, Counter) :-
-%     Remaining > 0,
-%     Consume is TotalCells // Rows,
-%     NuRemaining is Remaining - Consume,  
-%     grid_rows(TotalCells, Rows, NuRemaining, RestCounter),
-%     Counter is RestCounter + 1.
+% *************** Gates ******************
+% OutputCols(26) ; OutputRows(36)
 %
-%
-% grid_rows(_, _, 0, 0).
+% X = OutputCols(26)/2 ; Y = OutputRows(36)/2
+
+% ** Gate Valid
+gate_valid(config_id(1), gate_idx(0), x(13), y(18), gate_pass). 
+
+%% Helper
+gate_valid(Id, [A,B,C,D]) :- gate_valid(Id, A,B,C,D).
+
+
+% ** Gate Puzzle
+gate_puzzle(config_id(1), gate_idx(0), x(13), y(18), gate_unknown). 
+
+%% Helper
+gate_puzzle(Id, [A,B,C,D]) :- gate_valid(Id, A,B,C,D).
+
+
+% ** Gate Attempt
+gate_attempt(config_id(1), gate_idx(0),  x(13), y(18), gate_unknown). 
+
+%% Helper
+gate_attempt(Id, [A,B,C,D]) :- gate_valid(Id, A,B,C,D).
 
 
 
+% *************** Paths ******************
+
+% ** Puzzle Paths
+path_puzzle(config_id(1), start_x(13), start_y(35), end_x(13), end_y(15)).
+
+%% Helper
+path_puzzle(Id, [A, B, C, D]) :- path_puzzle(Id, A, B, C, D).
+
+% ** Gate Paths
+path_gate(gate_idx(0), gate_pass, start_x(13), start_y(16), end_x(13), end_y(0)).
+
+%% Helper
+path_gate(Id, [A, B, C, D, E]) :- path_puzzle(Id, A, B, C, D, E).
+
+
+config_data(config(Id, State, PuzzleTypeId, GateCount, MarkerCount, PuzzlePaths, ValidGates, PuzzleGates, AttemptGates, GatePaths)) :-
+    puzzle(config_id(Id), state(State), PuzzleType, gate_count(GateCount), marker_count(MarkerCount)),
+    puzzle_type(PuzzleTypeId, PuzzleType),
+
+    % Puzzle Paths
+    findall(
+        [StartX, StartY, EndX, EndY],
+        path_puzzle(config_id(Id), start_x(StartX), start_y(StartY), end_x(EndX), end_y(EndY)),
+        PuzzlePaths),
+
+    % Valid Gates
+    findall(
+        [Idx, X, Y, GateTypeId],
+        (gate_valid(config_id(Id), gate_idx(Idx), x(X), y(Y),  GateType), gate_type(GateTypeId, GateType)),
+        ValidGates),
+    % Puzzle Gates
+    findall(
+        [Idx, X, Y, GateTypeId],
+        (gate_puzzle(config_id(Id), gate_idx(Idx), x(X), y(Y),  GateType), gate_type(GateTypeId, GateType)),
+        PuzzleGates),
+    % Attempt Gates
+    findall(
+        [Idx, X, Y, GateTypeId],
+        (gate_attempt(config_id(Id), gate_idx(Idx), x(X), y(Y),  GateType), gate_type(GateTypeId, GateType)),
+        AttemptGates),
+    
+    % Gate paths
+    findall(
+        [Idx, GateTypeId, StartX, StartY, EndX, EndY],
+        (path_gate(gate_idx(Idx), GateType, start_x(StartX), start_y(StartY), end_x(EndX), end_y(EndY)), gate_type(GateTypeId, GateType)),
+        GatePaths).
+
+all_configs(Configs) :-
+    findall(C, config_data(C), Configs).

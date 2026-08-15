@@ -7,7 +7,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"github.com/ichiban/prolog"
 	// "github.com/trealla-prolog/go/trealla"
 	"image/color"
 	"techboot_reno/cmd/assets"
@@ -33,6 +32,9 @@ var fontSrc *text.GoTextFaceSource
 
 //go:embed parser.pl
 var parserpl []byte
+
+//go:embed puzzles.pl
+var puzzlespl []byte
 
 func init() {
 	src, err := text.NewGoTextFaceSource(bytes.NewReader(fontBytes))
@@ -62,6 +64,7 @@ type Game struct {
 	LastMouseX, LastMouseY int
 	Exit                   bool
 	parserpl               string
+	puzzlespl              string
 	prologInput            chan []byte          // Channel sending raw bytes to Prolog thread
 	prologOutput           chan CommandResponse // Channel receiving parsed commands from Prolog thread
 }
@@ -122,11 +125,6 @@ func main() {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetTPS(60) // Locks Update cycles to 60Hz natively
 
-	parser := prolog.New(nil, nil)
-	if err := parser.Exec(string(parserpl)); err != nil {
-		log.Fatalf("Failed to compile Prolog script: %v", err)
-	}
-
 	// This is a lot probably could tweak it once I have an idea of total grids
 	// const MaxTotalCells = 100_000
 	// const MaxGrids = 50
@@ -159,6 +157,7 @@ func main() {
 		gap:          NewFlagSystem(puzzleSystem.TotalGates),
 		gac:          NewFlagSystem(puzzleSystem.TotalGates),
 		parserpl:     string(parserpl),
+		puzzlespl:    string(puzzlespl),
 		prologInput:  make(chan []byte, 128), // Buffered to prevent blocking input
 		prologOutput: make(chan CommandResponse, 128),
 	}

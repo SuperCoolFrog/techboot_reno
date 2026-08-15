@@ -1,12 +1,84 @@
 package main
 
+import (
+	"context"
+	"fmt"
+
+	"github.com/trealla-prolog/go/trealla"
+)
+
+/**
+import (
+	"context"
+	"fmt"
+
+	"github.com/trealla-prolog/go/trealla"
+	"strings"
+)
+
+type CommandResponse struct {
+	ResultType CommandId
+	Items      []CommandId
+	ValuesInt  []int
+	Command    []byte
+}
+**/
+
+type PuzzleConfig struct {
+	trealla.Functor
+
+	ConfigId     int
+	GameState    int
+	PuzzleTypeId int
+	GateCount    int
+	MarkerCount  int
+
+	PuzzlePaths  [][]int
+	ValidGates   [][]int
+	PuzzleGates  [][]int
+	AttemptGates [][]int
+	GatePaths    [][]int
+}
+
+type PuzzleConfigResult struct {
+	Configs []PuzzleConfig `prolog:"Configs"`
+}
+
 /*
 Placeholder for now until puzzle generator is created
 
 ** Be sure that bucket is initialized
 */
-func GeneratePuzzles(game *Game) error {
-	errIntros := genIntroPuzzles(game)
+func GeneratePuzzles(g *Game) error {
+	// Initialize a clean, zero-dependency Trealla WebAssembly instance
+	pl, err := trealla.New()
+	if err != nil {
+		return fmt.Errorf("Failed to boot Trealla: %v\n", err)
+	}
+
+	ctx := context.Background()
+
+	if err := pl.ConsultText(ctx, "user", g.puzzlespl); err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("✅ Puzzles loaded and ready for query!\n")
+
+	queryStr := "all_configs(Configs)."
+	q, err11 := pl.QueryOnce(ctx, queryStr)
+	if err11 != nil {
+		panic(err11)
+	}
+
+	var r PuzzleConfigResult
+
+	if errv := q.Solution.Scan(&r); errv != nil {
+		panic(errv)
+	}
+
+	fmt.Printf("Loaded Puzzle Data: %v\n", r)
+
+	errIntros := genIntroPuzzles(g)
 	if errIntros != nil {
 		return errIntros
 	}

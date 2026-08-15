@@ -56,10 +56,8 @@ path_puzzle(config_id(1), start_x(13), start_y(35), end_x(13), end_y(15)).
 path_puzzle(Id, [A, B, C, D]) :- path_puzzle(Id, A, B, C, D).
 
 % ** Gate Paths
-path_gate(gate_idx(0), gate_pass, start_x(13), start_y(16), end_x(13), end_y(0)).
+path_gate(config_id(1), gate_idx(0), gate_pass, start_x(13), start_y(16), end_x(13), end_y(0)).
 
-%% Helper
-path_gate(Id, [A, B, C, D, E]) :- path_puzzle(Id, A, B, C, D, E).
 
 
 config_data(config(Id, State, PuzzleTypeId, GateCount, MarkerCount, PuzzlePaths, ValidGates, PuzzleGates, AttemptGates, GatePaths)) :-
@@ -68,30 +66,30 @@ config_data(config(Id, State, PuzzleTypeId, GateCount, MarkerCount, PuzzlePaths,
 
     % Puzzle Paths
     findall(
-        [StartX, StartY, EndX, EndY],
+        [Id, StartX, StartY, EndX, EndY],
         path_puzzle(config_id(Id), start_x(StartX), start_y(StartY), end_x(EndX), end_y(EndY)),
         PuzzlePaths),
 
     % Valid Gates
     findall(
-        [Idx, X, Y, GateTypeId],
+        [Id, Idx, X, Y, GateTypeId],
         (gate_valid(config_id(Id), gate_idx(Idx), x(X), y(Y),  GateType), gate_type(GateTypeId, GateType)),
         ValidGates),
     % Puzzle Gates
     findall(
-        [Idx, X, Y, GateTypeId],
+        [Id, Idx, X, Y, GateTypeId],
         (gate_puzzle(config_id(Id), gate_idx(Idx), x(X), y(Y),  GateType), gate_type(GateTypeId, GateType)),
         PuzzleGates),
     % Attempt Gates
     findall(
-        [Idx, X, Y, GateTypeId],
+        [Id, Idx, X, Y, GateTypeId],
         (gate_attempt(config_id(Id), gate_idx(Idx), x(X), y(Y),  GateType), gate_type(GateTypeId, GateType)),
         AttemptGates),
     
     % Gate paths
     findall(
-        [Idx, GateTypeId, StartX, StartY, EndX, EndY],
-        (path_gate(gate_idx(Idx), GateType, start_x(StartX), start_y(StartY), end_x(EndX), end_y(EndY)), gate_type(GateTypeId, GateType)),
+        [Id, Idx, GateTypeId, StartX, StartY, EndX, EndY],
+        (path_gate(config_id(Id), gate_idx(Idx), GateType, start_x(StartX), start_y(StartY), end_x(EndX), end_y(EndY)), gate_type(GateTypeId, GateType)),
         GatePaths).
 
 all_configs(Configs) :-
